@@ -297,8 +297,8 @@
             </h2>
         </div>
         
-        <!-- شريط تصفية التاريخ المرن والمطور -->
-        <form method="GET" action="/pharmacy/reports/" class="filter-bar">
+        <!-- 🎯 إصلاح مسار النموذج الديناميكي بفلتر Django -->
+        <form method="GET" action="{% url 'sales_reports' %}" class="filter-bar">
             <div class="filter-group">
                 <label><i class="bi bi-calendar-event"></i> من تاريخ:</label>
                 <input type="date" name="start_date" value="{{ start_date }}" required>
@@ -316,19 +316,19 @@
         <div class="kpi-container">
             <div class="kpi-card blue">
                 <div class="kpi-title"><i class="bi bi-cash-stack" style="color: #3182ce;"></i> صافي الأرباح المادية</div>
-                <div class="kpi-value" style="color: #3182ce;">{{ total_sales }} د.ع</div>
+                <div class="kpi-value" style="color: #3182ce;">{{ total_sales|default:0 }} د.ع</div>
             </div>
             <div class="kpi-card orange">
                 <div class="kpi-title"><i class="bi bi-tags-fill" style="color: #dd6b20;"></i> إجمالي الخصومات المقدمة</div>
-                <div class="kpi-value" style="color: #dd6b20;">{{ total_discounts_given }} د.ع</div>
+                <div class="kpi-value" style="color: #dd6b20;">{{ total_discounts_given|default:0 }} د.ع</div>
             </div>
             <div class="kpi-card">
                 <div class="kpi-title"><i class="bi bi-receipt" style="color: #1abc9c;"></i> عدد الفواتير الصادرة</div>
-                <div class="kpi-value" style="color: #2d3748;">{{ total_invoices_count }} فاتورة</div>
+                <div class="kpi-value" style="color: #2d3748;">{{ total_invoices_count|default:0 }} فاتورة</div>
             </div>
             <div class="kpi-card red">
                 <div class="kpi-title"><i class="bi bi-trash3-fill" style="color: #e53e3e;"></i> خسائر الأدوية والتوالف</div>
-                <div class="kpi-value" style="color: #e53e3e;">{{ total_damage_losses }} د.ع</div>
+                <div class="kpi-value" style="color: #e53e3e;">{{ total_damage_losses|default:0 }} د.ع</div>
             </div>
         </div>
 
@@ -355,7 +355,7 @@
                                 <span style="font-size: 11px; color: #718096;">{{ item.medicine__scientific_name }}</span>
                             </td>
                             <td><span class="custom-badge badge-success"><i class="bi bi-check2-all"></i> {{ item.total_qty }} عِلبة</span></td>
-                            <td><strong style="color: #2d3748;">{{ item.total_revenue }} د.ع</strong></td>
+                            <td><strong style="color: #2d3748;">{{ item.total_revenue|default:0 }} د.ع</strong></td>
                         </tr>
                         {% empty %}
                         <tr>
@@ -424,19 +424,19 @@
                     <tr>
                         <td><strong>{{ inv.invoice_number }}</strong></td>
                         <td style="color: #4a5568;">{{ inv.created_at|date:"Y-m-d H:i" }}</td>
-                        <td style="color: #718096;">{{ inv.total_amount }} د.ع</td>
-                        <td style="color: #e53e3e;">{{ inv.discount }} د.ع</td>
-                        <td><strong style="color: #38a169;">{{ inv.final_amount }} د.ع</strong></td>
+                        <td style="color: #718096;">{{ inv.total_amount|default:0 }} د.ع</td>
+                        <td style="color: #e53e3e;">{{ inv.discount|default:0 }} د.ع</td>
+                        <td><strong style="color: #38a169;">{{ inv.final_amount|default:0 }} د.ع</strong></td>
                         <td>
                             <!-- زر تفاصيل الفاتورة لفتح الـ Modal -->
-                            <button class="btn-view-invoice" onclick="openInvoiceModal('{{ inv.invoice_number }}', '{{ inv.total_amount }}', '{{ inv.discount }}', '{{ inv.final_amount }}', '{{ inv.id }}')">
+                            <button class="btn-view-invoice" onclick="openInvoiceModal('{{ inv.invoice_number }}', '{{ inv.total_amount|default:0 }}', '{{ inv.discount|default:0 }}', '{{ inv.final_amount|default:0 }}', '{{ inv.id }}')">
                                 <i class="bi bi-file-earmark-text"></i> تفاصيل الفاتورة
                             </button>
                             
-                            <!-- بيانات الأدوية المخفية التي سيقرأها الـ Modal عند الضغط -->
+                            <!-- 🎯 تأمين وسم حمال البيانات بفلتر escape لتجنب انكسار الـ HTML -->
                             <div id="items-data-{{ inv.id }}" style="display: none;">
                                 {% for item in inv.items.all %}
-                                <tr-data name="{{ item.medicine.trade_name }}" qty="{{ item.quantity }}" price="{{ item.unit_price }}" total="{{ item.total_price }}"></tr-data>
+                                <tr-data name="{{ item.medicine.trade_name|escape }}" qty="{{ item.quantity }}" price="{{ item.unit_price }}" total="{{ item.total_price }}"></tr-data>
                                 {% endfor %}
                             </div>
                         </td>
@@ -497,23 +497,36 @@
 
     <!-- كود الـ JavaScript الذكي لملء الـ Modal وتنشيط التبويب تلقائياً -->
     <script>
-        // 1. معالجة فتح وإغلاق النافذة المنبثقة للفواتير
+        // 🎯 1. معالجة فتح وإغلاق النافذة المنبثقة باستخدام parseFloat لحماية الفواصل العشرية
         function openInvoiceModal(invoiceNum, subtotal, discount, finalAmount, invoiceId) {
             document.getElementById('modalInvoiceTitle').innerHTML = '<i class="bi bi-receipt" style="color: #1abc9c;"></i> تفاصيل الفاتورة: ' + invoiceNum;
-            document.getElementById('modalInvoiceSubtotal').innerText = parseInt(subtotal).toLocaleString('en-US');
-            document.getElementById('modalInvoiceDiscount').innerText = '-' + parseInt(discount).toLocaleString('en-US');
-            document.getElementById('modalInvoiceTotal').innerText = parseInt(finalAmount).toLocaleString('en-US');
+            
+            const numSubtotal = parseFloat(subtotal) || 0;
+            const numDiscount = parseFloat(discount) || 0;
+            const numFinal = parseFloat(finalAmount) || 0;
+
+            document.getElementById('modalInvoiceSubtotal').innerText = numSubtotal.toLocaleString('en-US');
+            
+            // تنسيق عرض الخصم بذكاء لتجنب ظهور -0 د.ع
+            if (numDiscount > 0) {
+                document.getElementById('modalInvoiceDiscount').innerText = '-' + numDiscount.toLocaleString('en-US');
+            } else {
+                document.getElementById('modalInvoiceDiscount').innerText = '0';
+            }
+            
+            document.getElementById('modalInvoiceTotal').innerText = numFinal.toLocaleString('en-US');
             
             const dataContainer = document.getElementById('items-data-' + invoiceId);
-            const items = dataContainer.getElementsByTagName('tr-data');
+            if (!dataContainer) return;
             
+            const items = dataContainer.getElementsByTagName('tr-data');
             let htmlContent = '';
             
             for (let i = 0; i < items.length; i++) {
-                const name = items[i].getAttribute('name');
-                const qty = items[i].getAttribute('qty');
-                const price = parseInt(items[i].getAttribute('price'));
-                const total = parseInt(items[i].getAttribute('total'));
+                const name = items[i].getAttribute('name') || 'غير محدد';
+                const qty = items[i].getAttribute('qty') || 0;
+                const price = parseFloat(items[i].getAttribute('price')) || 0;
+                const total = parseFloat(items[i].getAttribute('total')) || 0;
                 
                 htmlContent += `
                     <tr>

@@ -1,3 +1,4 @@
+import uuid
 from django.db import models
 from django.contrib.auth.models import User
 
@@ -10,7 +11,7 @@ class PharmacyBranch(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="تاريخ الاشتراك")
 
     def __str__(self):
-        return self.name
+        return self.name or "صيدلية بدون اسم"
 
 # =======================================================
 # 2️⃣ جدول ملف المستخدم (لربط المستخدم بصيدلية معينة وصلاحياته)
@@ -21,10 +22,11 @@ class UserProfile(models.Model):
     is_pharmacy_owner = models.BooleanField(default=False, verbose_name="هل هو صاحب الصيدلية؟")
 
     def __str__(self):
-        return f"{self.user.username} - {self.pharmacy.name}"
+        pharmacy_name = self.pharmacy.name if self.pharmacy else "بدون صيدلية"
+        return f"{self.user.username} - {pharmacy_name}"
 
 # =======================================================
-# 3️⃣ جدول الأدوية (تم تعديل قيد الباركود ليتناسب مع تعدد الصيدليات)
+# 3️⃣ جدول الأدوية (محصن ضد تكرار الباركود الفارغ والأسعار)
 # =======================================================
 class Medicine(models.Model):
     CATEGORY_CHOICES = [
@@ -48,37 +50,44 @@ class Medicine(models.Model):
     scientific_name = models.CharField(max_length=200, verbose_name="الاسم العلمي")
     category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default='tablet', verbose_name="نوع الدواء")
     quantity = models.IntegerField(default=0, verbose_name="الكمية المتوفرة")
-    buy_price = models.IntegerField(verbose_name="سعر الشراء (د.ع)")
-    sell_price = models.IntegerField(verbose_name="سعر البيع (د.ع)")
+    buy_price = models.IntegerField(default=0, verbose_name="سعر الشراء (د.ع)")
+    sell_price = models.IntegerField(default=0, verbose_name="سعر البيع (د.ع)")
     expiry_date = models.DateField(verbose_name="تاريخ انتهاء الصلاحية")
     shelf_location = models.CharField(max_length=50, blank=True, null=True, verbose_name="مكان الرف")
     is_damaged = models.BooleanField(default=False, verbose_name="هل الدواء تالف/معزول؟")
     barcode = models.CharField(max_length=50, null=True, blank=True, verbose_name="باركود الدواء")
 
-    # 🛠️ قيد ذكي: منع تكرار الباركود داخل الصيدلية الواحدة، والسماح بتكراره بين الصيدليات المختلفة
     class Meta:
         unique_together = ('pharmacy', 'barcode')
 
+    def save(self, *args, **kwargs):
+        # 🛡️ تحويل الباركود الفارغ أو النص المكون من مسافات إلى None لمنع التصادم في unique_together
+        if self.barcode is not None and not str(self.barcode).strip():
+            self.barcode = None
+        super().save(*args, **kwargs)
+
     def __str__(self):
-        return f"{self.trade_name} ({self.scientific_name}) - {self.pharmacy.name}"
+        pharmacy_name = self.pharmacy.name if self.pharmacy else "عام"
+        return f"{self.trade_name} ({self.scientific_name}) - {pharmacy_name}"
 
 # =======================================================
-# 4️⃣ جدول المبيعات الفردية (تم إضافة حقل الصيدلية لتسريع التقارير)
+# 4️⃣ جدول المبيعات الفردية
 # =======================================================
 class Sale(models.Model):
     pharmacy = models.ForeignKey(PharmacyBranch, on_delete=models.CASCADE, related_name='sales', null=True, blank=True, verbose_name="الصيدلية")
     medicine = models.ForeignKey('Medicine', on_delete=models.CASCADE, verbose_name="الدواء المباع")
-    quantity_sold = models.IntegerField(verbose_name="الكمية المباعة")
-    total_price = models.IntegerField(verbose_name="إجمالي سعر البيع")
+    quantity_sold = models.IntegerField(default=1, verbose_name="الكمية المباعة")
+    total_price = models.IntegerField(default=0, verbose_name="إجمالي سعر البيع")
     sold_at = models.DateTimeField(auto_now_add=True, verbose_name="وقت عملية البيع")
     is_refunded = models.BooleanField(default=False)
     cashier = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='sales', verbose_name="الكاشير")
 
     def __str__(self):
-        return f"بيعة: {self.medicine.trade_name} x {self.quantity_sold}"
+        med_name = self.medicine.trade_name if self.medicine else "دواء محذوف"
+        return f"بيعة: {med_name} x {self.quantity_sold}"
 
 # =======================================================
-# 5️⃣ أ - جدول المذاخر والمكاتب العلمية (جديد)
+# 5️⃣ أ - جدول المذاخر والمكاتب العلمية
 # =======================================================
 class PharmacySupplier(models.Model):
     pharmacy = models.ForeignKey(PharmacyBranch, on_delete=models.CASCADE, related_name='suppliers', verbose_name="الصيدلية")
@@ -87,43 +96,32 @@ class PharmacySupplier(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ('pharmacy', 'name') # منع تكرار نفس اسم المذخر لنفس الصيدلية
+        unique_together = ('pharmacy', 'name')
 
     def __str__(self):
-        return f"{self.name} ({self.pharmacy.name})"
-
-
+        pharmacy_name = self.pharmacy.name if self.pharmacy else "عام"
+        return f"{self.name} ({pharmacy_name})"
 
 # =======================================================
-# 5️⃣ جدول النواقص
+# 5️⃣ ب - جدول النواقص
 # =======================================================
 class MissingMedicine(models.Model):
     pharmacy = models.ForeignKey(PharmacyBranch, on_delete=models.CASCADE, related_name='missing_medicines', null=True, blank=True)
-    
-    # إذا كان الدواء تم تحويله تلقائياً من المخزن نربطه هنا
     medicine = models.ForeignKey('Medicine', on_delete=models.SET_NULL, null=True, blank=True, verbose_name="الدواء المرتبط بالمخزن")
-    
-    # إذا كان الدواء جديداً يُكتب اسمه هنا
     medicine_name = models.CharField(max_length=200, verbose_name="اسم الدواء الناقص")
-    
-    # ربط الناقص بالمذخر (يمكن أن يكون فارغاً حتى يحدده الصيدلي لاحقاً)
     supplier = models.ForeignKey(PharmacySupplier, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="المذخر الموجه له الطلب")
-    
     notes = models.TextField(blank=True, null=True, verbose_name="ملاحظات الصيدلي")
     requested_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.medicine_name
+        return self.medicine_name or "دواء ناقص"
 
 # =======================================================
-# 6️⃣ جدول الفواتير الرئيسي (تم التعديل ليدعم تعدد الصيدليات)
+# 6️⃣ جدول الفواتير الرئيسي (محصن ضد التصادم والتزامن)
 # =======================================================
 class Invoice(models.Model):
     pharmacy = models.ForeignKey(PharmacyBranch, on_delete=models.CASCADE, related_name='invoices', null=True, blank=True)
-    
-    # 🟢 تم إزالة unique=True لأن الرقم سيتكرر (مثل: كل صيدلية سيكون عندها فاتورة رقم 1)
-    invoice_number = models.CharField(max_length=20, blank=True)
-    
+    invoice_number = models.CharField(max_length=50, blank=True)
     cashier = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='invoices', verbose_name="الكاشير المسؤول")
     total_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.0, verbose_name="المجموع قبل الخصم")
     discount = models.DecimalField(max_digits=10, decimal_places=2, default=0.0, verbose_name="قيمة الخصم المالي")
@@ -132,32 +130,32 @@ class Invoice(models.Model):
     is_refunded = models.BooleanField(default=False)
 
     class Meta:
-        # 🟢 قيد ذكي: يمنع تكرار نفس رقم الفاتورة داخل "نفس الصيدلية" فقط، ويسمح بتكراره في الصيدليات الأخرى
         unique_together = ('pharmacy', 'invoice_number')
 
     def save(self, *args, **kwargs):
         if not self.invoice_number:
-            # 🟢 1. الفلترة حسب الصيدلية الحالية فقط لجلب آخر فاتورة خاصة بها
-            last_invoice = Invoice.objects.filter(pharmacy=self.pharmacy).order_by('id').last()
-            
-            if last_invoice:
-                # 🟢 2. استخراج الرقم الحقيقي من نص الفاتورة (مثلاً INV-16 يأخذ منها 16) ويضيف عليه 1
-                try:
-                    last_num = int(last_invoice.invoice_number.split('-')[1])
-                    next_num = last_num + 1
-                except (ValueError, IndexError):
-                    # كخطة بديلة حاسبة في حال كان النص غير متوافق
-                    next_num = Invoice.objects.filter(pharmacy=self.pharmacy).count() + 1
-            else:
-                # 🟢 3. إذا كانت الصيدلية جديدة تماماً ولا تملك أي فاتورة، ابدأ من 1
-                next_num = 1    
+            try:
+                last_invoice = Invoice.objects.filter(pharmacy=self.pharmacy).order_by('id').last()
                 
-            self.invoice_number = f"INV-{next_num}"
-            
+                if last_invoice and last_invoice.invoice_number:
+                    try:
+                        last_num = int(last_invoice.invoice_number.split('-')[1])
+                        next_num = last_num + 1
+                    except (ValueError, IndexError):
+                        next_num = Invoice.objects.filter(pharmacy=self.pharmacy).count() + 1
+                else:
+                    next_num = 1
+                    
+                self.invoice_number = f"INV-{next_num}"
+            except Exception:
+                # 🛡️ خطة طوارئ في حال حدث تضارب في التوليد لضمان عدم انهيار السيرفر أبداً
+                self.invoice_number = f"INV-{uuid.uuid4().hex[:6].upper()}"
+                
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"فاتورة {self.invoice_number} - الصيدلية: {self.pharmacy.name if self.pharmacy else 'عام'} - الصافي: {self.final_amount} د.ع"
+        pharmacy_name = self.pharmacy.name if self.pharmacy else 'عام'
+        return f"فاتورة {self.invoice_number} - الصيدلية: {pharmacy_name} - الصافي: {self.final_amount} د.ع"
 
 # =======================================================
 # 7️⃣ جدول تفاصيل عناصر الفاتورة
@@ -165,30 +163,42 @@ class Invoice(models.Model):
 class InvoiceItem(models.Model):
     invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE, related_name='items')
     medicine = models.ForeignKey('Medicine', on_delete=models.CASCADE)
-    quantity = models.IntegerField()
-    unit_price = models.DecimalField(max_digits=10, decimal_places=2)
-    total_price = models.DecimalField(max_digits=10, decimal_places=2)
+    quantity = models.IntegerField(default=1)
+    unit_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
+    total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
 
     def __str__(self):
-        return f"{self.medicine.trade_name} x {self.quantity} in {self.invoice.invoice_number}"
+        med_name = self.medicine.trade_name if self.medicine else "دواء غير محدد"
+        inv_num = self.invoice.invoice_number if self.invoice else "بدون فاتورة"
+        return f"{med_name} x {self.quantity} in {inv_num}"
 
 # =======================================================
 # 8️⃣ جدول الأدوية التالفة
 # =======================================================
 class DamagedMedicine(models.Model):
+    # 🎯 خيارات موحدة ومتطابقة تماماً مع inventory.html و damaged_list.html
     DAMAGE_REASONS = [
-        ('heat', '🌡️ تلف بسبب الحرارة / انقطاع الكهرباء'),
-        ('storage', '📦 تلف بسبب سوء التخزين / الرطوبة'),
-        ('physical', '💥 كسر / تلف فيزيائي للمنتج'),
-        ('other', '🌀 أسباب أخرى'),
+        ('expired', '📆 منتهي الصلاحية'),
+        ('broken', '💔 كسر وضرر'),
+        ('spoiled', '☀️ سوء خزن'),
+        ('withdrawn', '🚫 سحب وزاري'),
+        ('other', '📦 أسباب أخرى'),
     ]
 
     pharmacy = models.ForeignKey(PharmacyBranch, on_delete=models.CASCADE, related_name='damaged_medicines', verbose_name="الصيدلية")
     medicine = models.ForeignKey(Medicine, on_delete=models.CASCADE, related_name='damaged_records', verbose_name="الدواء")
-    quantity_damaged = models.IntegerField(verbose_name="الكمية التالفة")
-    reason = models.CharField(max_length=20, choices=DAMAGE_REASONS, default='heat', verbose_name="سبب التلف")
+    quantity_damaged = models.IntegerField(default=1, verbose_name="الكمية التالفة")
+    reason = models.CharField(max_length=20, choices=DAMAGE_REASONS, default='expired', verbose_name="سبب التلف")
     notes = models.TextField(blank=True, null=True, verbose_name="ملاحظات إضافية")
     damaged_at = models.DateTimeField(auto_now_add=True, verbose_name="تاريخ ووقت الإتلاف")
 
+    # 💡 خاصية حاسبة لخسارة العملية بأمان دون الحاجة لفلاتر Django خارجية
+    @property
+    def total_loss(self):
+        if self.medicine and self.medicine.buy_price:
+            return self.quantity_damaged * self.medicine.buy_price
+        return 0
+
     def __str__(self):
-        return f"تلف: {self.medicine.trade_name} x {self.quantity_damaged}"
+        med_name = self.medicine.trade_name if self.medicine else "دواء غير محدد"
+        return f"تلف: {med_name} x {self.quantity_damaged}"

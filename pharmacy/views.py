@@ -10,16 +10,22 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import User
-from .models import Medicine, Sale, MissingMedicine, Invoice, InvoiceItem, DamagedMedicine
-from .iraqi_drugs import IRAQI_MEDICINES
-from .models import PharmacySupplier, MissingMedicine
+from django.core.exceptions import ObjectDoesNotExist
 
-# 1. لوحة التحكم الرئيسية للصيدلية (تعديل العزل المتعدد للمشتركين)
+from .models import Medicine, Sale, MissingMedicine, Invoice, InvoiceItem, DamagedMedicine, PharmacySupplier
+from .iraqi_drugs import IRAQI_MEDICINES
+
+
+# 1. لوحة التحكم الرئيسية للصيدلية
 @login_required
 def pharmacy_dashboard(request):
+    try:
+        user_pharmacy = request.user.profile.pharmacy
+    except ObjectDoesNotExist:
+        messages.error(request, "حسابك غير مرتبط بصيدلية مفعلة. يرجى مراجعة الدعم الفني.")
+        return redirect('login')
+
     today = date.today()
-    user_pharmacy = request.user.profile.pharmacy
-    
     total_medicines = Medicine.objects.filter(pharmacy=user_pharmacy, is_damaged=False).count()
     
     expired_medicines = Medicine.objects.filter(
@@ -59,70 +65,113 @@ def pharmacy_dashboard(request):
     }
     return render(request, 'pharmacy/dashboard.html', context)
 
-# 2. إدارة المخزن (مؤمنة بالكامل ومعزولة لكل صيدلية)
-# 2. إدارة المخزن (مؤمنة بالكامل ومعزولة لكل صيدلية)
+
+# 2. إدارة المخزن (محصنة بالكامل ضد الأخطاء الإدخالية)
 @login_required
 def inventory(request):
-    user_profile = request.user.profile
-    user_pharmacy = user_profile.pharmacy
+    try:
+        user_profile = request.user.profile
+        user_pharmacy = user_profile.pharmacy
+    except ObjectDoesNotExist:
+        messages.error(request, "حسابك غير مرتبط بصيدلية.")
+        return redirect('login')
 
     if request.method == 'POST':
-        # 🔒 فحص الأمان الحرج: منع الكاشير من الإضافة أو التحديث أو التعديل
         if not user_profile.is_pharmacy_owner:
-            messages.error(request, "عذراً، لا تمتلك الصلاحية الكافية لإجراء عمليات الإضافة أو التعديل على المخزن.")
+            messages.error(request, "عذراً، لا تمتلك الصلاحية الكافية لإجراء عمليات الإضافة أو التعديل.")
             return redirect('inventory')
 
         action_type = request.POST.get('action_type')
 
-        # 💡 معالجة الباركود: تحويل النص الفارغ إلى None
         raw_barcode = request.POST.get('barcode', '').strip()
         barcode_val = raw_barcode if raw_barcode else None
 
-        if action_type == 'add_new':
-            Medicine.objects.create(
-                pharmacy=user_pharmacy,
-                barcode=barcode_val, # 🌟 تم التعديل لمنع تكرار النصوص الفارغة
-                trade_name=request.POST.get('trade_name'),
-                scientific_name=request.POST.get('scientific_name'),
-                category=request.POST.get('category'),
-                quantity=request.POST.get('quantity'),
-                buy_price=request.POST.get('buy_price'),
-                sell_price=request.POST.get('sell_price'),
-                expiry_date=request.POST.get('expiry_date'),
-                shelf_location=request.POST.get('shelf_location', '')
-            )
-        
-        elif action_type == 'update_existing':
-            medicine_id = request.POST.get('medicine_id')
-            added_qty = int(request.POST.get('added_quantity'))
-            new_expiry = request.POST.get('expiry_date')
-            
-            selected_med = get_object_or_404(Medicine, id=medicine_id, pharmacy=user_pharmacy)
-            selected_med.quantity += added_qty
-            if new_expiry:
-                selected_med.expiry_date = new_expiry
-            selected_med.save()
+        # 🛡️ فحص أمان التاريخ
+        expiry_date_input = request.POST.get('expiry_date')
+        if expiry_date_input:
+            try:
+                exp_year = datetime.strptime(expiry_date_input, '%Y-%m-%d').year
+                if exp_year < 2000 or exp_year > 2099:
+                    messages.error(request, "سنة الصلاحية غير منطقية! يرجى إدخال تاريخ صحيح.")
+                    return redirect('inventory')
+            except ValueError:
+                messages.error(request, "صيغة التاريخ غير صحيحة.")
+                return redirect('inventory')
 
-        elif action_type == 'edit_full':
-            medicine_id = request.POST.get('medicine_id')
-            selected_med = get_object_or_404(Medicine, id=medicine_id, pharmacy=user_pharmacy)
-            
-            selected_med.barcode = barcode_val # 🌟 تم التعديل هنا أيضاً
-            selected_med.trade_name = request.POST.get('trade_name')
-            selected_med.scientific_name = request.POST.get('scientific_name')
-            selected_med.category = request.POST.get('category')
-            selected_med.quantity = int(request.POST.get('quantity'))
-            selected_med.buy_price = float(request.POST.get('buy_price'))
-            selected_med.sell_price = float(request.POST.get('sell_price'))
-            selected_med.expiry_date = request.POST.get('expiry_date')
-            selected_med.shelf_location = request.POST.get('shelf_location', '')
-            selected_med.save()
+        try:
+            if action_type == 'add_new':
+                quantity = int(request.POST.get('quantity', 0))
+                buy_price = float(request.POST.get('buy_price', 0))
+                sell_price = float(request.POST.get('sell_price', 0))
+
+                if quantity < 0 or buy_price < 0 or sell_price < 0:
+                    messages.error(request, "لا يمكن إدخال قيم بالسالب للكميات أو الأسعار!")
+                    return redirect('inventory')
+
+                Medicine.objects.create(
+                    pharmacy=user_pharmacy,
+                    barcode=barcode_val,
+                    trade_name=request.POST.get('trade_name'),
+                    scientific_name=request.POST.get('scientific_name'),
+                    category=request.POST.get('category'),
+                    quantity=quantity,
+                    buy_price=buy_price,
+                    sell_price=sell_price,
+                    expiry_date=expiry_date_input,
+                    shelf_location=request.POST.get('shelf_location', '')
+                )
+                messages.success(request, "تم إضافة الدواء للمخزن بنجاح.")
+
+            elif action_type == 'update_existing':
+                medicine_id = request.POST.get('medicine_id')
+                added_qty = int(request.POST.get('added_quantity', 0))
+                
+                if added_qty <= 0:
+                    messages.error(request, "يرجى إدخال كمية مضافة أكبر من الصفر.")
+                    return redirect('inventory')
+
+                selected_med = get_object_or_404(Medicine, id=medicine_id, pharmacy=user_pharmacy)
+                selected_med.quantity += added_qty
+                if expiry_date_input:
+                    selected_med.expiry_date = expiry_date_input
+                selected_med.save()
+                messages.success(request, f"تم تحديث كمية {selected_med.trade_name} بنجاح.")
+
+            elif action_type == 'edit_full':
+                medicine_id = request.POST.get('medicine_id')
+                selected_med = get_object_or_404(Medicine, id=medicine_id, pharmacy=user_pharmacy)
+                
+                quantity = int(request.POST.get('quantity', 0))
+                buy_price = float(request.POST.get('buy_price', 0))
+                sell_price = float(request.POST.get('sell_price', 0))
+
+                if quantity < 0 or buy_price < 0 or sell_price < 0:
+                    messages.error(request, "لا يمكن قبول قيم بالسالب!")
+                    return redirect('inventory')
+
+                selected_med.barcode = barcode_val
+                selected_med.trade_name = request.POST.get('trade_name')
+                selected_med.scientific_name = request.POST.get('scientific_name')
+                selected_med.category = request.POST.get('category')
+                selected_med.quantity = quantity
+                selected_med.buy_price = buy_price
+                selected_med.sell_price = sell_price
+                selected_med.expiry_date = expiry_date_input
+                selected_med.shelf_location = request.POST.get('shelf_location', '')
+                selected_med.save()
+                messages.success(request, "تم تعديل بيانات الدواء بنجاح.")
+
+        except (ValueError, TypeError):
+            messages.error(request, "حدث خطأ في المدخلات الرقمية! يرجى التأكد من كتابة أرقام صحيحة للأسعار والكميات.")
+            return redirect('inventory')
+        except Exception as e:
+            messages.error(request, f"تعذر تنفيذ العملية: {str(e)}")
+            return redirect('inventory')
 
         return redirect('inventory')
 
-    # --- كود العرض والفلترة (GET request) ---
+    # GET Request
     search_query = request.GET.get('search', '').strip()
-    
     if search_query:
         all_medicines = Medicine.objects.filter(
             Q(barcode__iexact=search_query) |
@@ -146,6 +195,8 @@ def inventory(request):
         'pharmacy_name': user_pharmacy.name
     }
     return render(request, 'pharmacy/inventory.html', context)
+
+
 # 3. تعديل أسعار الدواء
 @login_required
 def edit_prices(request, medicine_id):
@@ -158,12 +209,25 @@ def edit_prices(request, medicine_id):
     medicine = get_object_or_404(Medicine, id=medicine_id, pharmacy=user_pharmacy)
     
     if request.method == 'POST':
-        medicine.buy_price = request.POST.get('buy_price')
-        medicine.sell_price = request.POST.get('sell_price')
-        medicine.save()
-        return redirect('inventory')
+        try:
+            buy_price = float(request.POST.get('buy_price', 0))
+            sell_price = float(request.POST.get('sell_price', 0))
+
+            if buy_price < 0 or sell_price < 0:
+                messages.error(request, "الأسعار لا يمكن أن تكون بالسالب!")
+                return render(request, 'pharmacy/edit_prices.html', {'medicine': medicine})
+
+            medicine.buy_price = buy_price
+            medicine.sell_price = sell_price
+            medicine.save()
+            messages.success(request, "تم تعديل الأسعار بنجاح.")
+            return redirect('inventory')
+        except (ValueError, TypeError):
+            messages.error(request, "يرجى إدخال أرقام صحيحة للأسعار.")
+            return render(request, 'pharmacy/edit_prices.html', {'medicine': medicine})
     
     return render(request, 'pharmacy/edit_prices.html', {'medicine': medicine})
+
 
 # 4. شاشة نقطة البيع (POS)
 @login_required
@@ -177,7 +241,6 @@ def pos(request):
             quantity__gt=0, 
             is_damaged=False
         ).filter(
-            # 🌟 دعم البحث السريع بالباركود في شاشة البيع
             Q(barcode__iexact=search_query) |
             Q(trade_name__icontains=search_query) | 
             Q(scientific_name__icontains=search_query)
@@ -212,6 +275,9 @@ def pos(request):
 
                 for med_id, qty_str in zip(medicine_ids, quantities):
                     qty_sold = int(qty_str)
+                    if qty_sold <= 0:
+                        raise Exception("كمية البيع يجب أن تكون أكبر من الصفر!")
+
                     selected_med = get_object_or_404(Medicine, id=med_id, pharmacy=user_pharmacy)
 
                     if selected_med.quantity < qty_sold:
@@ -229,13 +295,10 @@ def pos(request):
                         total_price=total_item_price
                     )
 
-                    # خصم الكمية القديم
                     selected_med.quantity -= qty_sold
                     selected_med.save()
 
-                    # 🔥🔥🔥 أضف الكود الجديد هنا مباشرةً قبل نهاية الحلقة 🔥🔥🔥
                     if selected_med.quantity == 0:
-                        # التحقق أولاً منعاً للتكرار إذا كان مضافاً مسبقاً ولم يُحذف بعد
                         already_missing = MissingMedicine.objects.filter(
                             pharmacy=user_pharmacy, 
                             medicine=selected_med
@@ -245,10 +308,9 @@ def pos(request):
                             MissingMedicine.objects.create(
                                 pharmacy=user_pharmacy,
                                 medicine=selected_med,
-                                medicine_name=selected_med.trade_name, # حفظ الاسم احتياطاً
+                                medicine_name=selected_med.trade_name,
                                 notes="تم التحويل تلقائياً بسبب نفاد الكمية من المخزن."
                             )
-                # 🛑 نهاية حلقة التكرار
 
                 try:
                     discount_val = float(discount_value_raw)
@@ -290,6 +352,7 @@ def pos(request):
         'pharmacy_name': user_pharmacy.name
     })
 
+
 # 5. إرجاع الفاتورة
 @login_required
 def refund_sale(request, sale_id):
@@ -300,53 +363,45 @@ def refund_sale(request, sale_id):
         with transaction.atomic():
             for item in invoice.items.all():
                 medicine = item.medicine
-                medicine.quantity += item.quantity
-                medicine.save()
+                if medicine:
+                    medicine.quantity += item.quantity
+                    medicine.save()
             
             invoice.is_refunded = True
             invoice.save()
-            messages.success(request, f"تم إرجاع الفاتورة رقم {invoice.id} بنجاح وإعادة الأدوية للمخزن.")
+            messages.success(request, f"تم إرجاع الفاتورة بنجاح وإعادة الأدوية للمخزن.")
     else:
         messages.warning(request, "هذه الفاتورة تم إرجاعها مسبقاً!")
         
     return redirect('pos')
 
-# 6. النواقص
-# 6. النواقص
 
-@login_required
-
+# 6. النواقص
 @login_required
 def missing_medicines_view(request):
     user_pharmacy = request.user.profile.pharmacy
 
     if request.method == 'POST':
-        action = request.POST.get('action') # سنفرق بين الإضافة الجديدة وتحديث مذخر لدواء موجود
+        action = request.POST.get('action')
 
-        # 🛑 الحالة الأولى: إضافة دواء ناقص جديد يدوياً
         if action == 'add_new_missing':
             name = request.POST.get('medicine_name')
             notes = request.POST.get('notes', '')
-            supplier_id = request.POST.get('supplier_id') # المذخر المختار من القائمة
+            supplier_id = request.POST.get('supplier_id')
             new_supplier_name = request.POST.get('new_supplier_name', '').strip()
             new_supplier_phone = request.POST.get('new_supplier_phone', '').strip()
 
             if name:
                 selected_supplier = None
-                
-                # إذا كتب الصيدلي اسم مذخر جديد
                 if new_supplier_name:
-                    # جلب المذخر إذا كان موجوداً مسبقاً أو إنشائه لمنع التكرار
                     selected_supplier, created = PharmacySupplier.objects.get_or_create(
                         pharmacy=user_pharmacy,
                         name=new_supplier_name,
                         defaults={'phone': new_supplier_phone}
                     )
-                # إذا اختار مذخراً جاهزاً من القائمة المنسدلة
                 elif supplier_id and supplier_id != 'new':
                     selected_supplier = get_object_or_404(PharmacySupplier, id=supplier_id, pharmacy=user_pharmacy)
 
-                # إنشاء سجل النواقص
                 MissingMedicine.objects.create(
                     pharmacy=user_pharmacy,
                     medicine_name=name,
@@ -356,7 +411,6 @@ def missing_medicines_view(request):
                 messages.success(request, f"تم إضافة دواء ({name}) إلى قائمة النواقص.")
                 return redirect('missing_medicines')
 
-        # 🛑 الحالة الثانية: تحديد أو تحديث المذخر لدواء (مثل الأدوية المتحولة تلقائياً)
         elif action == 'update_supplier':
             missing_item_id = request.POST.get('missing_item_id')
             supplier_id = request.POST.get('supplier_id')
@@ -377,32 +431,33 @@ def missing_medicines_view(request):
 
             missing_item.supplier = selected_supplier
             missing_item.save()
-            messages.success(request, "تم تحديث بيانات المذخر للدواء الناقص بنجاح.")
+            messages.success(request, "تم تحديث بيانات المذخر بنجاح.")
             return redirect('missing_medicines')
 
-    # جلب البيانات للعرض (GET)
     missing_list = MissingMedicine.objects.filter(pharmacy=user_pharmacy).select_related('supplier', 'medicine').order_by('-requested_at')
     suppliers_list = PharmacySupplier.objects.filter(pharmacy=user_pharmacy).order_by('name')
 
-    context = {
+    return render(request, 'pharmacy/missing_medicines.html', {
         'missing_list': missing_list, 
         'suppliers_list': suppliers_list,
         'pharmacy_name': user_pharmacy.name
-    }
-    return render(request, 'pharmacy/missing_medicines.html', context)
+    })
+
 
 @login_required
 def delete_missing_medicine(request, pk):
     user_profile = request.user.profile
     if not user_profile.is_pharmacy_owner:
-        messages.error(request, "عذراً، لا تمتلك الصلاحية لشطب النواقص من القائمة.")
+        messages.error(request, "عذراً، لا تمتلك الصلاحية لشطب النواقص.")
         return redirect('missing_medicines')
         
     user_pharmacy = user_profile.pharmacy
     item = get_object_or_404(MissingMedicine, id=pk, pharmacy=user_pharmacy)
     item.delete()
+    messages.success(request, "تم حذف السجل من القائمة.")
     return redirect('missing_medicines')
-    
+
+
 # 7. الإتلاف
 @login_required
 def damage_medicine(request, medicine_id):
@@ -444,11 +499,12 @@ def damage_medicine(request, medicine_id):
                     notes=damage_notes
                 )
                 
-            messages.success(request, f"تم نقل ({qty_to_damage} علبة) من دواء ({medicine.trade_name}) إلى قائمة التوالف بنجاح.")
+            messages.success(request, f"تم نقل ({qty_to_damage} علبة) من دواء ({medicine.trade_name}) إلى التوالف بنجاح.")
         except Exception as e:
             messages.error(request, f"حدث خطأ أثناء معالجة الطلب: {str(e)}")
             
     return redirect('inventory')
+
 
 # 8. سجل الفواتير والمبيعات
 @login_required
@@ -457,38 +513,27 @@ def sales_history(request):
     user_pharmacy = user_profile.pharmacy
     search_query = request.GET.get('search_query', '').strip()
     
-    # 1️⃣ جعلنا المتغير الأساسي باسم invoices وتفعيل التحميل المسبق لمنع ثقل السيرفر
     invoices = Invoice.objects.filter(
         pharmacy=user_pharmacy
     ).select_related('cashier').prefetch_related('items__medicine')
 
     if search_query:
         search_filter = Q()
-        
-        # 1️⃣ الحالة الأولى: إذا كتب المستخدم رقم الفاتورة كاملاً (مثل INV-5)
         if search_query.upper().startswith('INV'):
             search_filter |= Q(invoice_number__iexact=search_query)
-            
-        # 2️⃣ الحالة الثانية: إذا كتب المستخدم رقماً مجرداً فقط (مثل 5 أو 12)
         elif search_query.isdigit():
             search_filter |= Q(id=int(search_query))
             search_filter |= Q(invoice_number__endswith=f"-{search_query}")
-            
-        # 3️⃣ الحالة الثالثة: إذا كتب صيغة تاريخ تحتوي على فواصل (مثل 2026-05)
         elif '-' in search_query or '/' in search_query:
             search_filter |= Q(created_at__icontains=search_query)
-            
-        # 4️⃣ الحالة الرابعة: إذا كتب نصاً عادياً (اسم دواء، باركود، أو اسم الكاشير)
         else:
             search_filter |= Q(items__medicine__barcode__iexact=search_query)
             search_filter |= Q(items__medicine__trade_name__icontains=search_query)
             search_filter |= Q(items__medicine__scientific_name__icontains=search_query)
             search_filter |= Q(cashier__username__icontains=search_query)
 
-        # فلترة الاستعلام الأساسي مباشرةً مع منع التكرار (distinct)
         invoices = invoices.filter(search_filter).distinct()
 
-    # 2️⃣ ترتيب النتائج النهائي دائماً من الأحدث إلى الأقدم
     invoices = invoices.order_by('-created_at')
 
     cashier_summary = []
@@ -520,6 +565,7 @@ def sales_history(request):
         'cashier_summary': cashier_summary
     })
 
+
 # 9. التقارير المالية
 @login_required
 def sales_reports(request):
@@ -529,13 +575,20 @@ def sales_reports(request):
         return redirect('pharmacy_dashboard')
     
     user_pharmacy = user_profile.pharmacy
-    
     start_date_str = request.GET.get('start_date')
     end_date_str = request.GET.get('end_date')
 
     if start_date_str and end_date_str:
-        start_date = datetime.strptime(start_date_str, '%Y-%m-%d')
-        end_date = datetime.strptime(end_date_str, '%Y-%m-%d') + timedelta(days=1) - timedelta(seconds=1)
+        try:
+            start_date = datetime.strptime(start_date_str, '%Y-%m-%d')
+            end_date = datetime.strptime(end_date_str, '%Y-%m-%d') + timedelta(days=1) - timedelta(seconds=1)
+            
+            if start_date.year < 2000 or start_date.year > 2099 or end_date.year < 2000 or end_date.year > 2099:
+                messages.error(request, "يرجى اختيار تواريخ تقرير بين سنتي 2000 و 2099.")
+                return redirect('sales_reports')
+        except ValueError:
+            messages.error(request, "صيغة التاريخ المدخلة غير صحيحة.")
+            return redirect('sales_reports')
     else:
         end_date = timezone.now()
         start_date = end_date - timedelta(days=30)
@@ -559,7 +612,7 @@ def sales_reports(request):
         quantity__gt=0,
         is_damaged=False
     )
-    total_expired_losses = sum(med.quantity * med.buy_price for med in expired_medicines)
+    total_expired_losses = sum((med.quantity * (med.buy_price or 0)) for med in expired_medicines)
 
     damaged_losses_query = DamagedMedicine.objects.filter(
         medicine__pharmacy=user_pharmacy
@@ -597,15 +650,16 @@ def sales_reports(request):
         'invoices': invoices,
         'start_date': start_date_str,
         'end_date': end_date_str,
-        'total_sales': int(total_sales),
-        'total_discounts_given': int(total_discounts_given),
+        'total_sales': int(total_sales or 0),
+        'total_discounts_given': int(total_discounts_given or 0),
         'total_invoices_count': total_invoices_count,
-        'total_damage_losses': int(total_combined_losses), 
+        'total_damage_losses': int(total_combined_losses or 0), 
         'top_selling_items': top_selling_items,
         'stagnant_medicines': stagnant_medicines,
         'pharmacy_name': user_pharmacy.name
     }
     return render(request, 'pharmacy/reports.html', context)
+
 
 # 10. التوالف
 @login_required
@@ -620,13 +674,14 @@ def damaged_medicines_list(request):
         pharmacy=user_pharmacy
     ).select_related('medicine').order_by('-damaged_at')
     
-    total_losses = sum(item.quantity_damaged * item.medicine.buy_price for item in damaged_list)
+    total_losses = sum(item.quantity_damaged * (item.medicine.buy_price if item.medicine else 0) for item in damaged_list)
     
     return render(request, 'pharmacy/damaged_medicines.html', {
         'damaged_list': damaged_list,
         'total_losses': total_losses,
         'pharmacy_name': user_pharmacy.name
     })
+
 
 # تسجيل الدخول والخروج
 def login_view(request):
@@ -643,13 +698,16 @@ def login_view(request):
         form = AuthenticationForm()
     return render(request, 'pharmacy/login.html', {'form': form})
 
+
 def logout_view(request):
     logout(request)
     return redirect('login')
 
+
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'pharmacy_dashboard'
 LOGOUT_REDIRECT_URL = 'login'
+
 
 def landing_page(request):
     return render(request, 'pharmacy/landing.html')

@@ -1,6 +1,9 @@
 {% extends "pharmacy/base.html" %}
 {% block content %}
 
+    <!-- استدعاء أيقونات بوتستراب لضمان ظهور أيقونة الباركود والواجهة -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
     <style>
         /* الأقسام والصناديق الرئيسية */
         .pos-section { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 30px; }
@@ -62,7 +65,7 @@
     <div class="pos-section" style="border-top: 5px solid #1abc9c;">
         <h2 class="section-title">🛒 شاشة البيع المباشر الحالية</h2>
         
-        <!-- 🔍 حقل البحث التفاعلي (مجهز للباركود بالتركيز التلقائي) -->
+        <!-- 🔍 حقل البحث التفاعلي -->
         <div class="search-container">
             <input type="text" id="pos_search_input" class="search-input" placeholder="🔍 مرر الباركود أو ابحث عن الدواء بالاسم التجاري/العلمي/الباركود..." autocomplete="off" autofocus>
             <div id="pos_suggestions" class="autocomplete-dropdown"></div>
@@ -151,9 +154,9 @@
                 <tr>
                     <td><strong>{{ invoice.invoice_number }}</strong></td>
                     <td>{{ invoice.created_at|date:"H:i A" }}</td>
-                    <td>{{ invoice.total_amount }} د.ع</td>
-                    <td style="color: #e74c3c;">{{ invoice.discount }} د.ع</td>
-                    <td style="color: #2ecc71; font-weight: bold;">{{ invoice.final_amount }} د.ع</td>
+                    <td>{{ invoice.total_amount|default:0 }} د.ع</td>
+                    <td style="color: #e74c3c;">{{ invoice.discount|default:0 }} د.ع</td>
+                    <td style="color: #2ecc71; font-weight: bold;">{{ invoice.final_amount|default:0 }} د.ع</td>
                     <td>
                         {% if invoice.is_refunded %}
                             <span style="background: #e74c3c; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px;">🚫 مرتجعة بالكامل</span>
@@ -163,7 +166,8 @@
                     </td>
                     <td style="text-align: center;">
                         {% if not invoice.is_refunded %}
-                            <button type="button" class="btn-refund-direct" onclick="confirmDirectRefund('{{ invoice.id }}', '{{ invoice.invoice_number }}', '{{ invoice.final_amount }}')">
+                            <!-- 🎯 إصلاح الاستدعاء بنقل الوسائط الثلاثة الصحيحة -->
+                            <button type="button" class="btn-refund-direct" onclick="confirmDirectRefund('{{ invoice.id }}', '{{ invoice.invoice_number }}', '{{ invoice.final_amount|default:0 }}')">
                                 🔄 إرجاع الفاتورة
                             </button>
                         {% else %}
@@ -180,17 +184,17 @@
         </table>
     </div>
 
-    <!-- 📦 تغذية بيانات الأدوية للجافا سكريبت متضمنة الباركود 🌟 -->
+    <!-- 📦 تغذية بيانات الأدوية للجافا سكريبت محصنة ضد القيم الفارغة 🌟 -->
     <script>
         const availableMedicines = [
             {% for med in medicines %}
             {
                 "id": "{{ med.id }}",
-                "barcode": "{{ med.barcode|escapejs }}", // حقل الباركود موجود
+                "barcode": "{{ med.barcode|default:''|escapejs }}",
                 "trade_name": "{{ med.trade_name|escapejs }}",
                 "scientific_name": "{{ med.scientific_name|escapejs }}",
-                "sell_price": {{ med.sell_price }},
-                "quantity": {{ med.quantity }}
+                "sell_price": {{ med.sell_price|default:0 }},
+                "quantity": {{ med.quantity|default:0 }}
             }{% if not forloop.last %},{% endif %}
             {% endfor %}
         ];
@@ -206,29 +210,26 @@
         let invoiceItems = [];
 
         if (searchInput) {
-            // 🌟 1. الاستماع المباشر لجهاز السكنر (يرسل إشارة Enter بعد قراءة الباركود)
+            // 🌟 1. الاستماع المباشر لجهاز السكنر
             searchInput.addEventListener('keydown', function(e) {
                 if (e.key === 'Enter') {
-                    e.preventDefault(); // منع إرسال الفاتورة بالخطأ عند ضرب السكنر
+                    e.preventDefault(); 
                     const query = this.value.trim().toLowerCase();
                     if (!query) return;
 
-                    // البحث عن مطابقة تامة للباركود
                     const exactMatch = availableMedicines.find(med => med.barcode && med.barcode.toLowerCase() === query);
                     
                     if (exactMatch) {
                         addMedicineToInvoice(exactMatch);
-                        this.value = ''; // تفريغ الحقل للصنف التالي فوراً
+                        this.value = ''; 
                         suggestionsBox.style.display = 'none';
                         this.placeholder = '🔍 مرر الباركود أو ابحث عن الدواء بالاسم التجاري/العلمي/الباركود...';
-                        this.focus(); // إبقاء المؤشر داخل الحقل بانتظار السكنة القادمة
+                        this.focus(); 
                     } else {
-                        // 🛡️ الإضافة الجديدة: تنبيه الكاشير وتفريغ الحقل إذا كان الباركود غير مسجل
                         this.value = '';
                         this.placeholder = '❌ هذا الباركود غير مسجل!';
                         suggestionsBox.style.display = 'none';
                         
-                        // إعادة النص الافتراضي بعد 3 ثوانٍ
                         setTimeout(() => {
                             this.placeholder = '🔍 مرر الباركود أو ابحث عن الدواء بالاسم التجاري/العلمي/الباركود...';
                         }, 3000);
@@ -238,7 +239,7 @@
                 }
             });
             
-            // 🔍 2. محرك البحث الفوري (يدعم الاسم والباركود معاً الآن)
+            // 🔍 2. محرك البحث الفوري
             searchInput.addEventListener('input', function() {
                 const query = this.value.trim().toLowerCase();
                 suggestionsBox.innerHTML = '';
@@ -248,7 +249,6 @@
                     return;
                 }
 
-                // تم إضافة فلتر الباركود هنا ليعمل البحث اليدوي بشكل كامل
                 const filtered = availableMedicines.filter(med => 
                     med.trade_name.toLowerCase().includes(query) || 
                     med.scientific_name.toLowerCase().includes(query) ||
@@ -280,7 +280,7 @@
                             addMedicineToInvoice(med);
                             searchInput.value = '';
                             suggestionsBox.style.display = 'none';
-                            searchInput.focus(); // إرجاع الفوكس للسكنر بعد الاختيار اليدوي
+                            searchInput.focus(); 
                         });
 
                         suggestionsBox.appendChild(row);
@@ -384,7 +384,7 @@
                 if (emptyRow) emptyRow.style.display = 'table-row';
             }
             calculateInvoice();
-            searchInput.focus(); // إرجاع التركيز للسكنر بعد الحذف
+            searchInput.focus(); 
         }
 
         // 🧮 الدالة الحسابية الكبرى
@@ -422,9 +422,9 @@
             document.getElementById('grand_total_display').textContent = grandTotal.toLocaleString('en-US') + ' د.ع';
         }
 
-        // 🔄 دالة الإرجاع المباشر
-        function confirmDirectRefund(invoiceId, finalAmount) {
-            const text = `هل أنت متأكد من رغبتك في إرجاع الفاتورة رقم #${invoiceId} بالكامل؟\n\nالصافي المدفوع المستحق للزبون: ${finalAmount} د.ع\n\nعند الضغط على موافق (OK)، ستتم إعادة الأدوية فوراً إلى مخزن الصيدلية.`;
+        // 🎯 إصلاح الدالة لاستقبال الوسائط الثلاثة لعرض البيانات الصحيحة
+        function confirmDirectRefund(invoiceId, invoiceNumber, finalAmount) {
+            const text = `هل أنت متأكد من رغبتك في إرجاع الفاتورة رقم #${invoiceNumber} بالكامل؟\n\nالصافي المدفوع المستحق للزبون: ${finalAmount} د.ع\n\nعند الضغط على موافق (OK)، ستتم إعادة الأدوية فوراً إلى مخزن الصيدلية.`;
             
             if (confirm(text)) {
                 let url = "{% url 'refund_sale' 0 %}".replace('0', invoiceId);
@@ -454,12 +454,11 @@
         if (posForm) {
             posForm.addEventListener('submit', function(e) {
                 if (invoiceItems.length === 0) {
-                    e.preventDefault(); // إيقاف الإرسال
+                    e.preventDefault(); 
                     alert('⚠️ لا يمكن إتمام عملية البيع: الفاتورة فارغة! يرجى إضافة دواء واحد على الأقل.');
                     if(searchInput) searchInput.focus();
                     return;
                 }
-                // في حال وجود أدوية، نسمح بالإرسال ونلغي تحذير المغادرة
                 isInvoiceStarted = false;
             });
         }
