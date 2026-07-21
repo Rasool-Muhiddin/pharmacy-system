@@ -135,7 +135,7 @@
                 </div>
                 
                 <div class="form-group"><label>مكان الرف:</label><input type="text" name="shelf_location"></div>
-                <div class="form-group"><label>الكمية الأولية (شيت):</label><input type="number" name="quantity" required min="1"></div>
+                <div class="form-group"><label>الكمية الأولية (قطعة):</label><input type="number" name="quantity" required min="1"></div>
                 <div class="form-group"><label>تاريخ انتهاء الصلاحية:</label><input type="date" name="expiry_date" required></div>
                 <div class="form-group"><label>سعر الشراء (د.ع):</label><input type="number" name="buy_price" required></div>
                 <div class="form-group"><label>سعر البيع (د.ع):</label><input type="number" name="sell_price" required></div>
@@ -201,9 +201,9 @@
                     <td style="color:#4a5568;">{{ med.get_category_display }}</td>
                     <td>
                         {% if med.quantity <= 5 %}
-                            <span class="custom-badge badge-warning"><i class="bi bi-exclamation-triangle"></i> {{ med.quantity }} عِلب</span>
+                            <span class="custom-badge badge-warning"><i class="bi bi-exclamation-triangle"></i> {{ med.quantity }} قطعة</span>
                         {% else %}
-                            <span class="custom-badge badge-success"><i class="bi bi-check2"></i> {{ med.quantity }} عِلب</span>
+                            <span class="custom-badge badge-success"><i class="bi bi-check2"></i> {{ med.quantity }} قطعة</span>
                         {% endif %}
                     </td>
                     <td><strong style="color:#2d3748;">{{ med.sell_price }} د.ع</strong></td>
@@ -444,7 +444,7 @@
         const currentQty = parseInt(button.getAttribute('data-quantity')) || 0;
         document.getElementById('damage_medicine_form').action = "{% url 'damage_medicine' 999999 %}".replace('999999', id);
         document.getElementById('damage_med_name').value = button.getAttribute('data-trade-name');
-        document.getElementById('damage_current_qty').value = `${currentQty} علبة`;
+        document.getElementById('damage_current_qty').value = `${currentQty} قطعة`;
         document.getElementById('damage_qty_input').max = currentQty;
         document.getElementById('damage_qty_input').value = currentQty;
         document.getElementById('damage_notes').value = '';
