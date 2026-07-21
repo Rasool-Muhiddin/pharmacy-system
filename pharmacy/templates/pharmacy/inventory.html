@@ -1,0 +1,478 @@
+{% extends "pharmacy/base.html" %}
+{% block content %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+<style>
+    html { overflow-y: scroll; }
+    body, h1, h2, h3, h4, th, td, span, div, button, input, select, textarea, label { font-family: 'Tajawal', 'Cairo', sans-serif !important; }
+    .inventory-container, .form-container, .table-container { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 25px; }
+    .form-container { border-top: 5px solid #1abc9c; border-left: 1px solid #edf2f7; border-right: 1px solid #edf2f7; border-bottom: 1px solid #edf2f7; }
+    .table-container { border-top: 4px solid #3182ce; width: 100%; box-sizing: border-box; }
+    .search-box { background: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 25px; display: flex; gap: 10px; border: 1px solid #edf2f7; }
+    .search-box input { flex: 1; padding: 10px 15px; border: 1px solid #cbd5e0; border-radius: 6px; font-size: 14px; outline: none; transition: border-color 0.2s; }
+    .search-box input:focus, input:focus, select:focus, textarea:focus { border-color: #1abc9c; box-shadow: 0 0 0 3px rgba(26, 188, 156, 0.15); }
+    .btn-search, .btn-submit { background: #1abc9c; color: white; border: none; padding: 10px 22px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; gap: 5px; }
+    .btn-search:hover, .btn-submit:hover { background: #16a085; box-shadow: 0 4px 10px rgba(26, 188, 156, 0.2); }
+    .collapsible-controls { display: flex; gap: 20px; margin-bottom: 25px; }
+    @media (max-width: 768px) { .collapsible-controls { flex-direction: column; gap: 10px; } }
+    .collapse-btn { flex: 1; padding: 14px 20px; font-size: 14.5px; font-weight: bold; border-radius: 8px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: all 0.25s ease; outline: none; }
+    .btn-new-drug { background: #fff; border: 2px solid #1abc9c; color: #1abc9c; }
+    .btn-new-drug:hover, .btn-new-drug.active { background: #1abc9c; color: #fff; }
+    .btn-supply-drug { background: #fff; border: 2px solid #e67e22; color: #e67e22; }
+    .btn-supply-drug:hover, .btn-supply-drug.active { background: #e67e22; color: #fff; }
+    .collapsible-content { display: none; margin-bottom: 25px; animation: slideDown 0.3s ease-out; }
+    @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 15px; margin-bottom: 15px; }
+    .form-grid-supply { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 15px; position: relative; }
+    @media (max-width: 768px) { .form-grid-supply { grid-template-columns: 1fr; } }
+    .form-group { margin-bottom: 5px; position: relative; }
+    label { display: block; margin-bottom: 6px; font-weight: bold; color: #4a5568; font-size: 13px; }
+    input[type="text"], input[type="number"], input[type="date"], select, textarea { width: 100%; padding: 10px 12px; border: 1px solid #cbd5e0; border-radius: 6px; box-sizing: border-box; font-size: 13.5px; color: #2d3748; outline: none; }
+    .autocomplete-suggestions { position: absolute; top: 100%; right: 0; left: 0; background: white; border: 1px solid #cbd5e0; border-top: none; border-radius: 0 0 6px 6px; max-height: 200px; overflow-y: auto; z-index: 1000; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); display: none; }
+    .suggestion-item { padding: 10px 15px; cursor: pointer; border-bottom: 1px solid #edf2f7; font-size: 13.5px; display: flex; justify-content: space-between; align-items: center; }
+    .suggestion-item:hover { background-color: #f7fafc; }
+    .suggestion-item .stock-badge { font-size: 11px; background: #718096; color: white; padding: 2px 8px; border-radius: 12px; font-weight: bold; }
+    .custom-badge { padding: 5px 12px; border-radius: 20px; color: white; font-size: 12px; font-weight: bold; display: inline-flex; align-items: center; gap: 5px; }
+    .badge-success { background-color: #c6f6d5; color: #22543d; }
+    .badge-warning { background-color: #feebc8; color: #c05621; }
+    .custom-table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 13.5px; }
+    .custom-table th, .custom-table td { padding: 12px; text-align: right; border-bottom: 1px solid #edf2f7; }
+    .custom-table th { background-color: #f7fafc; color: #4a5568; font-weight: bold; }
+    .custom-table tbody tr:hover { background-color: #fcfdfd; }
+    .modal { display: none; position: fixed; z-index: 1050; right: 0; top: 0; width: 100%; height: 100%; overflow: auto; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); }
+    .modal-content { background: #fff; margin: 5% auto; padding: 30px; width: 550px; max-width: 90%; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); border-top: 6px solid #1abc9c; position: relative; animation: animatetop 0.3s; }
+    @keyframes animatetop { from {top: -30px; opacity: 0} to {top: 0; opacity: 1} }
+    .close { color: #a0aec0; float: left; font-size: 24px; font-weight: bold; cursor: pointer; }
+    .close:hover { color: #e53e3e; }
+    .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+    .modal-full-width { grid-column: span 2; }
+    .no-permission-badge { background: #f7fafc; color: #718096; padding: 6px 14px; border-radius: 20px; font-size: 12px; border: 1px dashed #cbd5e0; display: inline-flex; gap: 5px; }
+    .alert { padding: 12px 20px; border-radius: 6px; font-weight: bold; margin-bottom: 10px; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+    .alert-success { background: #c6f6d5; color: #22543d; border: 1px solid #9ae6b4; }
+    .alert-error { background: #fed7d7; color: #9b2c2c; border: 1px solid #feb2b2; }
+    .barcode-input-wrapper input { padding-left: 35px; }
+</style>
+
+<div class="inventory-container">
+    {% if messages %}
+    <div class="messages-container">
+        {% for message in messages %}
+            <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-error{% endif %}">
+                <i class="bi {% if message.tags == 'success' %}bi-check-circle-fill{% else %}bi-exclamation-triangle-fill{% endif %}"></i> {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div style="border-bottom: 2px solid #f1f2f6; padding-bottom: 15px; margin-bottom: 25px;">
+        <h2 style="margin: 0; color: #2c3e50; display: flex; align-items: center; gap: 10px;">
+            <i class="bi bi-archive-fill" style="color: #1abc9c;"></i> إدارة مخزن الأدوية
+        </h2>
+    </div>
+    
+    <form method="GET" action="/pharmacy/inventory/" class="search-box">
+        <input type="text" name="search" value="{{ search_query }}" placeholder="🔍 ابحث عن دواء بالاسم أو الباركود..." autofocus>
+        <button type="submit" class="btn-search"><i class="bi bi-search"></i> بحث</button>
+        {% if search_query %}<a href="/pharmacy/inventory/" style="background:#718096; color:white; padding:10px 18px; text-decoration:none; border-radius:6px; font-weight:bold; font-size:14px;">إلغاء</a>{% endif %}
+    </form>
+
+    {% if request.user.profile.is_pharmacy_owner %}
+    <div class="collapsible-controls">
+        <button type="button" class="collapse-btn btn-new-drug" id="btn_toggle_new" onclick="toggleForm('new_drug_container', 'existing_drug_container', this)">
+            <span><i class="bi bi-plus-circle"></i> تسجيل صنف جديد في المخزن</span><span class="arrow">▼</span>
+        </button>
+        <button type="button" class="collapse-btn btn-supply-drug" id="btn_toggle_existing" onclick="toggleForm('existing_drug_container', 'new_drug_container', this)">
+            <span><i class="bi bi-box-seam"></i> تزويد كمية (صنف موجود)</span><span class="arrow">▼</span>
+        </button>
+    </div>
+
+    <!-- نموذج إضافة دواء جديد -->
+    <div id="new_drug_container" class="collapsible-content form-container">
+        <h3 style="margin-top:0; color:#1abc9c; border-bottom: 2px solid #edf2f7; padding-bottom: 12px; margin-bottom: 20px; font-size: 16px;">
+            <i class="bi bi-plus-circle-fill"></i> إضافة دواء جديد
+        </h3>
+        <form method="POST" id="add_new_drug_form">
+            {% csrf_token %}
+            <input type="hidden" name="action_type" value="add_new">
+            
+            <div class="form-grid">
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <label for="id_barcode">باركود الدواء (امسح العلبة بالجهاز أو اكتبه يدوياً):</label>
+                    <div class="barcode-input-wrapper" style="position: relative;">
+                        <input type="text" name="barcode" id="id_barcode" placeholder="قم بتوجيه قارئ الباركود نحو علبة الدواء..." autocomplete="off">
+                        <i class="bi bi-qr-code-scan" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #1abc9c; font-size: 18px;"></i>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>الاسم التجاري:</label>
+                    <input type="text" name="trade_name" id="id_trade_name" list="iraqi_drugs_list" required placeholder="مثال: Panadol" autocomplete="off">
+                    <datalist id="iraqi_drugs_list">
+                        {% for drug in iraqi_medicines %}<option value="{{ drug.trade_name }}">{{ drug.scientific_name }} ({{ drug.category }})</option>{% endfor %}
+                    </datalist>
+                </div>
+                
+                <div class="form-group">
+                    <label>الاسم العلمي:</label>
+                    <input type="text" name="scientific_name" id="id_scientific_name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>الشكل الدوائي:</label>
+                    <select name="category" id="id_category">
+                        <option value="tablet">💊 حبوب / كبسول</option>
+                        <option value="syrup">🧪 شراب / معلق</option>
+                        <option value="injection">💉 حقن / فيال / أمبول</option>
+                        <option value="ointment">🧴 مرهم / كريم / جيل</option>
+                        <option value="drops_eye_ear">👁️ قطرات عين / أذن</option>
+                        <option value="drops_nasal">👃 قطرات / بخاخ أنف</option>
+                        <option value="suppository">📦 تحاميل / لبوس</option>
+                        <option value="supplement_vitamin">🍏 فيتامينات / مكملات غذائية</option>
+                        <option value="tonic_energy">⚡ مقويات / منشطات</option>
+                        <option value="powder_sachet">🥛 بودرة / فوار</option>
+                        <option value="medical_device">🩺 مستلزمات طبية / أجهزة</option>
+                        <option value="other">📦 أخرى</option>
+                    </select>
+                </div>
+                
+                <div class="form-group"><label>مكان الرف:</label><input type="text" name="shelf_location"></div>
+                <div class="form-group"><label>الكمية الأولية (عِلب):</label><input type="number" name="quantity" required min="1"></div>
+                <div class="form-group"><label>تاريخ انتهاء الصلاحية:</label><input type="date" name="expiry_date" required></div>
+                <div class="form-group"><label>سعر الشراء (د.ع):</label><input type="number" name="buy_price" required></div>
+                <div class="form-group"><label>سعر البيع (د.ع):</label><input type="number" name="sell_price" required></div>
+            </div>
+            
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button type="submit" class="btn-submit" style="width: 200px;"><i class="bi bi-save"></i> حفظ كصنف جديد</button>
+                <button type="button" class="btn-submit" style="background:#718096; width: 120px;" onclick="toggleForm('new_drug_container', 'existing_drug_container', document.getElementById('btn_toggle_new'))">إلغاء</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- نموذج تزويد كمية (تم تحديثه ليعمل بالباركود أيضاً) -->
+    <div id="existing_drug_container" class="collapsible-content form-container" style="border-top-color: #e67e22;">
+        <h3 style="margin-top:0; color:#e67e22; border-bottom: 2px solid #edf2f7; padding-bottom: 12px; margin-bottom: 20px; font-size: 16px;">
+            <i class="bi bi-box-seam-fill"></i> تزويد شحنة
+        </h3>
+        <form method="POST" id="supply_existing_form">
+            {% csrf_token %}
+            <input type="hidden" name="action_type" value="update_existing">
+            <div class="form-grid-supply">
+                <div class="form-group">
+                    <label>امسح الباركود أو ابحث عن الدواء:</label>
+                    <input type="text" id="existing_drug_search_input" placeholder="🔍 مرر الباركود أو اكتب اسم الدواء..." autocomplete="off" required>
+                    <input type="hidden" name="medicine_id" id="selected_existing_med_id" required>
+                    <div id="search_suggestions_box" class="autocomplete-suggestions"></div>
+                </div>
+                <div class="form-group"><label>الكمية المضافة:</label><input type="number" name="added_quantity" id="supply_added_qty" required min="1"></div>
+                <div class="form-group"><label>تحديث صلاحية الوجبة (اختياري):</label><input type="date" name="expiry_date"></div>
+            </div>
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button type="submit" class="btn-submit" style="background:#e67e22; width: 200px;"><i class="bi bi-lightning-fill"></i> تحديث المخزون</button>
+                <button type="button" class="btn-submit" style="background:#718096; width: 120px;" onclick="toggleForm('existing_drug_container', 'new_drug_container', document.getElementById('btn_toggle_existing'))">إلغاء</button>
+            </div>
+        </form>
+    </div>
+    {% endif %}
+
+    <!-- جدول المخزون -->
+    <div class="table-container">
+        <h3 style="margin-top:0; border-bottom: 2px solid #edf2f7; padding-bottom: 12px; margin-bottom: 20px; color: #2d3748; font-size: 16px; display: flex; align-items: center; gap: 8px;">
+            <i class="bi bi-list-stars" style="color: #3182ce;"></i> قائمة المخزون الحالي
+        </h3>
+        <table class="custom-table">
+            <thead>
+                <tr>
+                    <th>الاسم (العلمي)</th>
+                    <th>النوع</th>
+                    <th>الكمية</th>
+                    <th>سعر البيع</th>
+                    <th>الانتهاء</th>
+                    <th>إجراءات</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for med in medicines %}
+                <tr>
+                    <td>
+                        <strong style="color:#2d3748;">{{ med.trade_name }}</strong><br>
+                        <span style="font-size:11px; color:#718096;">{{ med.scientific_name }}</span>
+                        {% if med.barcode %}<br><span style="font-size:10px; color:#1abc9c;"><i class="bi bi-barcode"></i> {{ med.barcode }}</span>{% endif %}
+                    </td>
+                    <td style="color:#4a5568;">{{ med.get_category_display }}</td>
+                    <td>
+                        {% if med.quantity <= 5 %}
+                            <span class="custom-badge badge-warning"><i class="bi bi-exclamation-triangle"></i> {{ med.quantity }} عِلب</span>
+                        {% else %}
+                            <span class="custom-badge badge-success"><i class="bi bi-check2"></i> {{ med.quantity }} عِلب</span>
+                        {% endif %}
+                    </td>
+                    <td><strong style="color:#2d3748;">{{ med.sell_price }} د.ع</strong></td>
+                    <td style="color:#4a5568;"><i class="bi bi-calendar-event"></i> {{ med.expiry_date }}</td>
+                    <td>
+                        {% if request.user.profile.is_pharmacy_owner %}
+                            <div style="display: flex; gap: 6px;">
+                                <button type="button" class="btn-edit-trigger" style="background:#3182ce; color:white; padding:6px 12px; border:none; border-radius:6px; font-size:13px; font-weight:bold; cursor:pointer;"
+                                        onclick="openEditModal(this)" data-id="{{ med.id }}" data-trade-name="{{ med.trade_name }}" data-scientific-name="{{ med.scientific_name }}"
+                                        data-category="{{ med.category }}" data-quantity="{{ med.quantity }}" data-buy-price="{{ med.buy_price }}" data-sell-price="{{ med.sell_price }}"
+                                        data-expiry-date="{{ med.expiry_date|date:'Y-m-d' }}" data-shelf-location="{{ med.shelf_location }}" data-barcode="{{ med.barcode|default_if_none:'' }}">
+                                    <i class="bi bi-pencil-square"></i> تعديل
+                                </button>
+                                <button type="button" style="background:#e53e3e; color:white; padding:6px 12px; border:none; border-radius:6px; font-size:13px; font-weight:bold; cursor:pointer;"
+                                        onclick="openDamageModal(this)" data-id="{{ med.id }}" data-trade-name="{{ med.trade_name }}" data-quantity="{{ med.quantity }}">
+                                    <i class="bi bi-trash3"></i> إتلاف
+                                </button>
+                            </div>
+                        {% else %}
+                            <span class="no-permission-badge"><i class="bi bi-lock-fill"></i> عرض فقط</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="6" style="text-align:center; color:#a0aec0; padding:40px;">المخزن فارغ تماماً.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- مودال التعديل -->
+<div id="editMedicineModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeEditModal()">&times;</span>
+        <h3 style="color:#1abc9c; margin-top:0; margin-bottom:15px;"><i class="bi bi-pencil-square"></i> تعديل بيانات الدواء</h3>
+        <hr style="border:0; border-top:1px solid #edf2f7; margin-bottom:20px;">
+        <form method="POST" id="edit_medicine_form">
+            {% csrf_token %}
+            <input type="hidden" name="action_type" value="edit_full">
+            <input type="hidden" name="medicine_id" id="edit_med_id">
+            
+            <div class="modal-grid">
+                <div class="form-group modal-full-width">
+                    <label>الباركود:</label>
+                    <input type="text" name="barcode" id="edit_barcode">
+                </div>
+                <div class="form-group modal-full-width"><label>الاسم التجاري:</label><input type="text" name="trade_name" id="edit_trade_name" required></div>
+                <div class="form-group modal-full-width"><label>الاسم العلمي:</label><input type="text" name="scientific_name" id="edit_scientific_name" required></div>
+                <div class="form-group">
+                    <label>الشكل الدوائي:</label>
+                    <select name="category" id="edit_category">
+                        <option value="tablet">💊 حبوب / كبسول</option>
+                        <option value="syrup">🧪 شراب / معلق</option>
+                        <option value="injection">💉 حقن / فيال / أمبول</option>
+                        <option value="ointment">🧴 مرهم / كريم / جيل</option>
+                        <option value="drops_eye_ear">👁️ قطرات عين / أذن</option>
+                        <option value="drops_nasal">👃 قطرات / بخاخ أنف</option>
+                        <option value="suppository">📦 تحاميل / لبوس</option>
+                        <option value="supplement_vitamin">🍏 فيتامينات / مكملات غذائية</option>
+                        <option value="tonic_energy">⚡ مقويات / منشطات</option>
+                        <option value="powder_sachet">🥛 بودرة / فوار</option>
+                        <option value="medical_device">🩺 مستلزمات طبية / أجهزة</option>
+                        <option value="other">📦 أخرى</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>الكمية الحالية:</label><input type="number" name="quantity" id="edit_quantity" required min="0"></div>
+                <div class="form-group"><label>سعر الشراء:</label><input type="number" name="buy_price" id="edit_buy_price" required></div>
+                <div class="form-group"><label>سعر البيع:</label><input type="number" name="sell_price" id="edit_sell_price" required></div>
+                <div class="form-group"><label>الانتهاء:</label><input type="date" name="expiry_date" id="edit_expiry_date" required></div>
+                <div class="form-group"><label>مكان الرف:</label><input type="text" name="shelf_location" id="edit_shelf_location"></div>
+            </div>
+            <div style="margin-top:25px; display:flex; gap:10px;">
+                <button type="submit" class="btn-submit" style="flex:1;"><i class="bi bi-save"></i> حفظ التعديلات</button>
+                <button type="button" class="btn-submit" style="background:#718096; flex:1;" onclick="closeEditModal()">إلغاء</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- مودال الإتلاف -->
+<div id="damageMedicineModal" class="modal">
+    <div class="modal-content" style="border-top-color:#e53e3e;">
+        <span class="close" onclick="closeDamageModal()">&times;</span>
+        <h3 style="color:#e53e3e; margin-top:0; margin-bottom:15px;"><i class="bi bi-exclamation-triangle-fill"></i> نقل لقائمة التوالف</h3>
+        <hr style="border:0; border-top:1px solid #edf2f7; margin-bottom:20px;">
+        <form method="POST" id="damage_medicine_form">
+            {% csrf_token %}
+            <div class="form-group"><label>الدواء المستهدف:</label><input type="text" id="damage_med_name" readonly style="background:#f7fafc; font-weight:bold;"></div>
+            <div class="modal-grid" style="margin-top:10px;">
+                <div class="form-group"><label>الكمية المتوفرة:</label><input type="text" id="damage_current_qty" readonly style="background:#f7fafc; text-align:center;"></div>
+                <div class="form-group"><label>الكمية للتلف: <span style="color:#e53e3e;">*</span></label><input type="number" name="quantity_damaged" id="damage_qty_input" required min="1"></div>
+            </div>
+            <div class="form-group" style="margin-top:12px;">
+                <label>سبب الإتلاف: <span style="color:#e53e3e;">*</span></label>
+                <select name="reason" id="damage_reason" required>
+                    <option value="expired">📆 منتهي الصلاحية</option>
+                    <option value="broken">💔 كسر بالعلبة</option>
+                    <option value="spoiled">☀️ سوء خزن</option>
+                    <option value="withdrawn">🚫 سحب وزاري</option>
+                    <option value="other">📦 أخرى</option>
+                </select>
+            </div>
+            <div class="form-group" style="margin-top:12px;"><label>ملاحظات (اختياري):</label><textarea name="notes" id="damage_notes" rows="3"></textarea></div>
+            <div style="margin-top:25px; display:flex; gap:10px;">
+                <button type="submit" class="btn-submit" style="background:#e53e3e; flex:1;"><i class="bi bi-trash3"></i> تأكيد الإتلاف</button>
+                <button type="button" class="btn-submit" style="background:#718096; flex:1;" onclick="closeDamageModal()">إلغاء</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script id="iraqi-medicines-data" type="application/json">{{ iraqi_medicines_json|safe }}</script>
+
+<script>
+    const iraqiMedicines = JSON.parse(document.getElementById('iraqi-medicines-data').textContent);
+    const pharmacyMedicines = [
+        {% for med in medicines %}{"id": "{{ med.id }}", "barcode": "{{ med.barcode|default_if_none:''|escapejs }}", "trade_name": "{{ med.trade_name|escapejs }}", "scientific_name": "{{ med.scientific_name|escapejs }}", "quantity": "{{ med.quantity }}"}{% if not forloop.last %},{% endif %}{% endfor %}
+    ];
+
+    // 🌟 حماية نموذج الإضافة من السكنر
+    const barcodeInput = document.getElementById('id_barcode');
+    const tradeNameInput = document.getElementById('id_trade_name');
+    
+    if (barcodeInput) {
+        barcodeInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault(); 
+                if(tradeNameInput) tradeNameInput.focus();
+            }
+        });
+    }
+
+    const scientificNameInput = document.getElementById('id_scientific_name');
+    const categorySelect = document.getElementById('id_category');
+    const editBarcodeInput = document.getElementById('edit_barcode');
+    const editTradeNameInput = document.getElementById('edit_trade_name');
+
+    if (tradeNameInput) {
+        tradeNameInput.addEventListener('input', function() {
+            const matchedDrug = iraqiMedicines.find(drug => drug.trade_name.toLowerCase() === this.value.trim().toLowerCase());
+            if (matchedDrug) {
+                scientificNameInput.value = matchedDrug.scientific_name;
+                categorySelect.value = matchedDrug.category;
+            }
+        });
+    }
+
+    // 🔄 معالج بحث الباركود والاسم في التزويد
+    const searchInput = document.getElementById('existing_drug_search_input');
+    const suggestionsBox = document.getElementById('search_suggestions_box');
+    const hiddenIdInput = document.getElementById('selected_existing_med_id');
+    const supplyAddedQty = document.getElementById('supply_added_qty');
+
+    if (searchInput) {
+        searchInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                // 🛡️ التعديل: إيقاف الإرسال فوراً بمجرد قراءة السكنر للباركود
+                e.preventDefault(); 
+                
+                const query = this.value.trim().toLowerCase();
+                if (!query) return;
+                
+                const exactMed = pharmacyMedicines.find(med => med.barcode && med.barcode.toLowerCase() === query);
+                if (exactMed) {
+                    searchInput.value = `${exactMed.trade_name} (${exactMed.scientific_name})`;
+                    hiddenIdInput.value = exactMed.id;
+                    suggestionsBox.style.display = 'none';
+                    if (supplyAddedQty) supplyAddedQty.focus();
+                } else {
+                    // تفريغ الحقل وإظهار تنبيه إذا كان الدواء غير موجود
+                    searchInput.value = '';
+                    searchInput.placeholder = '❌ هذا الدواء غير مسجل في المخزن!';
+                }
+            }
+        });
+
+        searchInput.addEventListener('input', function() {
+            const query = this.value.trim().toLowerCase();
+            suggestionsBox.innerHTML = '';
+            if (query.length < 1) { suggestionsBox.style.display = 'none'; hiddenIdInput.value = ''; return; }
+            
+            const filtered = pharmacyMedicines.filter(med => 
+                med.trade_name.toLowerCase().includes(query) || 
+                med.scientific_name.toLowerCase().includes(query) ||
+                med.barcode.toLowerCase().includes(query)
+            );
+            
+            if (filtered.length > 0) {
+                filtered.forEach(med => {
+                    const item = document.createElement('div');
+                    item.className = 'suggestion-item';
+                    item.innerHTML = `<div><strong>${med.trade_name}</strong> <span style="font-size:11px; color:#718096;">(${med.scientific_name})</span></div><span class="stock-badge">المخزون: ${med.quantity}</span>`;
+                    item.addEventListener('click', function() { 
+                        searchInput.value = `${med.trade_name} (${med.scientific_name})`; 
+                        hiddenIdInput.value = med.id; 
+                        suggestionsBox.style.display = 'none'; 
+                        if (supplyAddedQty) supplyAddedQty.focus();
+                    });
+                    suggestionsBox.appendChild(item);
+                });
+            } else {
+                suggestionsBox.innerHTML = `<div class="suggestion-item" style="color:#e53e3e; cursor:default;"><div><i class="bi bi-x-circle-fill"></i> لا يوجد دواء مطابق!</div></div>`;
+                hiddenIdInput.value = '';
+            }
+            suggestionsBox.style.display = 'block';
+        });
+        document.addEventListener('click', e => { if (e.target !== searchInput && e.target !== suggestionsBox) suggestionsBox.style.display = 'none'; });
+    }
+
+    function toggleForm(targetId, alternativeId, buttonElement) {
+        const target = document.getElementById(targetId);
+        const alternative = document.getElementById(alternativeId);
+        const altButton = buttonElement.id === 'btn_toggle_new' ? document.getElementById('btn_toggle_existing') : document.getElementById('btn_toggle_new');
+        if (alternative && alternative.style.display === "block") { alternative.style.display = "none"; altButton.classList.remove('active'); altButton.querySelector('.arrow').textContent = '▼'; }
+        const arrow = buttonElement.querySelector('.arrow');
+        if (target.style.display === "block") { target.style.display = "none"; buttonElement.classList.remove('active'); if(arrow) arrow.textContent = '▼'; } 
+        else { target.style.display = "block"; buttonElement.classList.add('active'); if(arrow) arrow.textContent = '▲'; if(targetId === 'new_drug_container' && barcodeInput) barcodeInput.focus(); if(targetId === 'existing_drug_container' && searchInput) searchInput.focus(); }
+    }
+
+    function openEditModal(button) {
+        document.getElementById('edit_med_id').value = button.getAttribute('data-id');
+        document.getElementById('edit_barcode').value = button.getAttribute('data-barcode');
+        document.getElementById('edit_trade_name').value = button.getAttribute('data-trade-name');
+        document.getElementById('edit_scientific_name').value = button.getAttribute('data-scientific-name');
+        document.getElementById('edit_category').value = button.getAttribute('data-category');
+        document.getElementById('edit_quantity').value = button.getAttribute('data-quantity');
+        document.getElementById('edit_buy_price').value = parseInt((button.getAttribute('data-buy-price') || "0").replace(/,/g, ''));
+        document.getElementById('edit_sell_price').value = parseInt((button.getAttribute('data-sell-price') || "0").replace(/,/g, ''));
+        document.getElementById('edit_expiry_date').value = button.getAttribute('data-expiry-date');
+        document.getElementById('edit_shelf_location').value = button.getAttribute('data-shelf-location');
+        document.getElementById('editMedicineModal').style.display = "block";
+    }
+    function closeEditModal() { document.getElementById('editMedicineModal').style.display = "none"; }
+
+    function openDamageModal(button) {
+        const id = button.getAttribute('data-id');
+        const currentQty = parseInt(button.getAttribute('data-quantity')) || 0;
+        document.getElementById('damage_medicine_form').action = "{% url 'damage_medicine' 999999 %}".replace('999999', id);
+        document.getElementById('damage_med_name').value = button.getAttribute('data-trade-name');
+        document.getElementById('damage_current_qty').value = `${currentQty} علبة`;
+        document.getElementById('damage_qty_input').max = currentQty;
+        document.getElementById('damage_qty_input').value = currentQty;
+        document.getElementById('damage_notes').value = '';
+        document.getElementById('damage_reason').value = 'expired';
+        document.getElementById('damageMedicineModal').style.display = "block";
+    }
+    function closeDamageModal() { document.getElementById('damageMedicineModal').style.display = "none"; }
+
+    window.onclick = function(e) { if (e.target == document.getElementById('editMedicineModal')) closeEditModal(); if (e.target == document.getElementById('damageMedicineModal')) closeDamageModal(); }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        document.querySelectorAll('.sidebar a').forEach(link => {
+            if (link.getAttribute('href')?.includes('inventory') || link.textContent.includes('المخزن')) link.classList.add('active');
+            else link.classList.remove('active');
+        });
+    });
+
+    let isSubmitting = false;
+    document.querySelectorAll('form').forEach(form => form.addEventListener('submit', () => isSubmitting = true));
+    window.addEventListener('beforeunload', function (e) {
+        if (isSubmitting) return;
+        let hasUnsavedChanges = false;
+        document.querySelectorAll('input, select, textarea').forEach(element => {
+            if (element.type !== 'submit' && element.type !== 'button' && element.type !== 'hidden' && element.offsetParent !== null) {
+                if (element.value !== element.defaultValue) hasUnsavedChanges = true;
+            }
+        });
+        if (hasUnsavedChanges) { e.preventDefault(); e.returnValue = 'لديك تعديلات غير محفوظة، هل أنت متأكد من المغادرة؟'; }
+    });
+</script>
+{% endblock %}

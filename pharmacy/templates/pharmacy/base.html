@@ -1,0 +1,260 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}نظام تيرا الرقمي{% endblock %}</title>
+    
+    <!-- 🎨 هنا نضع كل تنسيقات السايد بار الأنيق والخطوط الموحدة -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap');
+        
+        body {
+            font-family: 'Cairo', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+            display: flex;
+        }
+
+        /* 🟢 تنسيقات السايد بار المطور باللون الأخضر الرسمي */
+        .sidebar { 
+            width: 260px; 
+            background: linear-gradient(135deg, #1abc9c 0%, #148f77 100%); 
+            color: white; 
+            height: 100vh; 
+            position: fixed; 
+            right: 0; 
+            top: 0; 
+            box-sizing: border-box; 
+            box-shadow: -4px 0 20px rgba(0,0,0,0.15); 
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar .brand-container { 
+            background: rgba(0, 0, 0, 0.15); 
+            padding: 30px 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 15px;
+        }
+
+        .sidebar .brand-logo {
+            width:100px; 
+            height: 100px; 
+            border-radius: 50%; 
+            border: 4px solid rgba(255, 255, 255, 0.85); 
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2); 
+            margin-bottom: 12px; 
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar .brand-container:hover .brand-logo {
+            transform: scale(1.05);
+        }
+
+        .sidebar h2 { 
+            font-size: 16px; 
+            margin: 0; 
+            color: white; 
+            font-weight: 700;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.15); 
+        }
+
+        .sidebar-menu {
+            padding: 0 15px 20px 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .sidebar a { 
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: rgba(255, 255, 255, 0.9); 
+            padding: 12px 18px; 
+            text-decoration: none; 
+            border-radius: 8px; 
+            font-weight: 600; 
+            font-size: 14px; 
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        .sidebar a:hover { 
+            background-color: rgba(255, 255, 255, 0.12); 
+            color: white;
+            padding-right: 24px; 
+        }
+
+        .sidebar a.active { 
+            background-color: #ffffff; 
+            color: #148f77; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15); 
+            font-weight: 700;
+        }
+
+        /* 🖥️ المساحة المخصصة لمحتوى الصفحات بجانب السايد بار */
+        .main-content {
+            margin-right: 260px; /* نفس عرض السايد بار لكي لا يتداخلا */
+            flex: 1;
+            padding: 30px;
+            box-sizing: border-box;
+            min-height: 100vh;
+        }
+
+        /* 👑 حاوية الأزرار العائمة الفاخرة (أسفل اليسار) */
+        .floating-social-container {
+            position: fixed;
+            bottom: 25px;
+            left: 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px; /* مسافة عمودية أنيقة بين الأزرار */
+            z-index: 9999;
+        }
+
+        /* التصميم الموحد للأيقونات الدائرية الصغيرة */
+        .floating-btn {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-decoration: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            position: relative;
+        }
+
+        /* ألوان الخلفيات الخاصة بكل تطبيق */
+        .btn-whatsapp { background-color: #25D366; }
+        .btn-instagram { background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); }
+
+        /* حركات التمرير التفاعلية الرائعة */
+        .floating-btn:hover {
+            transform: scale(1.1) translateY(-3px);
+            box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+        }
+
+        /* مقاس وحجم الأيقونات الداخلية لتكون متناسقة */
+        .floating-btn svg {
+            width: 22px;
+            height: 22px;
+            fill: white;
+        }
+
+        /* ⚡ نظام تلميح ذكي ومتحرك (Sleek CSS Tooltip) يظهر على اليسار بجانب الأيقونة */
+        .floating-btn::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            left: 58px; /* تخرج الكتابة باتجاه اليمين بعيداً عن حافة الشاشة */
+            background-color: #2c3e50;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: bold;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateX(-10px);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            font-family: 'Cairo', sans-serif;
+            pointer-events: none;
+        }
+
+        /* إظهار التلميح فوراً وبنعومة عند وضع الماوس على الأيقونة */
+        .floating-btn:hover::after {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(0);
+        }
+    </style>
+    
+    <!-- لإتاحة الفرصة لإضافة ملفات CSS خاصة ببعض الصفحات مستقبلاً -->
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+    <!-- 🟢 القائمة الجانبية الموحدة لجميع النظام وبصمة شركة تيرا -->
+    <div class="sidebar">
+        <div class="brand-container">
+            <!-- تم توجيه اللوجو إلى لوجو شركتك المخصصة (tera_logo.png) -->
+            <img class="brand-logo" src="{% static 'pharmacy/images/tera_logo.png' %}" alt="تيرا للحلول البرمجية">
+            <h2>تيرا للحلول البرمجية</h2>
+        </div>
+        
+        <div class="sidebar-menu">
+            <a href="{% url 'pharmacy_dashboard' %}" class="{% if request.resolver_match.url_name == 'pharmacy_dashboard' %}active{% endif %}">
+                <span>🏠</span> الرئيسية
+            </a>
+            <a href="{% url 'inventory' %}" class="{% if request.resolver_match.url_name == 'inventory' %}active{% endif %}">
+                <span>📦</span> المخزن والأدوية
+            </a>
+            <a href="{% url 'pos' %}" class="{% if request.resolver_match.url_name == 'pos' %}active{% endif %}">
+                <span>🛒</span> نقطة البيع POS
+            </a>
+            <a href="{% url 'sales_history' %}" class="{% if request.resolver_match.url_name == 'sales_history' %}active{% endif %}">
+                <span>📜</span> سجل المبيعات
+            </a>
+            <a href="{% url 'missing_medicines' %}" class="{% if request.resolver_match.url_name == 'missing_medicines' %}active{% endif %}">
+                <span>📦</span> طلبيات الأدوية
+            </a>
+            
+            {% if request.user.profile.is_pharmacy_owner %}
+            <a href="{% url 'damaged_medicines' %}" class="{% if request.resolver_match.url_name == 'damaged_medicines_list' %}active{% endif %}">
+                <span>⚠️</span> الأدوية التالفة
+            </a>
+            <a href="{% url 'sales_reports' %}" class="{% if request.resolver_match.url_name == 'sales_reports' %}active{% endif %}">
+                <span>📊</span> التقارير والتحليلات
+            </a>
+            {% endif %}
+            
+            <a href="{% url 'logout' %}" style="margin-top: auto; background-color: rgba(151, 142, 141, 0.86); color: #e74c3c;">
+                <span>🚪</span> تسجيل الخروج
+            </a>
+        </div>
+    </div>
+
+    <!-- 🖥️ هنا سيتم حقن كود كل صفحة تلقائياً دون تكرار السايد بار -->
+    <div class="main-content">
+        {% block content %}
+        <!-- محتوى الصفحات الفرعية سيظهر هنا -->
+        {% endblock %}
+    </div>
+
+    <!-- 🌟 حاوية الأزرار الاجتماعية المصغرة الذكية (متاحة في كل النظام ولا تحجب أي محتوى) -->
+    <div class="floating-social-container">
+        
+        <!-- 📸 زر الإنستغرام (تظهر عبارة "موقع الانستغرام" عند تمرير الماوس) -->
+        <!-- ⚠️ ضع رابط حساب الإنستغرام الخاص بك بدلاً من '#' -->
+        <a href="https://instagram.com/rasool_trm" target="_blank" class="floating-btn btn-instagram" data-tooltip="موقع الانستغرام">
+            <svg viewBox="0 0 24 24">
+                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.051.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/>
+            </svg>
+        </a>
+
+        <!-- 📞 زر الواتساب (تظهر عبارة "الدعم الفني" عند تمرير الماوس) -->
+        <!-- ⚠️ قم باستبدال الرقم 9647XXXXXXXX برقم الواتساب الخاص بك كاملاً -->
+        <a href="https://wa.me/9647735088603" target="_blank" class="floating-btn btn-whatsapp" data-tooltip="الدعم الفني">
+            <svg viewBox="0 0 24 24">
+                <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.513 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.717-1.454L0 24zm6.59-4.846c1.6.95 3.198 1.451 4.825 1.453 5.46.002 9.9-4.436 9.903-9.896.002-2.646-1.02-5.133-2.878-6.992C16.58 1.86 14.09 .836 11.445.836c-5.46 0-9.9 4.438-9.902 9.898-.001 1.701.463 3.36 1.343 4.81l-.996 3.635 3.72-.975zm11.367-7.352c-.314-.157-1.86-.92-2.148-1.025-.289-.105-.5-.157-.712.157-.21.314-.813 1.025-.996 1.235-.183.21-.365.236-.679.079-1.356-.68-2.313-1.213-3.23-2.784-.242-.415.242-.385.693-1.284.076-.157.038-.293-.019-.41-.057-.115-.5-1.204-.685-1.65-.18-.435-.364-.376-.5-.383-.13-.007-.28-.008-.43-.008-.15 0-.395.056-.602.282-.207.225-.79.772-.79 1.883s.807 2.194.92 2.35c.113.156 1.588 2.426 3.847 3.4c.537.232.957.37 1.283.474.54.172 1.03.148 1.417.09.431-.064 1.86-.76 2.12-1.457.26-.697.26-1.294.182-1.42-.078-.124-.289-.203-.603-.36z"/>
+            </svg>
+        </a>
+
+    </div>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

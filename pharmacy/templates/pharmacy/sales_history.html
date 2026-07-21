@@ -1,0 +1,525 @@
+{% extends "pharmacy/base.html" %}
+{% block content %}
+
+    <!-- استدعاء أيقونات بوتستراب فقط (بدون الـ CSS المخرّب للتصميم) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
+    <style>
+        /* 1. توحيد شريط التمرير لمنع اهتزاز السايد بار */
+        html {
+            overflow-y: scroll;
+        }
+
+        /* 2. الأقسام والصناديق الرئيسية (مطابقة للـ POS تماماً) */
+        .sales-section {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            margin-bottom: 25px;
+        }
+
+        .section-title {
+            margin-top: 0;
+            color: #2c3e50;
+            border-bottom: 2px solid #f1f2f6;
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* 3. صندوق البحث الفاخر (مطابق للـ POS) */
+        .search-container {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #1abc9c;
+            border-radius: 6px;
+            font-size: 15px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .search-input:focus {
+            border-color: #16a085;
+        }
+
+        .btn-search {
+            background-color: #1abc9c;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 12px 30px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-search:hover {
+            background-color: #16a085;
+        }
+
+        /* زر الشفتات الأخضر الجديد للمدير */
+        .btn-shifts {
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 12px 20px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-shifts:hover {
+            background-color: #27ae60;
+        }
+
+        /* 4. جداول الفواتير بتصميم ناعم */
+        .custom-table-wrapper {
+            overflow-x: auto;
+        }
+
+        .custom-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+            text-align: right;
+        }
+
+        .custom-table th, .custom-table td {
+            padding: 14px 16px;
+            border-bottom: 1px solid #f1f2f6;
+        }
+
+        .custom-table th {
+            background-color: #1abc9c;
+            color: white;
+            font-weight: bold;
+        }
+
+        .custom-table tbody tr {
+            transition: background-color 0.2s;
+        }
+
+        .custom-table tbody tr:hover {
+            background-color: #fcfdfd;
+        }
+
+        /* 5. شارات الحالة والبيانات (Badges) */
+        .custom-badge {
+            padding: 5px 10px;
+            border-radius: 50px;
+            font-size: 11px;
+            font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .badge-date { background-color: #e2e8f0; color: #4a5568; }
+        .badge-time { background-color: #edf2f7; color: #718096; }
+        .badge-success { background-color: #d4efdf; color: #1e8449; }
+        .badge-refunded { background-color: #fadbd8; color: #c0392b; border: 1px dashed #e74c3c; }
+
+        /* أزرار الإجراءات */
+        .btn-details {
+            background: none;
+            border: 1px solid #cbd5e0;
+            color: #4a5568;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+
+        .btn-details:hover {
+            background-color: #4a5568;
+            color: white;
+            border-color: #4a5568;
+        }
+
+        /* 6. نافذة التفاصيل المنبثقة الفاخرة (Custom Modal) */
+        .custom-modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            right: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+            backdrop-filter: blur(3px); /* تأثير ضبابي خلف المودال لجذب التركيز */
+        }
+
+        .custom-modal-content {
+            background-color: #fefefe;
+            margin: 8% auto;
+            padding: 25px;
+            border: none;
+            width: 50%;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            border-top: 5px solid #1abc9c;
+            position: relative;
+            animation: animatetop 0.25s ease-out;
+        }
+
+        @keyframes animatetop {
+            from {top: -150px; opacity: 0}
+            to {top: 0; opacity: 1}
+        }
+
+        .custom-close {
+            color: #a0aec0;
+            float: left;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            line-height: 20px;
+            transition: color 0.2s;
+        }
+
+        .custom-close:hover {
+            color: #2d3748;
+        }
+
+        /* تنسيقات الجدول داخل المودال */
+        .modal-details-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 13px;
+        }
+        .modal-details-table th, .modal-details-table td {
+            padding: 10px 12px;
+            border: 1px solid #e2e8f0;
+            text-align: right;
+        }
+        .modal-details-table th {
+            background-color: #f7fafc;
+        }
+
+        .flex-row-between {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+    </style>
+
+    <!-- الهيكل الخارجي المتناسق مع الـ POS -->
+    <div class="sales-section">
+        <h2 class="section-title">
+            <i class="bi bi-file-earmark-text-fill" style="color: #1abc9c;"></i> 
+            سجل الفواتير والمبيعات
+        </h2>
+
+        <!-- خانة البحث المتناسقة مدمج معها زر الشفتات للمدير -->
+<!-- خانة البحث المتناسقة مدمج معها زر الشفتات للمدير -->
+        <div class="search-container">
+            <form method="GET" action="{% url 'sales_history' %}" style="display: flex; flex: 1; gap: 15px; margin: 0;">
+                <input type="text" name="search_query" class="search-input" 
+                    placeholder="🔍 مرر الباركود، أو ابحث برقم الفاتورة، اسم الدواء، أو اسم الكاشير..." 
+                    value="{{ search_query }}" autofocus autocomplete="off">
+                <button type="submit" class="btn-search">🔍 ابحث الآن</button>
+            </form>
+            
+            {% if is_owner %}
+                <!-- زر فتح تقرير الشفتات يظهر لصاحب الصيدلية فقط -->
+                <button type="button" class="btn-shifts" onclick="openShiftsModal()">
+                    <i class="bi bi-clock-history"></i> 📊 شفتات اليوم
+                </button>
+            {% endif %}
+        </div>
+
+        <!-- عرض جدول النتائج -->
+        {% if invoices %}
+            <div class="custom-table-wrapper">
+                <table class="custom-table">
+                    <thead>
+                        <tr>
+                            <th>رقم الفاتورة</th>
+                            <th>الكاشير المسؤول</th>
+                            <th>تاريخ ووقت البيع</th>
+                            <th>حالة الفاتورة</th>
+                            <th>الإجمالي (قبل الخصم)</th>
+                            <th>الخصم</th>
+                            <th>الصافي المدفوع</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for invoice in invoices %}
+                        <tr {% if invoice.is_refunded %}style="background-color: #faf2f2; opacity: 0.9;"{% endif %}>
+                            <td><strong>{{ invoice.invoice_number }}</strong></td>
+                            <!-- عرض اسم الكاشير الذي قام بالعملية -->
+                            <td>
+                                <strong style="color: #2c3e50;">{{ invoice.cashier.username|default:"غير محدد" }}</strong>
+                            </td>
+                            <td>
+                                <span class="custom-badge badge-date">{{ invoice.created_at|date:"Y-m-d" }}</span> 
+                                <span class="custom-badge badge-time">{{ invoice.created_at|date:"H:i" }}</span>
+                            </td>
+                            <td>
+                                {% if invoice.is_refunded %}
+                                    <span class="custom-badge badge-refunded">🚫 مرتجعة بالكامل</span>
+                                {% else %}
+                                    <span class="custom-badge badge-success">🟢 مكتملة</span>
+                                {% endif %}
+                            </td>
+                            <!-- الإجمالي قبل الخصم -->
+                            <td>
+                                {% if invoice.is_refunded %}
+                                    <span style="color: #a0aec0; text-decoration: line-through;">{{ invoice.total_amount }} د.ع</span>
+                                {% else %}
+                                    <span style="color: #718096;">{{ invoice.total_amount }} د.ع</span>
+                                {% endif %}
+                            </td>
+                            <!-- قيمة الخصم المطبق -->
+                            <td style="color: #e53e3e; font-weight: bold;">
+                                {% if invoice.discount > 0 %}
+                                    -{{ invoice.discount }} د.ع
+                                {% else %}
+                                    0 د.ع
+                                {% endif %}
+                            </td>
+                            <!-- الصافي الفعلي والنهائي للمدفوع -->
+                            <td>
+                                {% if invoice.is_refunded %}
+                                    <strong style="color: #e53e3e; text-decoration: line-through;">{{ invoice.final_amount }} د.ع</strong>
+                                {% else %}
+                                    <strong style="color: #38a169; font-size: 15px;">{{ invoice.final_amount }} د.ع</strong>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <button class="btn-details" onclick='openInvoiceDetails("{{ invoice.invoice_number }}", "{{ invoice.total_amount }}", "{{ invoice.discount }}", "{{ invoice.final_amount }}", "{{ invoice.created_at|date:"Y-m-d H:i" }}", "{{ invoice.id }}", "{{ invoice.is_refunded }}")'>
+                                    🔍 تفاصيل الفاتورة
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <!-- حالة عدم وجود نتائج بحث أو بيانات -->
+            <div style="text-align: center; padding: 50px 20px; color: #e53e3e;">
+                <i class="bi bi-exclamation-triangle" style="font-size: 3rem;"></i>
+                <p style="margin-top: 15px; font-size: 17px; font-weight: bold;">لم يتم العثور على أي فواتير مطابقة لبحثك.</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- نافذة التفاصيل المنبثقة الأنيقة (Custom Modal) -->
+    <div id="invoiceModal" class="custom-modal">
+        <div class="custom-modal-content">
+            <span class="custom-close" onclick="closeModal()">&times;</span>
+            <h3 style="color: #1abc9c; margin-top: 0; margin-bottom: 15px;" id="modal_invoice_num">تفاصيل الفاتورة</h3>
+            <hr style="border: 0; border-top: 1px solid #edf2f7; margin-bottom: 15px;">
+            
+            <div style="font-size: 14px; line-height: 1.8;">
+                <p><strong>تاريخ الفاتورة:</strong> <span id="modal_invoice_date"></span></p>
+                <p><strong>حالة الفاتورة:</strong> <span id="modal_invoice_status"></span></p>
+            </div>
+            
+            <table class="modal-details-table">
+                <thead>
+                    <tr>
+                        <th>اسم الدواء</th>
+                        <th>الكمية</th>
+                        <th>السعر المفرد</th>
+                        <th>المجموع</th>
+                    </tr>
+                </thead>
+                <tbody id="modal_items_body">
+                    <!-- يتم بناؤها بالجافا سكريبت تلقائياً -->
+                </tbody>
+            </table>
+            
+            <!-- التقسيم التفصيلي المالي -->
+            <div style="margin-top: 25px; border-top: 1px solid #edf2f7; padding-top: 15px; font-size: 14px;">
+                <div class="flex-row-between" style="color: #718096; margin-bottom: 8px;">
+                    <span>المجموع الإجمالي (قبل الخصم):</span>
+                    <span id="modal_invoice_subtotal">0 د.ع</span>
+                </div>
+                <div class="flex-row-between" style="color: #e53e3e; margin-bottom: 8px; font-weight: bold;">
+                    <span>الخصم المطبق:</span>
+                    <span id="modal_invoice_discount">0 د.ع</span>
+                </div>
+                <hr style="border: 0; border-top: 1px solid #edf2f7; margin: 12px 0;">
+                <div class="flex-row-between">
+                    <h3 style="margin: 0; font-weight: bold; color: #2d3748;">الصافي النهائي للمدفوع:</h3>
+                    <h3 style="margin: 0; font-weight: bold;" id="modal_invoice_total">0 د.ع</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if is_owner %}
+    <!-- نافذة شفتات ومبيعات اليوم المنبثقة المخصصة (Custom Shifts Modal) -->
+    <div id="shiftsModal" class="custom-modal">
+        <div class="custom-modal-content" style="border-top: 5px solid #2ecc71; width: 60%;">
+            <span class="custom-close" onclick="closeShiftsModal()">&times;</span>
+            <h3 style="color: #2ecc71; margin-top: 0; margin-bottom: 15px;">📊 تقرير شفتات ومبيعات اليوم الفورية</h3>
+            <hr style="border: 0; border-top: 1px solid #edf2f7; margin-bottom: 15px;">
+            
+            <!-- جدول تلخيص الصندوق والكاشيرية للـيوم -->
+            <table class="modal-details-table" style="margin-bottom: 25px;">
+                <thead>
+                    <tr style="background-color: #f8fafc;">
+                        <th style="text-align: right;">اسم الكاشير</th>
+                        <th style="text-align: center;">عدد فواتير الشفت</th>
+                        <th style="text-align: left;">إجمالي مبيعات الصندوق الصافية</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cashier in cashier_summary %}
+                    <tr>
+                        <td style="text-align: right;"><strong>{{ cashier.username }}</strong></td>
+                        <td style="text-align: center;">
+                            <span class="custom-badge badge-date" style="background-color: #e3fafc; color: #0b7285;">{{ cashier.bill_count }} فاتورة</span>
+                        </td>
+                        <td style="text-align: left;">
+                            <strong style="color: #2ecc71; font-size: 15px;">{{ cashier.total_sales }} د.ع</strong>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3" style="text-align: center; color: #e53e3e; padding: 15px;">لا توجد مبيعات مسجلة لأي شفت اليوم بعد.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <h4 style="color: #2c3e50; margin-bottom: 10px;">👁️ تفاصيل الفواتير الصادرة لكل شفت اليوم:</h4>
+            
+            <!-- صندوق تصفح فواتير اليوم لكل شفت بشكل معزول -->
+            <div style="max-height: 280px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px; background: #fafbfc;">
+                {% for cashier in cashier_summary %}
+                    <div style="margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px dashed #cbd5e0;">
+                        <h5 style="color: #34495e; margin-top: 5px; margin-bottom: 10px; background: #eaeded; padding: 6px 12px; border-radius: 4px;">
+                            الموظف: <strong>{{ cashier.username }}</strong>
+                        </h5>
+                        <ul style="list-style: none; padding: 0; margin: 0;">
+                            {% for inv in cashier.invoices_list %}
+                                <li class="flex-row-between" style="padding: 7px 8px; border-bottom: 1px solid #f1f2f6; font-size: 13px;">
+                                    <span>📄 الفاتورة <strong>{{ inv.invoice_number }}</strong> | الصافي الصادر: <strong style="color: #2ecc71;">{{ inv.final_amount }} د.ع</strong></span>
+                                    <span class="custom-badge badge-time">{{ inv.created_at|date:"H:i" }}</span>
+                                </li>
+                            {% empty %}
+                                <li style="color: #a0aec0; padding: 5px 8px; font-size: 13px; list-style: none;">لم يقم هذا الموظف بإصدار أي فواتير في شفت اليوم.</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- معالج الجافا سكريبت التفاعلي لربط محتويات الفاتورة بالنافذة المنبثقة -->
+    <script>
+        // كود الربط السريع لجلب أدوية كل فاتورة برمجياً
+        const invoiceDetailsLookup = {
+            {% for invoice in invoices %}
+                "{{ invoice.id }}": [
+                    {% for item in invoice.items.all %}
+                        {
+                            "name": "{{ item.medicine.trade_name|escapejs }}",
+                            "quantity": "{{ item.quantity }}",
+                            "price": "{{ item.unit_price }}",
+                            "total": "{{ item.total_price }}"
+                        },
+                    {% endfor %}
+                ],
+            {% endfor %}
+        };
+
+        function openInvoiceDetails(num, subtotal, discount, finalAmount, date, id, isRefunded) {
+            document.getElementById('modal_invoice_num').innerText = "🧾 تفاصيل الفاتورة: #" + num;
+            document.getElementById('modal_invoice_date').innerText = date;
+            
+            const statusSpan = document.getElementById('modal_invoice_status');
+            const subtotalSpan = document.getElementById('modal_invoice_subtotal');
+            const discountSpan = document.getElementById('modal_invoice_discount');
+            const totalSpan = document.getElementById('modal_invoice_total');
+            
+            // تعبئة البيانات المالية للـ Modal
+            subtotalSpan.innerText = parseInt(subtotal).toLocaleString('en-US') + " د.ع";
+            discountSpan.innerText = "-" + parseInt(discount).toLocaleString('en-US') + " د.ع";
+            
+            if (isRefunded === 'True' || isRefunded === 'true') {
+                statusSpan.innerHTML = '<span class="custom-badge badge-refunded">🚫 ملغاة ومرتجعة للمخزن</span>';
+                totalSpan.innerHTML = `<span style="color: #e53e3e; text-decoration: line-through;">${parseInt(finalAmount).toLocaleString('en-US')} د.ع</span>`;
+                subtotalSpan.style.textDecoration = "line-through";
+                discountSpan.style.textDecoration = "line-through";
+            } else {
+                statusSpan.innerHTML = '<span class="custom-badge badge-success">🟢 عملية بيع ناجحة</span>';
+                totalSpan.innerHTML = `<span style="color: #38a169;">${parseInt(finalAmount).toLocaleString('en-US')} د.ع</span>`;
+                subtotalSpan.style.textDecoration = "none";
+                discountSpan.style.textDecoration = "none";
+            }
+            
+            const tbody = document.getElementById('modal_items_body');
+            tbody.innerHTML = '';
+            
+            const items = invoiceDetailsLookup[id] || [];
+            items.forEach(item => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>${item.name}</strong></td>
+                    <td>${item.quantity} علبة</td>
+                    <td>${parseInt(item.price).toLocaleString('en-US')} د.ع</td>
+                    <td><strong style="color: #38a169;">${parseInt(item.total).toLocaleString('en-US')} د.ع</strong></td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            document.getElementById('invoiceModal').style.display = "block";
+        }
+
+        function closeModal() {
+            document.getElementById('invoiceModal').style.display = "none";
+        }
+
+        /* دالات تشغيل وإغلاق مودال الشفتات والمبيعات الفورية */
+        function openShiftsModal() {
+            const modal = document.getElementById('shiftsModal');
+            if (modal) modal.style.display = "block";
+        }
+
+        function closeShiftsModal() {
+            const modal = document.getElementById('shiftsModal');
+            if (modal) modal.style.display = "none";
+        }
+
+        // إغلاق أي نافذة مفتوحة عند الضغط في أي مكان فارغ بالخلفية
+        window.onclick = function(event) {
+            const invoiceModal = document.getElementById('invoiceModal');
+            const shiftsModal = document.getElementById('shiftsModal');
+            
+            if (event.target == invoiceModal) {
+                invoiceModal.style.display = "none";
+            }
+            if (event.target == shiftsModal) {
+                shiftsModal.style.display = "none";
+            }
+        }
+    </script>
+
+{% endblock %}
