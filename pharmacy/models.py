@@ -53,8 +53,6 @@ class Medicine(models.Model):
     expiry_date = models.DateField(verbose_name="تاريخ انتهاء الصلاحية")
     shelf_location = models.CharField(max_length=50, blank=True, null=True, verbose_name="مكان الرف")
     is_damaged = models.BooleanField(default=False, verbose_name="هل الدواء تالف/معزول؟")
-    
-    # 🟢 تم إزالة unique=True من هنا وتعديلها بالأسفل
     barcode = models.CharField(max_length=50, null=True, blank=True, verbose_name="باركود الدواء")
 
     # 🛠️ قيد ذكي: منع تكرار الباركود داخل الصيدلية الواحدة، والسماح بتكراره بين الصيدليات المختلفة

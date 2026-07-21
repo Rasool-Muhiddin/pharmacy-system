@@ -26,8 +26,11 @@ SECRET_KEY = 'django-insecure-uf&kvn!57eyqcb3&-v$59btt@mu_+x2c3oz&_#k&2g3g*=+gdq
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ["*"]
-
+ALLOWED_HOSTS = [
+    'pharmacy-system-7fpt.onrender.com',  # رابط موقعك على Render
+    'localhost',                          # للتجربة المحلية
+    '127.0.0.1',                          # للتجربة المحلية
+]
 
 # Application definition
 

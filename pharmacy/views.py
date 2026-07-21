@@ -60,6 +60,7 @@ def pharmacy_dashboard(request):
     return render(request, 'pharmacy/dashboard.html', context)
 
 # 2. إدارة المخزن (مؤمنة بالكامل ومعزولة لكل صيدلية)
+# 2. إدارة المخزن (مؤمنة بالكامل ومعزولة لكل صيدلية)
 @login_required
 def inventory(request):
     user_profile = request.user.profile
@@ -73,10 +74,14 @@ def inventory(request):
 
         action_type = request.POST.get('action_type')
 
+        # 💡 معالجة الباركود: تحويل النص الفارغ إلى None
+        raw_barcode = request.POST.get('barcode', '').strip()
+        barcode_val = raw_barcode if raw_barcode else None
+
         if action_type == 'add_new':
             Medicine.objects.create(
                 pharmacy=user_pharmacy,
-                barcode=request.POST.get('barcode', ''), # 🌟 تمت إضافة الباركود هنا
+                barcode=barcode_val, # 🌟 تم التعديل لمنع تكرار النصوص الفارغة
                 trade_name=request.POST.get('trade_name'),
                 scientific_name=request.POST.get('scientific_name'),
                 category=request.POST.get('category'),
@@ -102,7 +107,7 @@ def inventory(request):
             medicine_id = request.POST.get('medicine_id')
             selected_med = get_object_or_404(Medicine, id=medicine_id, pharmacy=user_pharmacy)
             
-            selected_med.barcode = request.POST.get('barcode', '') # 🌟 تمت إضافة الباركود هنا
+            selected_med.barcode = barcode_val # 🌟 تم التعديل هنا أيضاً
             selected_med.trade_name = request.POST.get('trade_name')
             selected_med.scientific_name = request.POST.get('scientific_name')
             selected_med.category = request.POST.get('category')
@@ -120,7 +125,6 @@ def inventory(request):
     
     if search_query:
         all_medicines = Medicine.objects.filter(
-            # 🌟 إضافة البحث بالباركود إلى جانب الاسم التجاري والعلمي
             Q(barcode__iexact=search_query) |
             Q(trade_name__icontains=search_query) | 
             Q(scientific_name__icontains=search_query),
@@ -142,7 +146,6 @@ def inventory(request):
         'pharmacy_name': user_pharmacy.name
     }
     return render(request, 'pharmacy/inventory.html', context)
-
 # 3. تعديل أسعار الدواء
 @login_required
 def edit_prices(request, medicine_id):
