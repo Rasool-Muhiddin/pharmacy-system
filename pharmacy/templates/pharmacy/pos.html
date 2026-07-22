@@ -136,7 +136,7 @@
     <!-- القسم الثاني: أرشيف الفواتير السابقة بالأسفل -->
     <!-- ========================================== -->
     <div class="pos-section" style="border-top: 4px solid #34495e;">
-        <h3 class="section-title">📜 آخر الفواتير الصادرة مؤخراً (اليوم)</h3>
+        <h3 class="section-title">📜 آخر الفواتير الصادرة مؤخراً </h3>
         <table>
             <thead>
                 <tr>
@@ -153,7 +153,7 @@
                 {% for invoice in recent_invoices %}
                 <tr>
                     <td><strong>{{ invoice.invoice_number }}</strong></td>
-                    <td>{{ invoice.created_at|date:"H:i A" }}</td>
+                    <td>{{ invoice.created_at|date:"Y-m-d" }}</td>
                     <td>{{ invoice.total_amount|default:0 }} د.ع</td>
                     <td style="color: #e74c3c;">{{ invoice.discount|default:0 }} د.ع</td>
                     <td style="color: #2ecc71; font-weight: bold;">{{ invoice.final_amount|default:0 }} د.ع</td>
