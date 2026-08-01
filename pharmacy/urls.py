@@ -14,6 +14,7 @@ urlpatterns = [
     path('reports/', views.sales_reports, name='sales_reports'),
     path('login/', views.login_view, name='login'),
     path('api/desktop/activate/', views.desktop_activate, name='desktop_activate'),
+    path('api/desktop/login/', views.desktop_login, name='desktop_login'),
     path('logout/', views.logout_view, name='logout'),
     path('damaged-medicines/', views.damaged_medicines_list, name='damaged_medicines'),
     path('', views.landing_page, name='landing_page'),

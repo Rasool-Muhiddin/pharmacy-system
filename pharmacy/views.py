@@ -14,7 +14,7 @@ from django.core.exceptions import ObjectDoesNotExist
 
 from .models import (
     Medicine, Sale, MissingMedicine, Invoice, InvoiceItem,
-    DamagedMedicine, PharmacySupplier, DesktopLicense, DeviceActivation,
+    DamagedMedicine, PharmacySupplier, DesktopLicense, DeviceActivation, UserProfile,
 )
 from .iraqi_drugs import IRAQI_MEDICINES
 from django.views.decorators.csrf import csrf_exempt
@@ -819,6 +819,140 @@ def desktop_activate(request):
             'pharmacy': {
                 'id': desktop_license.pharmacy.id,
                 'name': desktop_license.pharmacy.name,
+            },
+            'license': {
+                'type': desktop_license.license_type,
+                'status': desktop_license.status,
+                'expires_at': (
+                    desktop_license.expires_at.isoformat()
+                    if desktop_license.expires_at else None
+                ),
+                'max_devices': desktop_license.max_devices,
+            },
+        },
+        status=200,
+    )
+# =======================================================
+# API تسجيل دخول نسخة سطح المكتب
+# يستخدمه Flutter عند أول تسجيل دخول عبر الإنترنت،
+# ثم يمكنه حفظ بيانات التحقق للعمل دون اتصال لمدة 30 يومًا.
+# =======================================================
+@csrf_exempt
+@require_POST
+def desktop_login(request):
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        return JsonResponse(
+            {'ok': False, 'message': 'بيانات الطلب غير صحيحة.'},
+            status=400,
+        )
+
+    username = str(data.get('username', '')).strip()
+    password = str(data.get('password', ''))
+    device_fingerprint = str(data.get('device_fingerprint', '')).strip()
+
+    if not username or not password or not device_fingerprint:
+        return JsonResponse(
+            {
+                'ok': False,
+                'message': 'اسم المستخدم وكلمة المرور ومعرف الجهاز مطلوبة.',
+            },
+            status=400,
+        )
+
+    if len(device_fingerprint) > 128:
+        return JsonResponse(
+            {'ok': False, 'message': 'معرف الجهاز غير صالح.'},
+            status=400,
+        )
+
+    user = authenticate(
+        request,
+        username=username,
+        password=password,
+    )
+
+    if user is None or not user.is_active:
+        return JsonResponse(
+            {'ok': False, 'message': 'اسم المستخدم أو كلمة المرور غير صحيحة.'},
+            status=401,
+        )
+
+    try:
+        profile = (
+            UserProfile.objects
+            .select_related('pharmacy')
+            .get(user=user)
+        )
+    except UserProfile.DoesNotExist:
+        return JsonResponse(
+            {'ok': False, 'message': 'هذا الحساب غير مرتبط بصيدلية.'},
+            status=403,
+        )
+
+    if not profile.pharmacy.is_active:
+        return JsonResponse(
+            {'ok': False, 'message': 'هذه الصيدلية موقوفة حاليًا.'},
+            status=403,
+        )
+
+    try:
+        device = (
+            DeviceActivation.objects
+            .select_related('license', 'license__pharmacy')
+            .get(device_fingerprint=device_fingerprint,license__pharmacy_id=profile.pharmacy_id,)
+        )
+    except DeviceActivation.DoesNotExist:
+        return JsonResponse(
+            {
+                'ok': False,
+                'message': 'هذا الجهاز غير مفعّل. أدخل رمز التفعيل أولًا.',
+            },
+            status=403,
+        )
+
+    desktop_license = device.license
+
+    if not device.is_active:
+        return JsonResponse(
+            {'ok': False, 'message': 'هذا الجهاز موقوف من لوحة الإدارة.'},
+            status=403,
+        )
+
+    if desktop_license.pharmacy_id != profile.pharmacy_id:
+        return JsonResponse(
+            {
+                'ok': False,
+                'message': 'الحساب لا يتبع للصيدلية المرتبطة بهذا الجهاز.',
+            },
+            status=403,
+        )
+
+    if not desktop_license.is_valid:
+        return JsonResponse(
+            {'ok': False, 'message': 'ترخيص نسخة سطح المكتب غير فعال أو منتهي.'},
+            status=403,
+        )
+
+    # تحدّث last_seen_at تلقائيًا لأن الحقل يستخدم auto_now=True.
+    device.save(update_fields=['last_seen_at'])
+
+    return JsonResponse(
+        {
+            'ok': True,
+            'message': 'تم تسجيل الدخول بنجاح.',
+            'validated_at': timezone.now().isoformat(),
+            'offline_grace_days': 30,
+            'user': {
+                'id': user.id,
+                'username': user.username,
+                'full_name': user.get_full_name().strip() or user.username,
+                'is_owner': profile.is_pharmacy_owner,
+            },
+            'pharmacy': {
+                'id': profile.pharmacy.id,
+                'name': profile.pharmacy.name,
             },
             'license': {
                 'type': desktop_license.license_type,
