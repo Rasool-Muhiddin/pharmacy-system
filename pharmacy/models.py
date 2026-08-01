@@ -1,6 +1,11 @@
 import uuid
+import secrets
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils import timezone
+def generate_desktop_license_code():
+    """إنشاء رمز تفعيل آمن وفريد لنسخة سطح المكتب."""
+    return f"TERA-{secrets.token_urlsafe(24).upper()}"
 
 # =======================================================
 # 1️⃣ جدول الصيدليات (المشتركين في نظامك)
@@ -176,7 +181,6 @@ class InvoiceItem(models.Model):
 # 8️⃣ جدول الأدوية التالفة
 # =======================================================
 class DamagedMedicine(models.Model):
-    # 🎯 خيارات موحدة ومتطابقة تماماً مع inventory.html و damaged_list.html
     DAMAGE_REASONS = [
         ('expired', '📆 منتهي الصلاحية'),
         ('broken', '💔 كسر وضرر'),
@@ -192,7 +196,6 @@ class DamagedMedicine(models.Model):
     notes = models.TextField(blank=True, null=True, verbose_name="ملاحظات إضافية")
     damaged_at = models.DateTimeField(auto_now_add=True, verbose_name="تاريخ ووقت الإتلاف")
 
-    # 💡 خاصية حاسبة لخسارة العملية بأمان دون الحاجة لفلاتر Django خارجية
     @property
     def total_loss(self):
         if self.medicine and self.medicine.buy_price:
@@ -202,3 +205,210 @@ class DamagedMedicine(models.Model):
     def __str__(self):
         med_name = self.medicine.trade_name if self.medicine else "دواء غير محدد"
         return f"تلف: {med_name} x {self.quantity_damaged}"
+
+# =======================================================
+# 9️⃣ جدول اشتراكات الصيدليات
+# =======================================================
+class Subscription(models.Model):
+    PLAN_CHOICES = [
+        ('free', '🆓 مجاني (تجريبي)'),
+        ('silver', '🥈 الفضية'),
+        ('gold', '🥇 الذهبية'),
+        ('enterprise', '💎 ماسية / خاصة'),
+    ]
+
+    STATUS_CHOICES = [
+        ('active', '✅ فعال'),
+        ('expired', '❌ منتهي'),
+        ('trial', '⏳ فترة تجريبية'),
+        ('cancelled', '🚫 ملغى'),
+    ]
+
+    pharmacy = models.OneToOneField(PharmacyBranch, on_delete=models.CASCADE, related_name='subscription', verbose_name="الصيدلية")
+    plan_type = models.CharField(max_length=20, choices=PLAN_CHOICES, default='free', verbose_name="نوع الخطة")
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='trial', verbose_name="حالة الاشتراك")
+    start_date = models.DateTimeField(default=timezone.now, verbose_name="تاريخ بداية الاشتراك")
+    end_date = models.DateTimeField(verbose_name="تاريخ انتهاء الاشتراك")
+    is_auto_renew = models.BooleanField(default=False, verbose_name="تجديد تلقائي")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    @property
+    def is_valid(self):
+        """فحص سريع لمعرفة هل الاشتراك شغال ونافع حتى اللحظة"""
+        return self.status in ['active', 'trial'] and self.end_date >= timezone.now()
+
+    def __str__(self):
+        return f"اشتراك {self.pharmacy.name} - الخطة: {self.get_plan_type_display()} ({self.get_status_display()})"
+
+# =======================================================
+# 🔟 جدول المدفوعات والفواتير المالية للاشتراكات
+# =======================================================
+class Payment(models.Model):
+    PAYMENT_METHODS = [
+        ('zain_cash', '📱 زين كاش'),
+        ('qi_card', '💳 كي كارت / ماستر كارد'),
+        ('fastpay', '⚡ فاست باي'),
+        ('cash', '💵 نقداً للمندوب'),
+        ('other', '🏦 تحويل بانكي / آخر'),
+    ]
+
+    STATUS_CHOICES = [
+        ('success', '✅ ناجح'),
+        ('pending', '⏳ قيد الانتظار'),
+        ('failed', '❌ فاشل'),
+    ]
+
+    pharmacy = models.ForeignKey(PharmacyBranch, on_delete=models.CASCADE, related_name='payments', verbose_name="الصيدلية")
+    subscription = models.ForeignKey(Subscription, on_delete=models.SET_NULL, null=True, blank=True, related_name='payments', verbose_name="الاشتراك المرتبط")
+    amount = models.DecimalField(max_digits=12, decimal_places=2, verbose_name="المبلغ المدفوع")
+    currency = models.CharField(max_length=10, default='IQD', verbose_name="العملة")
+    payment_method = models.CharField(max_length=20, choices=PAYMENT_METHODS, default='zain_cash', verbose_name="طريقة الدفع")
+    transaction_id = models.CharField(max_length=100, blank=True, null=True, verbose_name="رقم العملية / التوثيق")
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending', verbose_name="حالة الدفع")
+    paid_at = models.DateTimeField(auto_now_add=True, verbose_name="تاريخ ووقت السداد")
+    notes = models.TextField(blank=True, null=True, verbose_name="ملاحظات التسديد")
+
+    def __str__(self):
+        return f"دفعة: {self.amount} {self.currency} - {self.pharmacy.name} ({self.get_status_display()})"
+
+# =======================================================
+# 1️⃣1️⃣ جدول سجل العمليات والتدقيق (الصندوق الأسود للأمان)
+# =======================================================
+class AuditLog(models.Model):
+    ACTION_CHOICES = [
+        ('create', '➕ إنشاء / إضافة'),
+        ('update', '✏️ تعديل'),
+        ('delete', '🗑️ حذف'),
+        ('login', '🔑 تسجيل دخول'),
+        ('logout', '🚪 تسجيل خروج'),
+        ('export', '📥 تصدير بيانات'),
+    ]
+
+    pharmacy = models.ForeignKey(PharmacyBranch, on_delete=models.CASCADE, related_name='audit_logs', null=True, blank=True, verbose_name="الصيدلية")
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='audit_logs', verbose_name="المستخدم")
+    action = models.CharField(max_length=20, choices=ACTION_CHOICES, verbose_name="نوع الحركة")
+    model_name = models.CharField(max_length=100, verbose_name="القسم / الموديل")
+    object_id = models.CharField(max_length=50, blank=True, null=True, verbose_name="رقم العنصر")
+    description = models.TextField(verbose_name="تفاصيل الحركة")
+    ip_address = models.GenericIPAddressField(blank=True, null=True, verbose_name="عنوان ה-IP")
+    timestamp = models.DateTimeField(auto_now_add=True, verbose_name="تاريخ ووقت الحركة")
+
+    class Meta:
+        ordering = ['-timestamp']
+
+    def __str__(self):
+        user_str = self.user.username if self.user else "نظام تلقائي"
+        return f"[{self.timestamp.strftime('%Y-%m-%d %H:%M')}] {user_str} - {self.get_action_display()} في {self.model_name}"
+
+# =======================================================
+# تراخيص نسخة سطح المكتب الأوفلاين
+# هذا الترخيص منفصل عن اشتراك SaaS.
+# =======================================================
+class DesktopLicense(models.Model):
+    LICENSE_TYPE_CHOICES = [
+        ('trial', 'تجريبي'),
+        ('annual', 'سنوي'),
+        ('lifetime', 'مدى الحياة'),
+    ]
+
+    STATUS_CHOICES = [
+        ('active', 'فعال'),
+        ('suspended', 'موقوف'),
+        ('revoked', 'ملغى'),
+    ]
+
+    pharmacy = models.OneToOneField(
+        PharmacyBranch,
+        on_delete=models.CASCADE,
+        related_name='desktop_license',
+        verbose_name='الصيدلية',
+    )
+
+    activation_code = models.CharField(
+        max_length=80,
+        unique=True,
+        default=generate_desktop_license_code,
+        editable=False,
+        verbose_name='رمز التفعيل',
+    )
+
+    license_type = models.CharField(
+        max_length=20,
+        choices=LICENSE_TYPE_CHOICES,
+        default='lifetime',
+        verbose_name='نوع الترخيص',
+    )
+
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='active',
+        verbose_name='حالة الترخيص',
+    )
+
+    max_devices = models.PositiveSmallIntegerField(
+        default=1,
+        verbose_name='عدد الأجهزة المسموح بها',
+    )
+
+    expires_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name='تاريخ انتهاء الترخيص',
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    @property
+    def is_valid(self):
+        if self.status != 'active':
+            return False
+
+        if self.license_type == 'lifetime':
+            return True
+
+        return self.expires_at is not None and self.expires_at >= timezone.now()
+
+    def __str__(self):
+        return f"ترخيص سطح المكتب: {self.pharmacy.name}"
+
+
+# =======================================================
+# الأجهزة المفعلة لكل ترخيص
+# =======================================================
+class DeviceActivation(models.Model):
+    license = models.ForeignKey(
+        DesktopLicense,
+        on_delete=models.CASCADE,
+        related_name='devices',
+        verbose_name='الترخيص',
+    )
+
+    device_fingerprint = models.CharField(
+        max_length=128,
+        verbose_name='معرف الجهاز',
+    )
+
+    device_name = models.CharField(
+        max_length=120,
+        blank=True,
+        verbose_name='اسم الجهاز',
+    )
+
+    is_active = models.BooleanField(default=True, verbose_name='نشط')
+    activated_at = models.DateTimeField(auto_now_add=True, verbose_name='تاريخ التفعيل')
+    last_seen_at = models.DateTimeField(auto_now=True, verbose_name='آخر اتصال')
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['license', 'device_fingerprint'],
+                name='unique_device_per_desktop_license',
+            )
+        ]
+
+    def __str__(self):
+        device = self.device_name or self.device_fingerprint[:12]
+        return f"{self.license.pharmacy.name} - {device}"    
