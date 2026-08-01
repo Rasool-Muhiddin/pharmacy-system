@@ -12,9 +12,13 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 
-from .models import Medicine, Sale, MissingMedicine, Invoice, InvoiceItem, DamagedMedicine, PharmacySupplier
+from .models import (
+    Medicine, Sale, MissingMedicine, Invoice, InvoiceItem,
+    DamagedMedicine, PharmacySupplier, DesktopLicense, DeviceActivation,
+)
 from .iraqi_drugs import IRAQI_MEDICINES
-
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
 
 # 1. لوحة التحكم الرئيسية للصيدلية
 @login_required
@@ -711,3 +715,120 @@ LOGOUT_REDIRECT_URL = 'login'
 
 def landing_page(request):
     return render(request, 'pharmacy/landing.html')
+
+
+# =======================================================
+# API تفعيل نسخة سطح المكتب
+# يستدعيه تطبيق Flutter مرة واحدة عند إدخال رمز التفعيل.
+# =======================================================
+@csrf_exempt
+@require_POST
+def desktop_activate(request):
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        return JsonResponse(
+            {'ok': False, 'message': 'بيانات الطلب غير صحيحة.'},
+            status=400,
+        )
+
+    activation_code = str(data.get('activation_code', '')).strip()
+    device_fingerprint = str(data.get('device_fingerprint', '')).strip()
+    device_name = str(data.get('device_name', '')).strip()[:120]
+
+    if not activation_code or not device_fingerprint:
+        return JsonResponse(
+            {
+                'ok': False,
+                'message': 'رمز التفعيل ومعرف الجهاز مطلوبان.',
+            },
+            status=400,
+        )
+
+    if len(device_fingerprint) > 128:
+        return JsonResponse(
+            {'ok': False, 'message': 'معرف الجهاز غير صالح.'},
+            status=400,
+        )
+
+    try:
+        with transaction.atomic():
+            desktop_license = (
+                DesktopLicense.objects
+                .select_for_update()
+                .select_related('pharmacy')
+                .get(activation_code=activation_code)
+            )
+
+            if not desktop_license.is_valid:
+                return JsonResponse(
+                    {
+                        'ok': False,
+                        'message': 'هذا الترخيص غير فعال أو منتهي.',
+                    },
+                    status=403,
+                )
+
+            existing_device = DeviceActivation.objects.filter(
+                license=desktop_license,
+                device_fingerprint=device_fingerprint,
+            ).first()
+
+            if existing_device:
+                if not existing_device.is_active:
+                    return JsonResponse(
+                        {
+                            'ok': False,
+                            'message': 'هذا الجهاز موقوف من لوحة الإدارة.',
+                        },
+                        status=403,
+                    )
+
+                existing_device.device_name = device_name
+                existing_device.save()
+            else:
+                active_devices_count = desktop_license.devices.filter(
+                    is_active=True
+                ).count()
+
+                if active_devices_count >= desktop_license.max_devices:
+                    return JsonResponse(
+                        {
+                            'ok': False,
+                            'message': 'تم الوصول إلى الحد الأقصى للأجهزة المسموح بها.',
+                        },
+                        status=403,
+                    )
+
+                DeviceActivation.objects.create(
+                    license=desktop_license,
+                    device_fingerprint=device_fingerprint,
+                    device_name=device_name,
+                )
+
+    except DesktopLicense.DoesNotExist:
+        return JsonResponse(
+            {'ok': False, 'message': 'رمز التفعيل غير صحيح.'},
+            status=404,
+        )
+
+    return JsonResponse(
+        {
+            'ok': True,
+            'message': 'تم تفعيل نسخة سطح المكتب بنجاح.',
+            'pharmacy': {
+                'id': desktop_license.pharmacy.id,
+                'name': desktop_license.pharmacy.name,
+            },
+            'license': {
+                'type': desktop_license.license_type,
+                'status': desktop_license.status,
+                'expires_at': (
+                    desktop_license.expires_at.isoformat()
+                    if desktop_license.expires_at else None
+                ),
+                'max_devices': desktop_license.max_devices,
+            },
+        },
+        status=200,
+    )
