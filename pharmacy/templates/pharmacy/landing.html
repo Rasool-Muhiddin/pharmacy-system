@@ -17,7 +17,7 @@
             --primary-light: #74ab9f; /* لون تركوازي فاتح جداً للخلفيات */
             --text-dark: #1a202c;
             --text-light: #4a5568;
-            --bg-body: #f8fcfb; /* استبدال الرصاصي بلون منعش */
+            --bg-body: #fcf8f8; /* استبدال الرصاصي بلون منعش */
             --white: #ffffff;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; scroll-behavior: smooth; }
@@ -58,9 +58,9 @@
         .services-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; max-width: 1200px; margin: 0 auto; }
         .service-card { background: var(--white); border-radius: 16px; padding: 30px; box-shadow: 0 10px 30px rgba(26, 188, 156, 0.05); transition: all 0.4s ease; border: 1px solid rgba(26, 188, 156, 0.1); display: flex; flex-direction: column; align-items: center; text-align: center; position: relative; overflow: hidden; }
         .service-card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: var(--primary); transform: scaleX(0); transition: transform 0.4s ease; transform-origin: right; }
-        .service-card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(26, 130, 109, 0.15); border-color: var(--primary); }
+        .service-card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(26, 130, 109, 0.15); border-color:#dce6e4;}
         .service-card:hover::before { transform: scaleX(1); }
-        .service-icon { width: 75px; height: 75px; background: var(--primary-light); color: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; margin-bottom: 20px; transition: all 0.4s ease; }
+        .service-icon { width: 75px; height: 75px; background: var(--primary-light); color:dce6e4; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; margin-bottom: 20px; transition: all 0.4s ease; }
         .service-card:hover .service-icon { background: var(--primary); color: var(--white); }
         .service-card h3 { font-size: 20px; color: var(--text-dark); margin-bottom: 15px; font-weight: 800; }
         .service-card p { font-size: 14px; color: var(--text-light); line-height: 1.7; margin-bottom: 20px; flex-grow: 1; }
@@ -85,22 +85,83 @@
         .screen-card h3 { font-size: 20px; color: var(--primary-dark); margin-bottom: 10px; font-weight: 800; }
         .screen-card p { font-size: 14px; color: var(--text-light); line-height: 1.6; }
 
-        /* التواصل */
-        .contact-section { padding: 100px 5%; background: linear-gradient(135deg, var(--primary-light) 0%, var(--bg-body) 100%); text-align: center; position: relative; }
-        .contact-container { display: flex; flex-wrap: wrap; gap: 40px; max-width: 1000px; margin: 0 auto; background: var(--white); border-radius: 24px; padding: 50px; box-shadow: 0 20px 60px rgba(26, 188, 156, 0.1); border: 1px solid rgba(26, 188, 156, 0.2); }
-        .contact-info { flex: 1; min-width: 300px; text-align: right; }
-        .contact-info h3 { font-size: 24px; color: var(--primary-dark); margin-bottom: 30px; font-weight: 900; }
-        .contact-item { display: flex; align-items: center; gap: 18px; margin-bottom: 25px; }
-        .contact-item i { width: 50px; height: 50px; background: var(--primary-light); color: var(--primary); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; transition: all 0.3s ease; }
-        .contact-item:hover i { background: var(--primary); color: var(--white); transform: rotate(-10deg); }
-        .contact-item div h4 { font-size: 16px; color: var(--text-dark); margin: 0; font-weight: 800; margin-bottom: 4px; }
-        .contact-item div p { font-size: 14px; color: var(--text-light); margin: 0; font-weight: 600; }
-        
-        .contact-form { flex: 1; min-width: 300px; display: flex; flex-direction: column; gap: 15px; }
-        .contact-form input, .contact-form textarea { width: 100%; padding: 16px; border: 2px solid var(--primary-light); border-radius: 12px; font-size: 14px; outline: none; transition: all 0.3s ease; background: var(--bg-body); font-family: 'Cairo', sans-serif; }
-        .contact-form input:focus, .contact-form textarea:focus { border-color: var(--primary); background: var(--white); box-shadow: 0 0 0 4px rgba(26, 188, 156, 0.1); }
-        .contact-form button { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; border: none; padding: 16px; border-radius: 12px; font-weight: 800; cursor: pointer; transition: all 0.3s ease; font-size: 16px; margin-top: 10px; box-shadow: 0 10px 20px rgba(26, 188, 156, 0.2); }
-        .contact-form button:hover { transform: translateY(-3px); box-shadow: 0 15px 25px rgba(26, 188, 156, 0.4); }
+    
+        /* Official Contact */
+
+        .contact-section{
+            padding:100px 5%;
+            background:linear-gradient(135deg,var(--primary-light) 0%,var(--bg-body) 100%);
+            text-align:center;
+        }
+
+        .contact-container{
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            margin-top:50px;
+        }
+
+        .contact-info{
+            display:flex;
+            gap:30px;
+            flex-wrap:wrap;
+            justify-content:center;
+        }
+
+        .contact-item{
+            width:260px;
+            background:var(--white);
+            border-radius:20px;
+            padding:30px 25px;
+            text-align:center;
+            border:1px solid rgba(26,188,156,.15);
+            box-shadow:0 15px 35px rgba(26,188,156,.08);
+            transition:.35s ease;
+        }
+
+        .contact-item:hover{
+            transform:translateY(-8px);
+            box-shadow:0 25px 45px rgba(26,188,156,.18);
+        }
+
+        .contact-item i{
+            width:70px;
+            height:70px;
+            margin:0 auto 18px;
+            border-radius:18px;
+            background:var(--primary-light);
+            color:#008b7a;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:34px;
+            transition:.3s;
+        }
+
+        .contact-item:hover i{
+            background:var(--primary);
+            color:#fff;
+            transform:scale(1.08) rotate(-8deg);
+        }
+
+        .contact-item h4{
+            margin-bottom:10px;
+            font-size:22px;
+            color:var(--text-dark);
+            font-weight:800;
+        }
+
+        .contact-item a{
+            color:var(--text-light);
+            text-decoration:none;
+            font-weight:600;
+            transition:.3s;
+            word-break:break-word;
+        }
+
+        .contact-item a:hover{
+            color:var(--primary);
+        }
 
         /* الفوتر */
         footer { background: linear-gradient(to left, #1a202c, var(--primary-dark)); color: var(--primary-light); text-align: center; padding: 30px; font-size: 15px; font-weight: 600; border-top: 4px solid var(--primary); }
@@ -109,6 +170,55 @@
             .hero-content h2 { font-size: 32px; }
             .nav-center { display: none; }
             .contact-container { padding: 30px; }
+        }
+
+        .developer-section{
+            padding:70px 20px;
+            text-align:center;
+            border-top:1px solid rgba(255,255,255,.1);
+        }
+
+        .developer-section h2{
+            font-size:18px;
+            opacity:.8;
+            margin-bottom:10px;
+        }
+
+        .developer-section h3{
+            font-size:30px;
+            margin-bottom:18px;
+        }
+
+        .developer-name{
+            font-size:22px;
+            font-weight:700;
+            margin-bottom:8px;
+        }
+
+        .developer-title{
+            color:#1abc9c;
+            font-weight:600;
+            margin-bottom:20px;
+        }
+
+        .developer-description{
+            max-width:650px;
+            margin:0 auto 25px;
+            line-height:1.8;
+            opacity:.85;
+        }
+
+        .developer-links{
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            gap:15px;
+            flex-wrap:wrap;
+        }
+
+        .developer-links a{
+            text-decoration:none;
+            font-weight:600;
         }
     </style>
 </head>
@@ -132,11 +242,6 @@
                 <!-- رابط واتساب المباشر -->
                 <a href="https://wa.me/9647745354803" target="_blank" class="whats" title="واتساب">
                 <i class="bi bi-whatsapp"></i>
-                </a>
-            
-                <!-- رابط البريد الإلكتروني -->
-                <a href="www." class="mail" title="البريد الإلكتروني">
-                <i class="bi bi-envelope-at-fill"></i>
                 </a>
             </div>
         </div>
@@ -259,53 +364,87 @@
                     <img src="{% static 'pharmacy/images/inv.png' %}" alt="ادارة المخازن">
                 </div>
                 <h3>إدارة متقدمة للمخزون</h3>
-                <p>اكثر من 400 عنصر دوائي توفر بالعراق لتسهيل اضافتها للمخزون بشكل سلس، مع مراقبة الكمية والصلاحية وامكانية التعديل.</p>
+                <p>اكثر من 1000 عنصر دوائي توفر بالعراق لتسهيل اضافتها للمخزون بشكل سلس، مع مراقبة الكمية والصلاحية وامكانية التعديل.</p>
             </div>
         </div>
     </section>
 
-    <!-- التواصل -->
+<!-- الحسابات الرسمية -->
     <section class="contact-section">
         <h2 class="section-title">تواصل معنا</h2>
-        <p class="section-subtitle">فريقنا مستعد دائماً للإجابة على استفساراتك والبدء في تطوير مشروعك</p>
-        
+        <p class="section-subtitle">
+            يمكنك التواصل معنا مباشرة عبر حساباتنا الرسمية.
+        </p>
+
         <div class="contact-container">
+
             <div class="contact-info">
-                <h3>بيانات التواصل</h3>
-                
+
                 <div class="contact-item">
                     <i class="bi bi-whatsapp"></i>
-                    <div>
-                        <h4>واتساب</h4>
-                        <p dir="ltr">+964 773 508 8603</p>
-                    </div>
+                    <h4>واتساب</h4>
+
+                    <a href="https://wa.me/9647745354803" target="_blank">
+                        +964 773 508 8603
+                    </a>
                 </div>
 
                 <div class="contact-item">
                     <i class="bi bi-instagram"></i>
-                    <div>
-                        <h4>الإنستغرام</h4>
-                        <p>@</p>
-                    </div>
+                    <h4>إنستغرام</h4>
+
+                    <a href="https://instagram.com/e_tera1" target="_blank">
+                        @tera_software
+                    </a>
                 </div>
-                
-                <div class="contact-item">
-                    <i class="bi bi-envelope-at"></i>
-                    <div>
-                        <h4>البريد الإلكتروني</h4>
-                        <p></p>
-                    </div>
-                </div>
+
             </div>
 
-            <form class="contact-form" onsubmit="event.preventDefault(); alert('تم إرسال رسالتك بنجاح!');">
-                <input type="text" placeholder="الاسم الكامل" required>
-                <input type="tel" placeholder="رقم الهاتف" required>
-                <textarea rows="4" placeholder="اكتب رسالتك أو استفسارك هنا..." required></textarea>
-                <button type="submit"><i class="bi bi-send"></i> إرسال الرسالة <i class="bi bi-arrow-left-short" style="vertical-align: middle; font-size: 20px;"></i></button>
-            </form>
         </div>
     </section>
+
+    <!-- Developer Section -->
+<section class="developer-section">
+    <div class="container">
+        <h2>Developed by</h2>
+
+        <h3>Tera Software Solutions</h3>
+
+        <p class="developer-name">
+            <strong>Eng. Rasool Tahseen muhiddin</strong>
+        </p>
+
+        <p class="developer-title">
+            Founder &amp; Technical Director
+        </p>
+
+        <p class="developer-description">
+            Biomedical Engineer with a passion for building healthcare technologies, SaaS products, commercial web applications,
+             and e-learning platforms, driving digital transformation across medical institutions.
+        </p>
+
+        <div class="developer-links">
+            <a href="https://www.linkedin.com/in/rasool-tahseen-609029421/" target="_blank">
+                LinkedIn
+            </a>
+
+            <span>•</span>
+
+            <a href="https://wa.me/9647735088603" target="_blank">
+                WhatsApp
+            </a>
+
+            <span>•</span>
+
+            <a href="rasoolmuhiddin@gmail.com">
+                Email
+            </a>
+            <a href="https://www.instagram.com/rasool_trm">
+                instagram
+            </a> 
+        </div>
+    </div>
+</section>
 
     <footer>
         <p>© 2026 تيرا للحلول البرمجية. جميع الحقوق محفوظة.</p>
@@ -313,3 +452,4 @@
 
 </body>
 </html>
+
