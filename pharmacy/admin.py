@@ -1,7 +1,7 @@
 from django.contrib import admin
 from .models import (
     PharmacyBranch, UserProfile, Medicine, Sale,
-    Invoice, InvoiceItem, PharmacySupplier, MissingMedicine,
+    Invoice, InvoiceItem, PharmacySupplier,
     DamagedMedicine, Subscription, Payment, AuditLog,
     DesktopLicense, DeviceActivation,
 )
@@ -52,15 +52,6 @@ class PharmacySupplierAdmin(admin.ModelAdmin):
     list_display = ('name', 'pharmacy', 'phone', 'created_at')
     list_filter = ('pharmacy',)
     search_fields = ('name', 'phone')
-
-    list_per_page = 50
-
-
-@admin.register(MissingMedicine)
-class MissingMedicineAdmin(admin.ModelAdmin):
-    list_display = ('medicine_name', 'pharmacy', 'supplier', 'requested_at')
-    list_filter = ('pharmacy', 'supplier', 'requested_at')
-    search_fields = ('medicine_name', 'notes')
 
     list_per_page = 50
 

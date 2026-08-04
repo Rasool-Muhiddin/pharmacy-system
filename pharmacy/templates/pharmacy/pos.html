@@ -1,4 +1,5 @@
 {% extends "pharmacy/base.html" %}
+{% load custom_filters %}
 {% block content %}
 
     <!-- استدعاء أيقونات بوتستراب لضمان ظهور أيقونة الباركود والواجهة -->
@@ -154,7 +155,7 @@
                 <tr>
                     <td><strong>{{ invoice.invoice_number }}</strong></td>
                     <td>{{ invoice.created_at|date:"Y-m-d H:i" }}</td>
-                    <td>{{ invoice.total_amount|default:0 }} د.ع</td>
+                    <td>{{ invoice.total_amount|iqd }} د.ع</td>
                     <td style="color: #e74c3c;">{{ invoice.discount|default:0 }} د.ع</td>
                     <td style="color: #2ecc71; font-weight: bold;">{{ invoice.final_amount|default:0 }} د.ع</td>
                     <td>
@@ -167,7 +168,7 @@
                     <td style="text-align: center;">
                         {% if not invoice.is_refunded %}
                             <!-- 🎯 إصلاح الاستدعاء بنقل الوسائط الثلاثة الصحيحة -->
-                            <button type="button" class="btn-refund-direct" onclick="confirmDirectRefund('{{ invoice.id }}', '{{ invoice.invoice_number }}', '{{ invoice.final_amount|default:0 }}')">
+                            <button type="button" class="btn-refund-direct" onclick="confirmDirectRefund('{{ invoice.id }}', '{{ invoice.invoice_number }}', '{{ invoice.final_amount|iqd }}')">
                                 🔄 إرجاع الفاتورة
                             </button>
                         {% else %}
@@ -355,7 +356,7 @@
             if (item) {
                 let numericVal = parseInt(val) || 1;
                 if (numericVal > item.maxQty) {
-                    alert(`⚠️ الحد الأقصى المتوفر في المخزن هو ${item.maxQty} علبة فقط!`);
+                    alert(`⚠️ الحد الأقصى المتوفر في المخزن هو ${item.maxQty} قطعة فقط!`);
                     numericVal = item.maxQty;
                     document.getElementById(`qty_${id}`).value = numericVal;
                 }

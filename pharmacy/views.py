@@ -1,5 +1,6 @@
 import json
 from django.shortcuts import render, redirect, get_object_or_404
+from decimal import Decimal
 from django.db.models import Count, Sum, F, Q
 from django.contrib import messages
 from datetime import date, datetime, timedelta
@@ -11,14 +12,15 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
-
 from .models import (
-    Medicine, Sale, MissingMedicine, Invoice, InvoiceItem,
+    Medicine, Sale, Invoice, InvoiceItem,
     DamagedMedicine, PharmacySupplier, DesktopLicense, DeviceActivation, UserProfile,
+    SupplierInvoice,  SupplierPayment, SupplierReturn,
 )
 from .iraqi_drugs import IRAQI_MEDICINES
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
+from django.db.models.functions import Coalesce
 
 # 1. لوحة التحكم الرئيسية للصيدلية
 @login_required
@@ -302,20 +304,6 @@ def pos(request):
                     selected_med.quantity -= qty_sold
                     selected_med.save()
 
-                    if selected_med.quantity == 0:
-                        already_missing = MissingMedicine.objects.filter(
-                            pharmacy=user_pharmacy, 
-                            medicine=selected_med
-                        ).exists()
-                        
-                        if not already_missing:
-                            MissingMedicine.objects.create(
-                                pharmacy=user_pharmacy,
-                                medicine=selected_med,
-                                medicine_name=selected_med.trade_name,
-                                notes="تم التحويل تلقائياً بسبب نفاد الكمية من المخزن."
-                            )
-
                 try:
                     discount_val = float(discount_value_raw)
                 except ValueError:
@@ -380,87 +368,312 @@ def refund_sale(request, sale_id):
     return redirect('pos')
 
 
-# 6. النواقص
+# =======================================================
+# 6. إدارة المذاخر والفواتير (النواقص سابقاً)
+# =======================================================
+
 @login_required
 def missing_medicines_view(request):
-    user_pharmacy = request.user.profile.pharmacy
+    search = request.GET.get("search", "").strip()
+    user_profile = request.user.profile
+    user_pharmacy = user_profile.pharmacy
 
-    if request.method == 'POST':
-        action = request.POST.get('action')
+    suppliers = (
+        PharmacySupplier.objects
+        .filter(pharmacy=user_pharmacy)
+        .prefetch_related(
+            'invoices',
+            'invoices__payments',
+            'invoices__returns'
+        )
+    )
+    if search:
+        suppliers = suppliers.filter(name__icontains=search)
+        
+    suppliers = suppliers.annotate(
+        invoices_count=Count("invoices", distinct=True)
+    )
+    
+    total_debt = 0
+    top_supplier = None
+    top_supplier_total = 0
+    supplier_data = []
+    
+    for supplier in suppliers:
+        invoices = list(supplier.invoices.all())
+        total_purchase = sum(invoice.net_amount for invoice in invoices)
+        supplier_debt = sum(invoice.remaining_amount for invoice in invoices)
+        
+        supplier_data.append({
+            "supplier": supplier,
+            "invoices": invoices,
+            "total_purchase": total_purchase,
+            "total_debt": supplier_debt,
+            "invoice_count": supplier.invoices_count,
+        })
+        
+        total_debt += supplier_debt
+        if total_purchase > top_supplier_total:
+            top_supplier_total = total_purchase
+            top_supplier = supplier
 
-        if action == 'add_new_missing':
-            name = request.POST.get('medicine_name')
-            notes = request.POST.get('notes', '')
-            supplier_id = request.POST.get('supplier_id')
-            new_supplier_name = request.POST.get('new_supplier_name', '').strip()
-            new_supplier_phone = request.POST.get('new_supplier_phone', '').strip()
-
-            if name:
-                selected_supplier = None
-                if new_supplier_name:
-                    selected_supplier, created = PharmacySupplier.objects.get_or_create(
-                        pharmacy=user_pharmacy,
-                        name=new_supplier_name,
-                        defaults={'phone': new_supplier_phone}
-                    )
-                elif supplier_id and supplier_id != 'new':
-                    selected_supplier = get_object_or_404(PharmacySupplier, id=supplier_id, pharmacy=user_pharmacy)
-
-                MissingMedicine.objects.create(
-                    pharmacy=user_pharmacy,
-                    medicine_name=name,
-                    supplier=selected_supplier,
-                    notes=notes
-                )
-                messages.success(request, f"تم إضافة دواء ({name}) إلى قائمة النواقص.")
-                return redirect('missing_medicines')
-
-        elif action == 'update_supplier':
-            missing_item_id = request.POST.get('missing_item_id')
-            supplier_id = request.POST.get('supplier_id')
-            new_supplier_name = request.POST.get('new_supplier_name', '').strip()
-            new_supplier_phone = request.POST.get('new_supplier_phone', '').strip()
-
-            missing_item = get_object_or_404(MissingMedicine, id=missing_item_id, pharmacy=user_pharmacy)
-            selected_supplier = None
-
-            if new_supplier_name:
-                selected_supplier, created = PharmacySupplier.objects.get_or_create(
-                    pharmacy=user_pharmacy,
-                    name=new_supplier_name,
-                    defaults={'phone': new_supplier_phone}
-                )
-            elif supplier_id and supplier_id != 'new':
-                selected_supplier = get_object_or_404(PharmacySupplier, id=supplier_id, pharmacy=user_pharmacy)
-
-            missing_item.supplier = selected_supplier
-            missing_item.save()
-            messages.success(request, "تم تحديث بيانات المذخر بنجاح.")
-            return redirect('missing_medicines')
-
-    missing_list = MissingMedicine.objects.filter(pharmacy=user_pharmacy).select_related('supplier', 'medicine').order_by('-requested_at')
-    suppliers_list = PharmacySupplier.objects.filter(pharmacy=user_pharmacy).order_by('name')
-
-    return render(request, 'pharmacy/missing_medicines.html', {
-        'missing_list': missing_list, 
-        'suppliers_list': suppliers_list,
-        'pharmacy_name': user_pharmacy.name
-    })
+    context = {
+        "supplier_data": supplier_data,
+        "total_debt": total_debt,
+        "top_supplier": top_supplier,
+        "top_supplier_total": top_supplier_total,
+        "search": search,
+        "today": timezone.now().date(),
+    }
+    return render(request, "pharmacy/missing_medicines.html", context)
 
 
+
+# إضافة مذخر
 @login_required
-def delete_missing_medicine(request, pk):
+def add_supplier(request):
+    if request.method != "POST":
+        return redirect("missing_medicines")
+        
     user_profile = request.user.profile
     if not user_profile.is_pharmacy_owner:
-        messages.error(request, "عذراً، لا تمتلك الصلاحية لشطب النواقص.")
-        return redirect('missing_medicines')
+        messages.error(request, "ليس لديك صلاحية لإضافة مذخر.")
+        return redirect("missing_medicines")
         
-    user_pharmacy = user_profile.pharmacy
-    item = get_object_or_404(MissingMedicine, id=pk, pharmacy=user_pharmacy)
-    item.delete()
-    messages.success(request, "تم حذف السجل من القائمة.")
-    return redirect('missing_medicines')
+    pharmacy = user_profile.pharmacy
+    name = request.POST.get("name", "").strip()
+    phone = request.POST.get("phone", "").strip()
 
+    if not name:
+        messages.error(request, "يرجى إدخال اسم المذخر.")
+        return redirect("missing_medicines")
+        
+    if PharmacySupplier.objects.filter(pharmacy=pharmacy, name=name).exists():
+        messages.warning(request, "يوجد مذخر بنفس الاسم.")
+        return redirect("missing_medicines")
+        
+    PharmacySupplier.objects.create(
+        pharmacy=pharmacy,
+        name=name,
+        phone=phone
+    )
+    messages.success(request, "تمت إضافة المذخر بنجاح.")
+    return redirect("missing_medicines")
+
+
+# تعديل مذخر
+@login_required
+def edit_supplier(request, pk):
+    if request.method != "POST":
+        return redirect("missing_medicines")
+
+    user_profile = request.user.profile
+    if not user_profile.is_pharmacy_owner:
+        messages.error(request, "ليس لديك صلاحية.")
+        return redirect("missing_medicines")
+
+    pharmacy = user_profile.pharmacy
+    supplier = get_object_or_404(PharmacySupplier, pk=pk, pharmacy=pharmacy)
+
+    name = request.POST.get("name", "").strip()
+    phone = request.POST.get("phone", "").strip()
+
+    if not name:
+        messages.error(request, "اسم المذخر مطلوب.")
+        return redirect("missing_medicines")
+
+    if PharmacySupplier.objects.filter(pharmacy=pharmacy, name=name).exclude(pk=supplier.pk).exists():
+        messages.warning(request, "يوجد مذخر آخر بنفس الاسم.")
+        return redirect("missing_medicines")
+
+    supplier.name = name
+    supplier.phone = phone
+    supplier.save()
+
+    messages.success(request, "تم تحديث بيانات المذخر.")
+    return redirect("missing_medicines")
+
+
+# حذف مذخر
+@login_required
+def delete_supplier(request, pk):
+    user_profile = request.user.profile
+    if not user_profile.is_pharmacy_owner:
+        messages.error(request, "ليس لديك صلاحية.")
+        return redirect("missing_medicines")
+
+    pharmacy = user_profile.pharmacy
+    supplier = get_object_or_404(PharmacySupplier, pk=pk, pharmacy=pharmacy)
+
+    if supplier.invoices.exists():
+        messages.warning(request, "لا يمكن حذف مذخر يحتوي على فواتير.")
+        return redirect("missing_medicines")
+
+    supplier.delete()
+    messages.success(request, "تم حذف المذخر.")
+    return redirect("missing_medicines")
+
+
+# إضافة فاتورة للمذخر
+@login_required
+def add_invoice(request, supplier_id):
+    if request.method != "POST":
+        return redirect("missing_medicines")
+
+    user_profile = request.user.profile
+    if not user_profile.is_pharmacy_owner:
+        messages.error(request, "ليس لديك صلاحية لإضافة فاتورة.")
+        return redirect("missing_medicines")
+
+    supplier = get_object_or_404(
+        PharmacySupplier,
+        id=supplier_id,
+        pharmacy=user_profile.pharmacy
+    )
+
+    invoice_number = request.POST.get("invoice_number", "").strip()
+    invoice_date = request.POST.get("invoice_date") or timezone.now().date()
+    original_amount_raw = request.POST.get("original_amount", "0").strip()
+    payment_type = request.POST.get("payment_type")
+    notes = request.POST.get("notes", "").strip()
+    first_payment_raw = request.POST.get("first_payment", "0").strip()
+
+    if not invoice_number:
+        messages.error(request, "رقم الفاتورة مطلوب.")
+        return redirect("missing_medicines")
+
+    if SupplierInvoice.objects.filter(supplier=supplier, invoice_number=invoice_number).exists():
+        messages.warning(request, "رقم الفاتورة مستخدم مسبقاً لهذا المذخر.")
+        return redirect("missing_medicines")
+
+    try:
+        original_amount = Decimal(original_amount_raw or "0")
+    except Exception:
+        messages.error(request, "مبلغ الفاتورة غير صحيح.")
+        return redirect("missing_medicines")
+
+    with transaction.atomic():
+        invoice = SupplierInvoice.objects.create(
+            supplier=supplier,
+            invoice_number=invoice_number,
+            invoice_date=invoice_date,
+            original_amount=original_amount,
+            status="partial",
+            notes=notes,
+        )
+
+        if payment_type == "paid":
+            SupplierPayment.objects.create(
+                invoice=invoice,
+                amount=invoice.original_amount,
+                payment_date=invoice.invoice_date,
+                notes="تم الدفع بالكامل عند إنشاء الفاتورة."
+            )
+        elif payment_type == "partial":
+            try:
+                first_payment = Decimal(first_payment_raw or "0")
+            except Exception:
+                first_payment = Decimal("0")
+
+            if first_payment > invoice.original_amount:
+                transaction.set_rollback(True)
+                messages.error(request, "الدفعة الأولى لا يمكن أن تكون أكبر من مبلغ الفاتورة.")
+                return redirect("missing_medicines")
+
+            if first_payment > 0:
+                SupplierPayment.objects.create(
+                    invoice=invoice,
+                    amount=first_payment,
+                    payment_date=invoice.invoice_date,
+                    notes="الدفعة الأولى."
+                )
+
+    messages.success(request, "تمت إضافة الفاتورة بنجاح.")
+    return redirect("missing_medicines")
+
+
+# إضافة دفعة مالية لفاتورة
+@login_required
+def add_payment(request, invoice_id):
+    if request.method != "POST":
+        return redirect("missing_medicines")
+
+    user_profile = request.user.profile
+    if not user_profile.is_pharmacy_owner:
+        messages.error(request, "ليس لديك صلاحية لتسجيل الدفعات.")
+        return redirect("missing_medicines")
+
+    invoice = get_object_or_404(
+        SupplierInvoice,
+        id=invoice_id,
+        supplier__pharmacy=user_profile.pharmacy
+    )
+
+    amount_raw = request.POST.get("amount", "0").strip()
+    payment_date = request.POST.get("payment_date") or timezone.now().date()
+    notes = request.POST.get("notes", "").strip()
+
+    try:
+        amount = Decimal(amount_raw)
+        if amount <= 0:
+            messages.error(request, "يجب أن يكون مبلغ الدفعة أكبر من الصفر.")
+            return redirect("missing_medicines")
+    except Exception:
+        messages.error(request, "مبلغ الدفعة غير صحيح.")
+        return redirect("missing_medicines")
+
+    if amount > invoice.remaining_amount:
+        messages.warning(request, f"المبلغ المدخل ({amount}) أكبر من المتبقي على الفاتورة ({invoice.remaining_amount}).")
+        return redirect("missing_medicines")
+
+    SupplierPayment.objects.create(
+        invoice=invoice,
+        amount=amount,
+        payment_date=payment_date,
+        notes=notes
+    )
+    messages.success(request, "تم تسجيل الدفعة بنجاح.")
+    return redirect("missing_medicines")
+
+
+# إضافة استرجاع بضاعة لفاتورة
+@login_required
+def add_return(request, invoice_id):
+    if request.method != "POST":
+        return redirect("missing_medicines")
+
+    user_profile = request.user.profile
+    if not user_profile.is_pharmacy_owner:
+        messages.error(request, "ليس لديك صلاحية لتسجيل الإرجاع.")
+        return redirect("missing_medicines")
+
+    invoice = get_object_or_404(
+        SupplierInvoice,
+        id=invoice_id,
+        supplier__pharmacy=user_profile.pharmacy
+    )
+
+    amount_raw = request.POST.get("amount", "0").strip()
+    return_date = request.POST.get("return_date") or timezone.now().date()
+    notes = request.POST.get("notes", "").strip()
+
+    try:
+        amount = Decimal(amount_raw)
+        if amount <= 0:
+            messages.error(request, "يجب أن يكون مبلغ الاسترجاع أكبر من الصفر.")
+            return redirect("missing_medicines")
+    except Exception:
+        messages.error(request, "مبلغ الاسترجاع غير صحيح.")
+        return redirect("missing_medicines")
+
+    SupplierReturn.objects.create(
+        invoice=invoice,
+        amount=amount,
+        return_date=return_date,
+        notes=notes
+    )
+    messages.success(request, "تم تسجيل الاسترجاع بنجاح.")
+    return redirect("missing_medicines")
 
 # 7. الإتلاف
 @login_required
@@ -542,10 +755,13 @@ def sales_history(request):
 
     cashier_summary = []
     if user_profile.is_pharmacy_owner:
-        today = timezone.now().date()
+        today = timezone.localdate()
         pharmacy_users = User.objects.filter(profile__pharmacy=user_pharmacy)
         
         for u in pharmacy_users:
+            print(f"اسم الموظف: {u.username}")
+            print(f"تاريخ اليوم في السيرفر: {today}")
+            print(f"عدد فواتير هذا الموظف كلياً: {Invoice.objects.filter(cashier=u).count()}")
             today_invoices = Invoice.objects.filter(
                 pharmacy=user_pharmacy,
                 cashier=u,
@@ -609,7 +825,7 @@ def sales_reports(request):
     total_invoices_count = invoices.count()
     total_discounts_given = invoices.aggregate(Sum('discount'))['discount__sum'] or 0.0
 
-    today = timezone.now().date()
+    today = timezone.localdate()
     expired_medicines = Medicine.objects.filter(
         pharmacy=user_pharmacy,
         expiry_date__lt=today,

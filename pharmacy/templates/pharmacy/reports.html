@@ -1,5 +1,5 @@
 {% extends "pharmacy/base.html" %}
-
+{% load custom_filters %}
 {% block content %}
 
     <!-- استدعاء أيقونات بوتستراب للتناسق البصري -->
@@ -316,11 +316,11 @@
         <div class="kpi-container">
             <div class="kpi-card blue">
                 <div class="kpi-title"><i class="bi bi-cash-stack" style="color: #3182ce;"></i> صافي الأرباح المادية</div>
-                <div class="kpi-value" style="color: #3182ce;">{{ total_sales|default:0 }} د.ع</div>
+                <div class="kpi-value" style="color: #3182ce;">{{ total_sales|iqd }} </div>
             </div>
             <div class="kpi-card orange">
                 <div class="kpi-title"><i class="bi bi-tags-fill" style="color: #dd6b20;"></i> إجمالي الخصومات المقدمة</div>
-                <div class="kpi-value" style="color: #dd6b20;">{{ total_discounts_given|default:0 }} د.ع</div>
+                <div class="kpi-value" style="color: #dd6b20;">{{ total_discounts_given|iqd }} </div>
             </div>
             <div class="kpi-card">
                 <div class="kpi-title"><i class="bi bi-receipt" style="color: #1abc9c;"></i> عدد الفواتير الصادرة</div>
@@ -328,7 +328,7 @@
             </div>
             <div class="kpi-card red">
                 <div class="kpi-title"><i class="bi bi-trash3-fill" style="color: #e53e3e;"></i> خسائر الأدوية والتوالف</div>
-                <div class="kpi-value" style="color: #e53e3e;">{{ total_damage_losses|default:0 }} د.ع</div>
+                <div class="kpi-value" style="color: #e53e3e;">{{ total_damage_losses|iqd }}</div>
             </div>
         </div>
 
@@ -354,8 +354,8 @@
                                 <br>
                                 <span style="font-size: 11px; color: #718096;">{{ item.medicine__scientific_name }}</span>
                             </td>
-                            <td><span class="custom-badge badge-success"><i class="bi bi-check2-all"></i> {{ item.total_qty }} عِلبة</span></td>
-                            <td><strong style="color: #2d3748;">{{ item.total_revenue|default:0 }} د.ع</strong></td>
+                            <td><span class="custom-badge badge-success"><i class="bi bi-check2-all"></i> {{ item.total_qty }} قطعة</span></td>
+                            <td><strong style="color: #2d3748;">{{ item.total_revenue|iqd}} </strong></td>
                         </tr>
                         {% empty %}
                         <tr>
@@ -424,9 +424,9 @@
                     <tr>
                         <td><strong>{{ inv.invoice_number }}</strong></td>
                         <td style="color: #4a5568;">{{ inv.created_at|date:"Y-m-d H:i" }}</td>
-                        <td style="color: #718096;">{{ inv.total_amount|default:0 }} د.ع</td>
-                        <td style="color: #e53e3e;">{{ inv.discount|default:0 }} د.ع</td>
-                        <td><strong style="color: #38a169;">{{ inv.final_amount|default:0 }} د.ع</strong></td>
+                        <td style="color: #718096;">{{ inv.total_amount|iqd }}</td>
+                        <td style="color: #e53e3e;">{{ inv.discount|iqd }}</td>
+                        <td><strong style="color: #38a169;">{{ inv.final_amount|iqd }}</strong></td>
                         <td>
                             <!-- زر تفاصيل الفاتورة لفتح الـ Modal -->
                             <button class="btn-view-invoice" onclick="openInvoiceModal('{{ inv.invoice_number }}', '{{ inv.total_amount|default:0 }}', '{{ inv.discount|default:0 }}', '{{ inv.final_amount|default:0 }}', '{{ inv.id }}')">
@@ -531,7 +531,7 @@
                 htmlContent += `
                     <tr>
                         <td><strong>${name}</strong></td>
-                        <td><span class="custom-badge badge-info"><i class="bi bi-box-seam"></i> ${qty} علبة</span></td>
+                        <td><span class="custom-badge badge-info"><i class="bi bi-box-seam"></i> ${qty} قطعة</span></td>
                         <td style="color: #4a5568;">${price.toLocaleString('en-US')} د.ع</td>
                         <td><strong style="color: #2d3748;">${total.toLocaleString('en-US')} د.ع</strong></td>
                     </tr>

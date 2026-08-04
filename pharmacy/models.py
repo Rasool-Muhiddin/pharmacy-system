@@ -101,25 +101,14 @@ class PharmacySupplier(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
+        ordering = ['name']
+
+    class Meta:
         unique_together = ('pharmacy', 'name')
 
     def __str__(self):
         pharmacy_name = self.pharmacy.name if self.pharmacy else "عام"
         return f"{self.name} ({pharmacy_name})"
-
-# =======================================================
-# 5️⃣ ب - جدول النواقص
-# =======================================================
-class MissingMedicine(models.Model):
-    pharmacy = models.ForeignKey(PharmacyBranch, on_delete=models.CASCADE, related_name='missing_medicines', null=True, blank=True)
-    medicine = models.ForeignKey('Medicine', on_delete=models.SET_NULL, null=True, blank=True, verbose_name="الدواء المرتبط بالمخزن")
-    medicine_name = models.CharField(max_length=200, verbose_name="اسم الدواء الناقص")
-    supplier = models.ForeignKey(PharmacySupplier, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="المذخر الموجه له الطلب")
-    notes = models.TextField(blank=True, null=True, verbose_name="ملاحظات الصيدلي")
-    requested_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return self.medicine_name or "دواء ناقص"
 
 # =======================================================
 # 6️⃣ جدول الفواتير الرئيسي (محصن ضد التصادم والتزامن)
@@ -412,3 +401,152 @@ class DeviceActivation(models.Model):
     def __str__(self):
         device = self.device_name or self.device_fingerprint[:12]
         return f"{self.license.pharmacy.name} - {device}"    
+
+
+#موديل فواتير المذاخر
+class SupplierInvoice(models.Model):
+    STATUS_CHOICES = (
+        ('paid', 'مدفوعة'),
+        ('partial', 'مؤجلة'),
+    )
+
+    supplier = models.ForeignKey(
+        PharmacySupplier,
+        on_delete=models.CASCADE,
+        related_name='invoices'
+    )
+
+    invoice_number = models.CharField(max_length=50)
+
+    invoice_date = models.DateField()
+
+    original_amount = models.DecimalField(
+        max_digits=12,
+        decimal_places=0
+    )
+
+    status = models.CharField(
+        max_length=10,
+        choices=STATUS_CHOICES,
+        default='partial'
+    )
+
+    notes = models.TextField(
+        blank=True,
+        null=True
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-invoice_date', '-id']
+
+        constraints = [
+            models.UniqueConstraint(
+                fields=['supplier', 'invoice_number'],
+                name='unique_invoice_per_supplier'
+            )
+        ]
+
+    @property
+    def total_paid(self):
+        return (
+            self.payments.aggregate(
+                total=models.Sum('amount')
+            )['total'] or 0
+        )
+
+    @property
+    def total_returned(self):
+        return (
+            self.returns.aggregate(
+                total=models.Sum('amount')
+            )['total'] or 0
+        )
+
+    @property
+    def net_amount(self):
+        return self.original_amount - self.total_returned
+
+    @property
+    def remaining_amount(self):
+        remaining = self.net_amount - self.total_paid
+
+        if remaining < 0:
+            return 0
+
+        return remaining
+
+    @property
+    def is_paid(self):
+        return self.remaining_amount == 0
+    #--------
+
+    def __str__(self):
+        return f"{self.supplier.name} - {self.invoice_number}"
+
+
+#موديل الدفعات
+class SupplierPayment(models.Model):
+
+    invoice = models.ForeignKey(
+        SupplierInvoice,
+        on_delete=models.CASCADE,
+        related_name='payments'
+    )
+
+    amount = models.DecimalField(
+        max_digits=12,
+        decimal_places=0
+    )
+
+    payment_date = models.DateField()
+
+    notes = models.TextField(
+        blank=True,
+        null=True
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['payment_date', 'id']
+
+    def __str__(self):
+        return f"{self.invoice.invoice_number} - {self.amount}"
+
+
+#موديل الاسترجاعات
+class SupplierReturn(models.Model):
+
+    invoice = models.ForeignKey(
+        SupplierInvoice,
+        on_delete=models.CASCADE,
+        related_name='returns'
+    )
+
+    amount = models.DecimalField(
+        max_digits=12,
+        decimal_places=0
+    )
+
+    return_date = models.DateField()
+
+    reason = models.CharField(
+        max_length=200,
+        blank=True,
+        null=True
+    )
+
+    notes = models.TextField(
+        blank=True,
+        null=True
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['return_date', 'id']
+
+    def __str__(self):
+        return f"{self.invoice.invoice_number} - {self.amount}"        

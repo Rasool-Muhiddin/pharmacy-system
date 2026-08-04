@@ -1,4 +1,5 @@
 {% extends "pharmacy/base.html" %}
+{% load custom_filters %}
 {% block content %}
 
     <!-- استدعاء أيقونات بوتستراب -->
@@ -296,9 +297,9 @@
                             <!-- الإجمالي قبل الخصم -->
                             <td>
                                 {% if invoice.is_refunded %}
-                                    <span style="color: #a0aec0; text-decoration: line-through;">{{ invoice.total_amount|default:0 }} د.ع</span>
+                                    <span style="color: #a0aec0; text-decoration: line-through;">{{ invoice.total_amount|iqd }} د.ع</span>
                                 {% else %}
-                                    <span style="color: #718096;">{{ invoice.total_amount|default:0 }} د.ع</span>
+                                    <span style="color: #718096;">{{ invoice.total_amount|iqd }} </span>
                                 {% endif %}
                             </td>
                             <!-- قيمة الخصم المطبق -->
@@ -312,9 +313,9 @@
                             <!-- الصافي الفعلي والنهائي للمدفوع -->
                             <td>
                                 {% if invoice.is_refunded %}
-                                    <strong style="color: #e53e3e; text-decoration: line-through;">{{ invoice.final_amount|default:0 }} د.ع</strong>
+                                    <strong style="color: #e53e3e; text-decoration: line-through;">{{ invoice.final_amount|iqd }} </strong>
                                 {% else %}
-                                    <strong style="color: #38a169; font-size: 15px;">{{ invoice.final_amount|default:0 }} د.ع</strong>
+                                    <strong style="color: #38a169; font-size: 15px;">{{ invoice.final_amount|iqd }} </strong>
                                 {% endif %}
                             </td>
                             <td>
@@ -529,7 +530,7 @@
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td><strong>${item.name}</strong></td>
-                    <td>${item.quantity} علبة</td>
+                    <td>${item.quantity} قطعة</td>
                     <td>${itemPrice.toLocaleString('en-US')} د.ع</td>
                     <td><strong style="color: #38a169;">${itemTotal.toLocaleString('en-US')} د.ع</strong></td>
                 `;
