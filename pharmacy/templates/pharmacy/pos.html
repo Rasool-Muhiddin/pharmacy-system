@@ -155,9 +155,9 @@
                 <tr>
                     <td><strong>{{ invoice.invoice_number }}</strong></td>
                     <td>{{ invoice.created_at|date:"Y-m-d H:i" }}</td>
-                    <td>{{ invoice.total_amount|iqd }} د.ع</td>
+                    <td>{{ invoice.total_amount|iqd }}</td>
                     <td style="color: #e74c3c;">{{ invoice.discount|default:0 }} د.ع</td>
-                    <td style="color: #2ecc71; font-weight: bold;">{{ invoice.final_amount|default:0 }} د.ع</td>
+                    <td style="color: #2ecc71; font-weight: bold;">{{ invoice.final_amount|iqd }}</td>
                     <td>
                         {% if invoice.is_refunded %}
                             <span style="background: #e74c3c; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px;">🚫 مرتجعة بالكامل</span>
