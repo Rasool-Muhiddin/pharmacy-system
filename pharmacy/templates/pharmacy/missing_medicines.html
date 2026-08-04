@@ -7,11 +7,11 @@
     --primary: #1abc9c;
     --primary-dark: #16a085;
     --primary-light: #e8f8f5;
-    --bg-body: #f4f7f6;
+    --bg-body: #93afb12b;
     --card-bg: #ffffff;
     --text-dark: #2c3e50;
     --text-muted: #7f8c8d;
-    --border-color: #e2e8f0;
+    --border-color: #cfeeea;
     --danger: #e74c3c;
     --warning: #f39c12;
     --success: #2ecc71;
@@ -46,10 +46,15 @@
     align-items: center;
     gap: 20px;
     border-right: 5px solid var(--primary);
+    transition:.25s;
   }
 
   .stats-card.danger {
     border-right-color: var(--danger);
+  }
+  .stats-card:hover{
+    transform:translateY(-4px);
+    box-shadow:0 12px 25px rgba(0,0,0,.08);
   }
 
   .stat-icon {
@@ -122,9 +127,10 @@
     background: var(--primary);
     color: white;
     border: none;
-    padding: 19px 24px;
+    padding: 13px 24px;
     border-radius: var(--radius);
     font-weight: 800;
+    font-size: 20px;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
@@ -132,7 +138,7 @@
   }
 
   .btn-main:hover { background: var(--primary-dark); }
-  .btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 6px; }
+  .btn-sm { padding: 6px 12px; font-size: 13px; border-radius: 6px; }
 
   /* Suppliers Grid */
   .suppliers-grid {
@@ -147,6 +153,11 @@
     box-shadow: var(--shadow);
     border: 1px solid var(--border-color);
     overflow: hidden;
+    transition: .25s ease;
+  }
+  .supplier-card:hover{
+    transform: translateY(-5px);
+    box-shadow:0 12px 30px rgba(0,0,0,.10);
   }
 
   .supplier-header {
@@ -155,7 +166,7 @@
     justify-content: space-between;
     align-items: flex-start;
     border-bottom: 1px solid var(--border-color);
-    background: #fafafa;
+    background: #65a7ca56;
   }
 
   /* Scalable Layout for future fields */
@@ -188,7 +199,7 @@
 
   .supplier-actions {
     padding: 12px 20px;
-    background: #fff;
+    background: #e6edecab;
     border-top: 1px solid var(--border-color);
     display: flex;
     justify-content: space-between;
@@ -203,6 +214,11 @@
     border-radius: 8px;
     cursor: pointer;
     font-weight: 800;
+     transition:.25s;
+  }
+  .btn-toggle-details:hover{
+    background:var(--primary);
+    color:white;
   }
 
   /* Details & Table */
