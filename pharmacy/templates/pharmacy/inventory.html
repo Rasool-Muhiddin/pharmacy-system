@@ -207,7 +207,7 @@
                             <span class="custom-badge badge-success"><i class="bi bi-check2"></i> {{ med.quantity }} قطعة</span>
                         {% endif %}
                     </td>
-                    <td><strong style="color:#2d3748;">{{ med.sell_price|iqd }} د.ع</strong></td>
+                    <td><strong style="color:#2d3748;">{{ med.sell_price|iqd }} </strong></td>
                     <td style="color:#4a5568;"><i class="bi bi-calendar-event"></i> {{ med.expiry_date }}</td>
                     <td>
                         {% if request.user.profile.is_pharmacy_owner %}
