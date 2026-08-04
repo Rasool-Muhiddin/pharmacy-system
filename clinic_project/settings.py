@@ -27,6 +27,8 @@ SECRET_KEY = 'django-insecure-uf&kvn!57eyqcb3&-v$59btt@mu_+x2c3oz&_#k&2g3g*=+gdq
 DEBUG = False
 
 ALLOWED_HOSTS = [
+    "tera-software1.com",
+    "www.tera-software1.com",
     'pharmacy-system-7fpt.onrender.com',  # رابط موقعك على Render
     'localhost',                          # للتجربة المحلية
     '127.0.0.1',                          # للتجربة المحلية
@@ -43,6 +45,11 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.humanize',
     'pharmacy',
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://tera-software1.com",
+    "https://www.tera-software1.com",
 ]
 
 MIDDLEWARE = [
