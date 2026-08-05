@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.urls import path, include
 from django.contrib.sitemaps.views import sitemap
+from django.views.generic import TemplateView
 
 from pharmacy import views as pharmacy_views
 from pharmacy.sitemaps import StaticViewSitemap
@@ -22,4 +23,13 @@ urlpatterns = [
         {'sitemaps': sitemaps},
         name='django.contrib.sitemaps.views.sitemap'
     ),
+    
+    path(
+        "robots.txt",
+        TemplateView.as_view(
+            template_name="robots.txt",
+            content_type="text/plain",
+        ),
+    ),
+
 ]
