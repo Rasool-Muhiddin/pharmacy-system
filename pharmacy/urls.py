@@ -14,6 +14,7 @@ urlpatterns = [
     path('missing-medicines/add-invoice/<int:supplier_id>/', views.add_invoice, name='add_invoice'),
     path('missing-medicines/add-payment/<int:invoice_id>/', views.add_payment, name='add_payment'),
     path('missing-medicines/add-return/<int:invoice_id>/', views.add_return, name='add_return'),
+    path('missing-medicines/settle-debt/<int:invoice_id>/', views.settle_supplier_debt, name='settle_supplier_debt'),
     path('medicine/damage/<int:medicine_id>/', views.damage_medicine, name='damage_medicine'),
     path('sales-history/', views.sales_history, name='sales_history'),
     path('reports/', views.sales_reports, name='sales_reports'),

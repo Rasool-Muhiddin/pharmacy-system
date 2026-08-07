@@ -15,7 +15,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from .models import (
     Medicine, Sale, Invoice, InvoiceItem,
     DamagedMedicine, PharmacySupplier, DesktopLicense, DeviceActivation, UserProfile,
-    SupplierInvoice,  SupplierPayment, SupplierReturn,
+    SupplierInvoice,  SupplierPayment, SupplierReturn, SupplierRefund,
 )
 from .iraqi_drugs import IRAQI_MEDICINES
 from django.views.decorators.csrf import csrf_exempt
@@ -384,7 +384,8 @@ def missing_medicines_view(request):
         .prefetch_related(
             'invoices',
             'invoices__payments',
-            'invoices__returns'
+            'invoices__returns',
+            'invoices__refunds'
         )
     )
     if search:
@@ -403,13 +404,95 @@ def missing_medicines_view(request):
         invoices = list(supplier.invoices.all())
         total_purchase = sum(invoice.net_amount for invoice in invoices)
         supplier_debt = sum(invoice.remaining_amount for invoice in invoices)
-        
+
+        # ----- بناء كشف الحساب (حركات مرتبة زمنياً + رصيد متراكم) -----
+        statement_entries = []
+        for invoice in invoices:
+            statement_entries.append({
+                "date": invoice.invoice_date,
+                "created_at": invoice.created_at,
+                "type": "invoice",
+                "type_label": "فاتورة",
+                "label": f"فاتورة رقم #{invoice.invoice_number}",
+                "debit": invoice.original_amount,
+                "credit_payment": Decimal("0"),
+                "credit_return": Decimal("0"),
+                "debit_refund": Decimal("0"),
+                "notes": invoice.notes,
+            })
+            for payment in invoice.payments.all():
+                statement_entries.append({
+                    "date": payment.payment_date,
+                    "created_at": payment.created_at,
+                    "type": "payment",
+                    "type_label": "دفعة",
+                    "label": f"دفعة نقدية - فاتورة #{invoice.invoice_number}",
+                    "debit": Decimal("0"),
+                    "credit_payment": payment.amount,
+                    "credit_return": Decimal("0"),
+                    "debit_refund": Decimal("0"),
+                    "notes": payment.notes,
+                })
+            for ret in invoice.returns.all():
+                statement_entries.append({
+                    "date": ret.return_date,
+                    "created_at": ret.created_at,
+                    "type": "return",
+                    "type_label": "استرجاع",
+                    "label": f"استرجاع بضاعة - فاتورة #{invoice.invoice_number}"
+                              + (f" ({ret.reason})" if ret.reason else ""),
+                    "debit": Decimal("0"),
+                    "credit_payment": Decimal("0"),
+                    "credit_return": ret.amount,
+                    "debit_refund": Decimal("0"),
+                    "notes": ret.notes,
+                })
+            for refund in invoice.refunds.all():
+                statement_entries.append({
+                    "date": refund.refund_date,
+                    "created_at": refund.created_at,
+                    "type": "refund",
+                    "type_label": "استلام دين",
+                    "label": f"استلام مبلغ من المذخر - فاتورة #{invoice.invoice_number}",
+                    "debit": Decimal("0"),
+                    "credit_payment": Decimal("0"),
+                    "credit_return": Decimal("0"),
+                    "debit_refund": refund.amount,
+                    "notes": refund.notes,
+                })
+
+        # ترتيب حسب تاريخ الحركة (الذي يدخله المستخدم) أولاً،
+        # وعند تساوي التاريخ يُستخدم وقت التنفيذ الفعلي (created_at)
+        # ليعكس الترتيب الحقيقي للعمليات كما نفّذها الصيدلي بالضبط.
+        statement_entries.sort(key=lambda e: (e["date"], e["created_at"]))
+
+        running_balance = Decimal("0")
+        statement_total_debit = Decimal("0")
+        statement_total_payment = Decimal("0")
+        statement_total_return = Decimal("0")
+        statement_total_refund = Decimal("0")
+        for entry in statement_entries:
+            running_balance += (
+                entry["debit"] + entry["debit_refund"]
+                - entry["credit_payment"] - entry["credit_return"]
+            )
+            entry["balance"] = running_balance
+            statement_total_debit += entry["debit"]
+            statement_total_payment += entry["credit_payment"]
+            statement_total_return += entry["credit_return"]
+            statement_total_refund += entry["debit_refund"]
+
         supplier_data.append({
             "supplier": supplier,
             "invoices": invoices,
             "total_purchase": total_purchase,
             "total_debt": supplier_debt,
             "invoice_count": supplier.invoices_count,
+            "statement_entries": statement_entries,
+            "statement_total_debit": statement_total_debit,
+            "statement_total_payment": statement_total_payment,
+            "statement_total_return": statement_total_return,
+            "statement_total_refund": statement_total_refund,
         })
         
         total_debt += supplier_debt
@@ -673,6 +756,45 @@ def add_return(request, invoice_id):
         notes=notes
     )
     messages.success(request, "تم تسجيل الاسترجاع بنجاح.")
+    return redirect("missing_medicines")
+
+
+# استلام مبلغ من المذخر (عندما يكون المذخر مديناً للصيدلية على فاتورة معينة)
+@login_required
+def settle_supplier_debt(request, invoice_id):
+    if request.method != "POST":
+        return redirect("missing_medicines")
+
+    user_profile = request.user.profile
+    if not user_profile.is_pharmacy_owner:
+        messages.error(request, "ليس لديك صلاحية لتنفيذ هذا الإجراء.")
+        return redirect("missing_medicines")
+
+    invoice = get_object_or_404(
+        SupplierInvoice,
+        id=invoice_id,
+        supplier__pharmacy=user_profile.pharmacy
+    )
+
+    with transaction.atomic():
+        # إعادة قراءة الفاتورة داخل transaction لتفادي أي تعارض في نفس اللحظة
+        invoice = SupplierInvoice.objects.select_for_update().get(id=invoice.id)
+        remaining = invoice.remaining_amount
+
+        if remaining >= 0:
+            messages.warning(request, "لا يوجد رصيد مستحق لنا على هذا المذخر لهذه الفاتورة.")
+            return redirect("missing_medicines")
+
+        amount_to_receive = abs(remaining)
+
+        SupplierRefund.objects.create(
+            invoice=invoice,
+            amount=amount_to_receive,
+            refund_date=timezone.now().date(),
+            notes="تصفير رصيد - استلام مستحقات من المذخر."
+        )
+
+    messages.success(request, "تم تسجيل استلام المبلغ من المذخر وتصفير الرصيد.")
     return redirect("missing_medicines")
 
 # 7. الإتلاف

@@ -465,17 +465,23 @@ class SupplierInvoice(models.Model):
         )
 
     @property
+    def total_refunded(self):
+        return (
+            self.refunds.aggregate(
+                total=models.Sum('amount')
+            )['total'] or 0
+        )
+
+    @property
     def net_amount(self):
         return self.original_amount - self.total_returned
 
     @property
     def remaining_amount(self):
-        remaining = self.net_amount - self.total_paid
-
-        if remaining < 0:
-            return 0
-
-        return remaining
+        # ملاحظة: قد تكون النتيجة سالبة، وهذا يعني أن المذخر بات
+        # مديناً للصيدلية (نتيجة دفعات أو استرجاعات تجاوزت قيمة الفاتورة).
+        # لا نصفّرها هنا حتى لا تضيع هذه المعلومة.
+        return self.net_amount - self.total_paid + self.total_refunded
 
     @property
     def is_paid(self):
@@ -550,3 +556,33 @@ class SupplierReturn(models.Model):
 
     def __str__(self):
         return f"{self.invoice.invoice_number} - {self.amount}"        
+
+
+#موديل استلام مبلغ من المذخر (عندما يكون المذخر مديناً للصيدلية على فاتورة معينة)
+class SupplierRefund(models.Model):
+
+    invoice = models.ForeignKey(
+        SupplierInvoice,
+        on_delete=models.CASCADE,
+        related_name='refunds'
+    )
+
+    amount = models.DecimalField(
+        max_digits=12,
+        decimal_places=0
+    )
+
+    refund_date = models.DateField()
+
+    notes = models.TextField(
+        blank=True,
+        null=True
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['refund_date', 'id']
+
+    def __str__(self):
+        return f"استلام من المذخر - {self.invoice.invoice_number} - {self.amount}"

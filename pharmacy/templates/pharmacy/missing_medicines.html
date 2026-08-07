@@ -83,7 +83,7 @@
 
   .stat-info h2 {
     margin: 0;
-    font-size: 22px;
+    font-size: 17px;
     font-weight: 700;
   }
 
@@ -130,7 +130,7 @@
     padding: 13px 24px;
     border-radius: var(--radius);
     font-weight: 800;
-    font-size: 20px;
+    font-size: 16px;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
@@ -176,7 +176,7 @@
     gap: 6px;
   }
 
-  .supplier-meta h3 { margin: 0; font-size: 25px; color: var(--text-dark); }
+  .supplier-meta h3 { margin: 0; font-size: 17px; color: var(--text-dark); }
   .supplier-meta span { font-size: 15px; color: var(--text-muted); }
 
   .supplier-metrics {
@@ -236,7 +236,7 @@
     width: 100%;
     border-collapse: collapse;
     margin-top: 15px;
-    font-size: 15px;
+    font-size: 13px;
   }
 
   .invoice-table th, .invoice-table td {
@@ -258,6 +258,7 @@
   }
   .badge-success { background: #d4edda; color: #155724; }
   .badge-warning { background: #fff3cd; color: #856404; }
+  .badge-info { background: #d1ecf1; color: #0c5460; }
 
   .action-btn {
     border: none; background: none; cursor: pointer; padding: 4px; font-size: 16px;
@@ -273,14 +274,18 @@
   .modal-box {
     background: white; width: 100%; max-width: 500px;
     border-radius: var(--radius); overflow: hidden;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
   }
   .modal-header {
     padding: 15px 20px; background: var(--primary); color: white;
     display: flex; justify-content: space-between;
+    flex-shrink: 0;
   }
   .modal-header h3 { margin: 0; font-size: 16px; }
   .modal-close { background: none; border: none; color: white; font-size: 20px; cursor: pointer; }
-  .modal-body { padding: 20px; }
+  .modal-body { padding: 20px; overflow-y: auto; flex: 1 1 auto; }
   .form-group { margin-bottom: 15px; }
   .form-group label { display: block; margin-bottom: 6px; font-size: 16px; font-weight: 600; }
   .form-control {
@@ -290,9 +295,38 @@
   .form-control:focus { border-color: var(--primary); }
   .modal-footer {
     padding: 15px 20px; background: #f9f9f9; display: flex; justify-content: flex-end; gap: 10px;
+    flex-shrink: 0;
   }
   .btn-secondary {
     background: #95a5a6; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;
+  }
+
+  /* Statement Modal (كشف الحساب) */
+  .statement-box {
+    max-width: 800px;
+  }
+  .statement-summary {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+  }
+  .statement-summary > div {
+    background: var(--bg-body);
+    border-radius: 8px;
+    padding: 12px 18px;
+    flex: 1;
+    min-width: 180px;
+    text-align: center;
+  }
+  .statement-summary span {
+    display: block;
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+  }
+  .statement-summary strong {
+    font-size: 18px;
   }
 </style>
 {% endblock extra_css %}
@@ -339,12 +373,17 @@
           <span>📞 {{ item.supplier.phone|default:"بدون رقم" }}</span>
           <!-- مساحة قابلة للتوسعة مستقبلاً (اسم المندوب، العنوان، الخ) -->
         </div>
-        <button class="action-btn trigger-modal" 
-                data-target="modal-edit-supplier" 
-                data-id="{{ item.supplier.id }}"
-                data-name="{{ item.supplier.name }}"
-                data-phone="{{ item.supplier.phone }}"
-                title="تعديل">✏️</button>
+        <div style="display:flex; gap:6px; align-items:flex-start;">
+          <button class="action-btn trigger-modal"
+                  data-target="modal-statement-{{ item.supplier.id }}"
+                  title="كشف الحساب">🧾</button>
+          <button class="action-btn trigger-modal" 
+                  data-target="modal-edit-supplier" 
+                  data-id="{{ item.supplier.id }}"
+                  data-name="{{ item.supplier.name }}"
+                  data-phone="{{ item.supplier.phone }}"
+                  title="تعديل">✏️</button>
+        </div>
       </div>
 
       <div class="supplier-metrics">
@@ -403,12 +442,20 @@
                   <td>{{ invoice.total_returned|intcomma }}</td>
                   <td>{{ invoice.net_amount|intcomma }}</td>
                   <td>{{ invoice.total_paid|intcomma }}</td>
-                  <td>{{ invoice.remaining_amount|intcomma }}</td>
+                  <td>
+                    {% if invoice.remaining_amount < 0 %}
+                      <strong style="color: var(--success, #28a745);">{{ invoice.remaining_amount|intcomma }}</strong>
+                    {% else %}
+                      {{ invoice.remaining_amount|intcomma }}
+                    {% endif %}
+                  </td>
                   <td>
                     {% if invoice.remaining_amount == 0 %}
                       <span class="badge badge-success">مدفوعة</span>
                     {% elif invoice.remaining_amount > 0 %}
                       <span class="badge badge-warning">مؤجلة</span>
+                    {% elif invoice.remaining_amount < 0 %}
+                      <span class="badge badge-info">المذخر مدين لنا</span>
                     {% endif %}
                   </td>
                   <td>
@@ -420,6 +467,15 @@
                             data-target="modal-return" 
                             data-invoice-id="{{ invoice.id }}" 
                             title="إضافة استرجاع">↩️</button>
+                    {% if invoice.remaining_amount < 0 %}
+                    <form method="POST" 
+                          action="/pharmacy/missing-medicines/settle-debt/{{ invoice.id }}/" 
+                          style="display:inline;"
+                          onsubmit="return confirm('هل استلمت المبلغ المستحق من المذخر لهذه الفاتورة؟ سيتم تصفير الرصيد.');">
+                      {% csrf_token %}
+                      <button type="submit" class="action-btn" title="استلام الدين من المذخر - تصفير الرصيد">🏦</button>
+                    </form>
+                    {% endif %}
                     <!-- روابط الحذف أو التعديل إذا كانت موجودة في الـ views لديك يتم وضعها هنا -->
                   </td>
                 </tr>
@@ -431,6 +487,88 @@
               </tbody>
             </table>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal: Statement (كشف الحساب) -->
+    <div class="modal-overlay" id="modal-statement-{{ item.supplier.id }}">
+      <div class="modal-box statement-box">
+        <div class="modal-header">
+          <h3>كشف حساب: {{ item.supplier.name }}</h3>
+          <button class="modal-close" data-dismiss="modal-statement-{{ item.supplier.id }}">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="statement-summary">
+            <div>
+              <span>إجمالي المشتريات</span>
+              <strong>{{ item.total_purchase|intcomma }}</strong>
+            </div>
+            <div>
+              <span>الرصيد الحالي (المتبقي)</span>
+              <strong style="color: {% if item.total_debt > 0 %}var(--danger){% else %}var(--success){% endif %};">
+                {{ item.total_debt|intcomma }}
+              </strong>
+            </div>
+          </div>
+
+          <div style="overflow-x: auto;">
+            <table class="invoice-table">
+              <thead>
+                <tr>
+                  <th>التاريخ</th>
+                  <th>البيان</th>
+                  <th>مدين (فاتورة)</th>
+                  <th>دائن - دفعة 💵</th>
+                  <th>دائن - استرجاع 📦</th>
+                  <th>مدين - استلام دين 🏦</th>
+                  <th>الرصيد بعد الحركة</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for entry in item.statement_entries %}
+                <tr>
+                  <td>{{ entry.date }}</td>
+                  <td>
+                    <span class="badge {% if entry.type == 'invoice' %}badge-warning{% elif entry.type == 'payment' %}badge-success{% elif entry.type == 'refund' %}badge-info{% else %}badge-info{% endif %}">
+                      {{ entry.type_label }}
+                    </span>
+                    {{ entry.label }}
+                    {% if entry.notes %}<br><small style="color: var(--text-muted);">{{ entry.notes }}</small>{% endif %}
+                  </td>
+                  <td>{% if entry.debit > 0 %}{{ entry.debit|intcomma }}{% else %}—{% endif %}</td>
+                  <td>{% if entry.credit_payment > 0 %}{{ entry.credit_payment|intcomma }}{% else %}—{% endif %}</td>
+                  <td>{% if entry.credit_return > 0 %}{{ entry.credit_return|intcomma }}{% else %}—{% endif %}</td>
+                  <td>{% if entry.debit_refund > 0 %}{{ entry.debit_refund|intcomma }}{% else %}—{% endif %}</td>
+                  <td>
+                    <strong style="{% if entry.balance < 0 %}color: var(--success, #28a745);{% endif %}">
+                      {{ entry.balance|intcomma }}
+                    </strong>
+                  </td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="7" style="text-align: center; padding: 20px;">لا توجد حركات مسجلة لهذا المذخر.</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+              {% if item.statement_entries %}
+              <tfoot>
+                <tr style="font-weight: bold; background: var(--bg-body);">
+                  <td colspan="2">الإجمالي</td>
+                  <td>{{ item.statement_total_debit|intcomma }}</td>
+                  <td>{{ item.statement_total_payment|intcomma }}</td>
+                  <td>{{ item.statement_total_return|intcomma }}</td>
+                  <td>{{ item.statement_total_refund|intcomma }}</td>
+                  <td>{{ item.total_debt|intcomma }}</td>
+                </tr>
+              </tfoot>
+              {% endif %}
+            </table>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" data-dismiss="modal-statement-{{ item.supplier.id }}">إغلاق</button>
         </div>
       </div>
     </div>
@@ -525,6 +663,31 @@
           <div class="form-group">
             <label>ملاحظات</label>
             <textarea name="notes" class="form-control" rows="2"></textarea>
+          </div>
+
+          <hr style="margin: 15px 0; border-color: var(--border-color, #ddd);">
+
+          <div class="form-group">
+            <label>حالة الدفع</label>
+            <div style="display:flex; gap:15px; flex-wrap:wrap;">
+              <label style="display:flex; align-items:center; gap:5px; font-weight:normal;">
+                <input type="radio" name="payment_type" value="none" class="invoice-payment-type" checked>
+                لم يُدفع شيء بعد
+              </label>
+              <label style="display:flex; align-items:center; gap:5px; font-weight:normal;">
+                <input type="radio" name="payment_type" value="paid" class="invoice-payment-type">
+                مدفوعة بالكامل الآن
+              </label>
+              <label style="display:flex; align-items:center; gap:5px; font-weight:normal;">
+                <input type="radio" name="payment_type" value="partial" class="invoice-payment-type">
+                دفعة أولى (جزئي)
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group" id="first_payment_group" style="display:none;">
+            <label>مبلغ الدفعة الأولى *</label>
+            <input type="number" step="0.01" name="first_payment" id="first_payment_input" class="form-control">
           </div>
         </div>
         <div class="modal-footer">
@@ -649,6 +812,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const openModal = (modalId) => document.getElementById(modalId)?.classList.add('active');
     const closeModal = (modalId) => document.getElementById(modalId)?.classList.remove('active');
 
+    // إظهار/إخفاء حقل "الدفعة الأولى" حسب حالة الدفع المختارة عند إضافة فاتورة
+    const firstPaymentGroup = document.getElementById('first_payment_group');
+    const firstPaymentInput = document.getElementById('first_payment_input');
+    document.querySelectorAll('.invoice-payment-type').forEach(radio => {
+        radio.addEventListener('change', function() {
+            if (this.value === 'partial') {
+                firstPaymentGroup.style.display = 'block';
+                firstPaymentInput.setAttribute('required', 'required');
+            } else {
+                firstPaymentGroup.style.display = 'none';
+                firstPaymentInput.removeAttribute('required');
+                firstPaymentInput.value = '';
+            }
+        });
+    });
+
     // Attach click events to all triggers
     document.querySelectorAll('.trigger-modal').forEach(trigger => {
         trigger.addEventListener('click', function() {
@@ -663,6 +842,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     `/pharmacy/missing-medicines/edit-supplier/${this.dataset.id}/`;
             } 
             else if (targetId === 'modal-add-invoice') {
+                document.getElementById('addInvoiceForm').reset();
+                firstPaymentGroup.style.display = 'none';
+                firstPaymentInput.removeAttribute('required');
                 document.getElementById('invoice_supplier_id').value = this.dataset.supplierId;
                 document.getElementById('addInvoiceForm').action =
                     `/pharmacy/missing-medicines/add-invoice/${this.dataset.supplierId}/`;
