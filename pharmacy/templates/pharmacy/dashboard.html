@@ -25,13 +25,13 @@
             position: relative;
         }
 
-        /* شارة علامة شركة تيرا للحلول البرمجية الأنيقة */
+       
         .brand-badge {
-            background-color: #e6f7f4; /* خلفية خضراء هادئة جداً متناسقة مع الهوية */
-            color: #1abc9c;
-            border: 1px solid #a3e4d7;
+            background-color: #f2f6f9; /* خلفية خضراء هادئة جداً متناسقة مع الهوية */
+            color: #1aa1bc;
+            border: 1px solid #a3c9e4;
             padding: 6px 14px;
-            border-radius: 50px;
+            border-radius: 5px;
             font-size: 20px;
             font-weight: bold;
             display: inline-flex;
@@ -165,15 +165,15 @@
 
     <div class="dashboard-section">
         
-        <!-- ترويسة الصفحة الاحترافية مع شارة المطورين الذكية -->
+        <!-- ترويسة الصفحة الاحترافية -->
         <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f1f2f6; padding-bottom: 15px; margin-bottom: 25px; flex-wrap: wrap; gap: 12px;">
             <h2 style="margin: 0; color: #2c3e50; display: flex; align-items: center; gap: 10px;">
                 <i class="bi bi-speedometer2" style="color: #1abc9c;"></i>
                 المؤشرات المباشرة للصيدلية اليوم
             </h2>
-            <!-- شارة علامة شركة تيرا للحلول البرمجية -->
+            <!-- الشارة المحدثة فقط بالداخل بالقيم المطلوبة -->
             <div class="brand-badge">
-                <i class=" "></i> مرحبا بك في الواجهة الرئيسية لإدارة الصيدلية
+                <i class="bi bi-hospital-fill"></i> {{ pharmacy_name }} | <i class="bi bi-calendar3"></i> {% now "Y/m/d" %}
             </div>
         </div>
 
@@ -215,7 +215,7 @@
             <div class="alert-box">
                 <h3 style="color: #e53e3e;">
                     <i class="bi bi-calendar-x-fill"></i> 
-                    أدوية منتهية الصلاحية (عدد: {{ expired_count }})
+                      تحذيرات الصلاحية
                 </h3>
                 <table class="alert-table">
                     <thead>
@@ -258,7 +258,7 @@
             <div class="alert-box" style="border-top-color: #dd6b20;">
                 <h3 style="color: #dd6b20;">
                     <i class="bi bi-graph-down"></i>  
-                    أدوية أوشكت على النفاذ (عدد: {{ low_stock_count }})
+                   تحذيرات الكمية
                 </h3>
                 <table class="alert-table">
                     <thead>

@@ -121,6 +121,7 @@
         .badge-broken { background-color: #faf5ff; color: #6b46c1; border: 1px dashed #d6bcfa; }
         .badge-spoiled { background-color: #fff5f5; color: #c53030; border: 1px dashed #feb2b2; }
         .badge-withdrawn { background-color: #edf2f7; color: #4a5568; }
+        .badge-correction { background-color: #ebfff4; color: #2f855a; border: 1px dashed #9ae6b4; }
         .badge-other { background-color: #ebf8ff; color: #2b6cb0; }
 
         /* 7. تنبيهات رسائل النظام المتطابقة */
@@ -204,12 +205,16 @@
                             <span style="font-size: 11px; color: #718096;">{{ item.medicine.scientific_name|default:"-" }}</span>
                         </td>
                         <td><strong style="color: #e53e3e;">{{ item.quantity_damaged }} قطعة</strong></td>
-                        <td>{{ item.medicine.buy_price|iqd }} </td>
+                        <td>{{ item.unit_cost|iqd }} </td>
                         <td>
                             <!-- 🛡️ الاستعانة بخاصية total_loss المباشرة والمحمية -->
-                            <strong style="color: #e53e3e;">
-                                {{ item.total_loss|iqd }} 
-                            </strong>
+                            {% if item.reason == 'quantity_correction' %}
+                                <span style="color: #a0aec0; font-style: italic; font-size: 12.5px;">لا تُحتسب كخسارة</span>
+                            {% else %}
+                                <strong style="color: #e53e3e;">
+                                    {{ item.total_loss|iqd }} 
+                                </strong>
+                            {% endif %}
                         </td>
                         <td>
                             {% if item.reason == 'expired' %}
@@ -220,6 +225,8 @@
                                 <span class="custom-badge badge-spoiled"><i class="bi bi-thermometer-sun"></i> سوء خزن</span>
                             {% elif item.reason == 'withdrawn' %}
                                 <span class="custom-badge badge-withdrawn"><i class="bi bi-slash-circle"></i> سحب وزاري</span>
+                            {% elif item.reason == 'quantity_correction' %}
+                                <span class="custom-badge badge-correction"><i class="bi bi-pencil"></i> تعديل كمية</span>
                             {% else %}
                                 <span class="custom-badge badge-other"><i class="bi bi-box"></i> أسباب أخرى</span>
                             {% endif %}

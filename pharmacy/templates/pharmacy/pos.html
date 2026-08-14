@@ -100,7 +100,7 @@
                 <div class="discount-box">
                     <div>
                         <label style="font-size: 11px; font-weight: bold; color: #7f8c8d; display: block; margin-bottom: 4px;">قيمة الخصم المطلوبة:</label>
-                        <input type="number" id="invoice_discount" name="discount_value" value="0" min="0" oninput="calculateInvoice()" placeholder="مثال: 500 أو 10">
+                        <input type="number" id="invoice_discount" name="discount_value" value="0" min="0" step="1" oninput="calculateInvoice()" placeholder="مثال: 500  ">
                     </div>
                     <div>
                         <label style="font-size: 11px; font-weight: bold; color: #7f8c8d; display: block; margin-bottom: 4px;">نوع الخصم:</label>
@@ -423,15 +423,28 @@
             document.getElementById('grand_total_display').textContent = grandTotal.toLocaleString('en-US') + ' د.ع';
         }
 
-        // 🎯 إصلاح الدالة لاستقبال الوسائط الثلاثة لعرض البيانات الصحيحة
         function confirmDirectRefund(invoiceId, invoiceNumber, finalAmount) {
-            const text = `هل أنت متأكد من رغبتك في إرجاع الفاتورة رقم #${invoiceNumber} بالكامل؟\n\nالصافي المدفوع المستحق للزبون: ${finalAmount} د.ع\n\nعند الضغط على موافق (OK)، ستتم إعادة الأدوية فوراً إلى مخزن الصيدلية.`;
-            
-            if (confirm(text)) {
-                let url = "{% url 'refund_sale' 0 %}".replace('0', invoiceId);
-                window.location.href = url;
-            }
-        }
+            const text = `هل أنت متأكد من إرجاع الفاتورة رقم #${invoiceNumber}؟\n\nالمبلغ المستحق للزبون: ${finalAmount} د.ع`;
+
+            if (!confirm(text)) return;
+
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = "{% url 'refund_sale' 0 %}".replace('0', invoiceId);
+
+            const csrfToken = document.querySelector(
+                '#pos_invoice_form input[name="csrfmiddlewaretoken"]'
+            ).value;
+
+            const csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = 'csrfmiddlewaretoken';
+            csrfInput.value = csrfToken;
+
+            form.appendChild(csrfInput);
+            document.body.appendChild(form);
+            form.submit();
+        } 
     </script>
 
     <script>

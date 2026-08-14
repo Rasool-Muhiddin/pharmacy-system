@@ -1,7 +1,9 @@
 import uuid
 import secrets
-from django.db import models
+from django.db import models, transaction
 from django.contrib.auth.models import User
+from django.core.validators import MinValueValidator
+from django.core.exceptions import ValidationError
 from django.utils import timezone
 def generate_desktop_license_code():
     """إنشاء رمز تفعيل آمن وفريد لنسخة سطح المكتب."""
@@ -13,6 +15,11 @@ def generate_desktop_license_code():
 class PharmacyBranch(models.Model):
     name = models.CharField(max_length=255, verbose_name="اسم الصيدلية")
     is_active = models.BooleanField(default=True, verbose_name="حالة الاشتراك")
+    invoice_sequence = models.PositiveBigIntegerField(
+        default=0,
+        editable=False,
+        verbose_name="آخر رقم فاتورة صادر",
+    )
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="تاريخ الاشتراك")
 
     def __str__(self):
@@ -54,9 +61,9 @@ class Medicine(models.Model):
     trade_name = models.CharField(max_length=200, verbose_name="الاسم التجاري")
     scientific_name = models.CharField(max_length=200, verbose_name="الاسم العلمي")
     category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default='tablet', verbose_name="نوع الدواء")
-    quantity = models.IntegerField(default=0, verbose_name="الكمية المتوفرة")
-    buy_price = models.IntegerField(default=0, verbose_name="سعر الشراء (د.ع)")
-    sell_price = models.IntegerField(default=0, verbose_name="سعر البيع (د.ع)")
+    quantity = models.IntegerField(default=0, validators=[MinValueValidator(0)], verbose_name="الكمية المتوفرة")
+    buy_price = models.IntegerField(default=0, validators=[MinValueValidator(0)], verbose_name="سعر الشراء (د.ع)")
+    sell_price = models.IntegerField(default=0, validators=[MinValueValidator(0)], verbose_name="سعر البيع (د.ع)")
     expiry_date = models.DateField(verbose_name="تاريخ انتهاء الصلاحية")
     shelf_location = models.CharField(max_length=50, blank=True, null=True, verbose_name="مكان الرف")
     is_damaged = models.BooleanField(default=False, verbose_name="هل الدواء تالف/معزول؟")
@@ -81,8 +88,8 @@ class Medicine(models.Model):
 class Sale(models.Model):
     pharmacy = models.ForeignKey(PharmacyBranch, on_delete=models.CASCADE, related_name='sales', null=True, blank=True, verbose_name="الصيدلية")
     medicine = models.ForeignKey('Medicine', on_delete=models.CASCADE, verbose_name="الدواء المباع")
-    quantity_sold = models.IntegerField(default=1, verbose_name="الكمية المباعة")
-    total_price = models.IntegerField(default=0, verbose_name="إجمالي سعر البيع")
+    quantity_sold = models.IntegerField(default=1, validators=[MinValueValidator(1)], verbose_name="الكمية المباعة")
+    total_price = models.IntegerField(default=0, validators=[MinValueValidator(0)], verbose_name="إجمالي سعر البيع")
     sold_at = models.DateTimeField(auto_now_add=True, verbose_name="وقت عملية البيع")
     is_refunded = models.BooleanField(default=False)
     cashier = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='sales', verbose_name="الكاشير")
@@ -99,11 +106,9 @@ class PharmacySupplier(models.Model):
     name = models.CharField(max_length=255, verbose_name="اسم المذخر / المكتب")
     phone = models.CharField(max_length=50, blank=True, null=True, verbose_name="رقم الهاتف")
     created_at = models.DateTimeField(auto_now_add=True)
-
+    
     class Meta:
         ordering = ['name']
-
-    class Meta:
         unique_together = ('pharmacy', 'name')
 
     def __str__(self):
@@ -117,34 +122,54 @@ class Invoice(models.Model):
     pharmacy = models.ForeignKey(PharmacyBranch, on_delete=models.CASCADE, related_name='invoices', null=True, blank=True)
     invoice_number = models.CharField(max_length=50, blank=True)
     cashier = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='invoices', verbose_name="الكاشير المسؤول")
-    total_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.0, verbose_name="المجموع قبل الخصم")
-    discount = models.DecimalField(max_digits=10, decimal_places=2, default=0.0, verbose_name="قيمة الخصم المالي")
-    final_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.0, verbose_name="الصافي المدفوع فعلياً")
+    total_amount = models.IntegerField(default=0, validators=[MinValueValidator(0)], verbose_name="المجموع قبل الخصم")
+    discount = models.IntegerField(default=0, validators=[MinValueValidator(0)], verbose_name="قيمة الخصم المالي")
+    final_amount = models.IntegerField(default=0, validators=[MinValueValidator(0)], verbose_name="الصافي المدفوع فعلياً")
     created_at = models.DateTimeField(auto_now_add=True)
     is_refunded = models.BooleanField(default=False)
 
     class Meta:
         unique_together = ('pharmacy', 'invoice_number')
 
+    def clean(self):
+        # 🛡️ الخصم لا يجب أن يتجاوز المجموع قبل الخصم
+        if self.discount and self.total_amount and self.discount > self.total_amount:
+            raise ValidationError({'discount': 'قيمة الخصم لا يمكن أن تتجاوز المجموع قبل الخصم.'})
+
     def save(self, *args, **kwargs):
         if not self.invoice_number:
-            try:
-                last_invoice = Invoice.objects.filter(pharmacy=self.pharmacy).order_by('id').last()
-                
-                if last_invoice and last_invoice.invoice_number:
-                    try:
-                        last_num = int(last_invoice.invoice_number.split('-')[1])
-                        next_num = last_num + 1
-                    except (ValueError, IndexError):
-                        next_num = Invoice.objects.filter(pharmacy=self.pharmacy).count() + 1
-                else:
-                    next_num = 1
-                    
-                self.invoice_number = f"INV-{next_num}"
-            except Exception:
-                # 🛡️ خطة طوارئ في حال حدث تضارب في التوليد لضمان عدم انهيار السيرفر أبداً
-                self.invoice_number = f"INV-{uuid.uuid4().hex[:6].upper()}"
-                
+            if self.pharmacy_id:
+                # قفل صف الصيدلية يجعل العداد متسلسلاً لكل صيدلية، حتى عند
+                # تنفيذ عمليتي بيع متزامنتين أو إنشاء فاتورة من مسار آخر.
+                with transaction.atomic():
+                    pharmacy = PharmacyBranch.objects.select_for_update().get(
+                        pk=self.pharmacy_id
+                    )
+
+                    # بعد تطبيق الـ migration سيكون العداد صفراً للفواتير
+                    # القديمة؛ نهيئه مرة واحدة من أرقام INV الرقمية الموجودة.
+                    if pharmacy.invoice_sequence == 0:
+                        existing_numbers = Invoice.objects.filter(
+                            pharmacy_id=pharmacy.pk
+                        ).values_list('invoice_number', flat=True)
+                        numeric_numbers = (
+                            int(number[4:])
+                            for number in existing_numbers
+                            if number and number.startswith('INV-')
+                            and number[4:].isdigit()
+                        )
+                        pharmacy.invoice_sequence = max(numeric_numbers, default=0)
+
+                    pharmacy.invoice_sequence += 1
+                    pharmacy.save(update_fields=['invoice_sequence'])
+                    self.invoice_number = f"INV-{pharmacy.invoice_sequence}"
+
+                    return super().save(*args, **kwargs)
+
+            # هذا المسار مخصص فقط للفواتير الإدارية القديمة التي لا ترتبط
+            # بصيدلية، ولا يدخل في تسلسل فواتير نقاط البيع.
+            self.invoice_number = f"INV-{uuid.uuid4().hex[:6].upper()}"
+
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -157,9 +182,9 @@ class Invoice(models.Model):
 class InvoiceItem(models.Model):
     invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE, related_name='items')
     medicine = models.ForeignKey('Medicine', on_delete=models.CASCADE)
-    quantity = models.IntegerField(default=1)
-    unit_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
-    total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
+    quantity = models.IntegerField(default=1, validators=[MinValueValidator(1)])
+    unit_price = models.IntegerField(default=0, validators=[MinValueValidator(0)])
+    total_price = models.IntegerField(default=0, validators=[MinValueValidator(0)])
 
     def __str__(self):
         med_name = self.medicine.trade_name if self.medicine else "دواء غير محدد"
@@ -175,21 +200,38 @@ class DamagedMedicine(models.Model):
         ('broken', '💔 كسر وضرر'),
         ('spoiled', '☀️ سوء خزن'),
         ('withdrawn', '🚫 سحب وزاري'),
+        ('quantity_correction', '✏️ تعديل كمية (إضافة خاطئة)'),
         ('other', '📦 أسباب أخرى'),
     ]
 
     pharmacy = models.ForeignKey(PharmacyBranch, on_delete=models.CASCADE, related_name='damaged_medicines', verbose_name="الصيدلية")
     medicine = models.ForeignKey(Medicine, on_delete=models.CASCADE, related_name='damaged_records', verbose_name="الدواء")
-    quantity_damaged = models.IntegerField(default=1, verbose_name="الكمية التالفة")
+    quantity_damaged = models.IntegerField(default=1, validators=[MinValueValidator(1)], verbose_name="الكمية التالفة")
+    unit_cost = models.IntegerField(
+        default=0,
+        validators=[MinValueValidator(0)],
+        editable=False,
+        verbose_name="سعر شراء الوحدة وقت الإتلاف",
+    )
     reason = models.CharField(max_length=20, choices=DAMAGE_REASONS, default='expired', verbose_name="سبب التلف")
     notes = models.TextField(blank=True, null=True, verbose_name="ملاحظات إضافية")
     damaged_at = models.DateTimeField(auto_now_add=True, verbose_name="تاريخ ووقت الإتلاف")
 
     @property
     def total_loss(self):
-        if self.medicine and self.medicine.buy_price:
-            return self.quantity_damaged * self.medicine.buy_price
-        return 0
+        # 🛡️ عمليات "تعديل الكمية" ليست خسارة فعلية (كمية أُضيفت بالخطأ للمخزون)
+        # لذا لا تُحتسب ضمن مجموع الخسائر المالية.
+        if self.reason == 'quantity_correction':
+            return 0
+        return self.quantity_damaged * self.unit_cost
+
+    def save(self, *args, **kwargs):
+        # يحمي السجلات التي تُنشأ من Admin أو أي مسار آخر غير شاشة الإتلاف.
+        if self._state.adding and not self.unit_cost and self.medicine_id:
+            self.unit_cost = Medicine.objects.only('buy_price').get(
+                pk=self.medicine_id
+            ).buy_price
+        super().save(*args, **kwargs)
 
     def __str__(self):
         med_name = self.medicine.trade_name if self.medicine else "دواء غير محدد"
@@ -250,7 +292,7 @@ class Payment(models.Model):
 
     pharmacy = models.ForeignKey(PharmacyBranch, on_delete=models.CASCADE, related_name='payments', verbose_name="الصيدلية")
     subscription = models.ForeignKey(Subscription, on_delete=models.SET_NULL, null=True, blank=True, related_name='payments', verbose_name="الاشتراك المرتبط")
-    amount = models.DecimalField(max_digits=12, decimal_places=2, verbose_name="المبلغ المدفوع")
+    amount = models.IntegerField(validators=[MinValueValidator(1)], verbose_name="المبلغ المدفوع")
     currency = models.CharField(max_length=10, default='IQD', verbose_name="العملة")
     payment_method = models.CharField(max_length=20, choices=PAYMENT_METHODS, default='zain_cash', verbose_name="طريقة الدفع")
     transaction_id = models.CharField(max_length=100, blank=True, null=True, verbose_name="رقم العملية / التوثيق")
@@ -420,10 +462,7 @@ class SupplierInvoice(models.Model):
 
     invoice_date = models.DateField()
 
-    original_amount = models.DecimalField(
-        max_digits=12,
-        decimal_places=0
-    )
+    original_amount = models.IntegerField(validators=[MinValueValidator(0)])
 
     status = models.CharField(
         max_length=10,
@@ -486,7 +525,13 @@ class SupplierInvoice(models.Model):
     @property
     def is_paid(self):
         return self.remaining_amount == 0
-    #--------
+
+    def update_status(self):
+        """يزامن الحقل المخزن مع الرصيد الفعلي للفواتير وحركاتها."""
+        new_status = 'paid' if self.remaining_amount == 0 else 'partial'
+        if self.status != new_status:
+            self.status = new_status
+            self.save(update_fields=['status'])
 
     def __str__(self):
         return f"{self.supplier.name} - {self.invoice_number}"
@@ -501,10 +546,7 @@ class SupplierPayment(models.Model):
         related_name='payments'
     )
 
-    amount = models.DecimalField(
-        max_digits=12,
-        decimal_places=0
-    )
+    amount = models.IntegerField(validators=[MinValueValidator(1)])
 
     payment_date = models.DateField()
 
@@ -531,10 +573,7 @@ class SupplierReturn(models.Model):
         related_name='returns'
     )
 
-    amount = models.DecimalField(
-        max_digits=12,
-        decimal_places=0
-    )
+    amount = models.IntegerField(validators=[MinValueValidator(1)])
 
     return_date = models.DateField()
 
@@ -567,10 +606,7 @@ class SupplierRefund(models.Model):
         related_name='refunds'
     )
 
-    amount = models.DecimalField(
-        max_digits=12,
-        decimal_places=0
-    )
+    amount = models.IntegerField(validators=[MinValueValidator(1)])
 
     refund_date = models.DateField()
 

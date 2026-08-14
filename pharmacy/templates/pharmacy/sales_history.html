@@ -246,7 +246,7 @@
         <div class="search-container">
             <form method="GET" action="{% url 'sales_history' %}" style="display: flex; flex: 1; gap: 15px; margin: 0;">
                 <input type="text" name="search_query" class="search-input" 
-                    placeholder="🔍 مرر الباركود، أو ابحث برقم الفاتورة، اسم الدواء، أو اسم الكاشير..." 
+                    placeholder="🔍 مرر الباركود، أو ابحث برقم الفاتورة، اسم الدواء، أو اسم البائع..." 
                     value="{{ search_query }}" autofocus autocomplete="off">
                 <button type="submit" class="btn-search">🔍 ابحث الآن</button>
             </form>
@@ -266,7 +266,7 @@
                     <thead>
                         <tr>
                             <th>رقم الفاتورة</th>
-                            <th>الكاشير المسؤول</th>
+                            <th>البائع </th>
                             <th>تاريخ ووقت البيع</th>
                             <th>حالة الفاتورة</th>
                             <th>الإجمالي (قبل الخصم)</th>
@@ -297,7 +297,7 @@
                             <!-- الإجمالي قبل الخصم -->
                             <td>
                                 {% if invoice.is_refunded %}
-                                    <span style="color: #a0aec0; text-decoration: line-through;">{{ invoice.total_amount|iqd }} د.ع</span>
+                                    <span style="color: #a0aec0; text-decoration: line-through;">{{ invoice.total_amount|iqd }} </span>
                                 {% else %}
                                     <span style="color: #718096;">{{ invoice.total_amount|iqd }} </span>
                                 {% endif %}
@@ -305,7 +305,7 @@
                             <!-- قيمة الخصم المطبق -->
                             <td style="color: #e53e3e; font-weight: bold;">
                                 {% if invoice.discount > 0 %}
-                                    -{{ invoice.discount }} د.ع
+                                    -{{ invoice.discount|iqd }}
                                 {% else %}
                                     0 د.ع
                                 {% endif %}
@@ -403,7 +403,7 @@
             <table class="modal-details-table" style="margin-bottom: 25px;">
                 <thead>
                     <tr style="background-color: #f8fafc;">
-                        <th style="text-align: right;">اسم الكاشير</th>
+                        <th style="text-align: right;">اسم البائع</th>
                         <th style="text-align: center;">عدد فواتير الشفت</th>
                         <th style="text-align: left;">إجمالي مبيعات الصندوق الصافية</th>
                     </tr>
@@ -416,7 +416,7 @@
                             <span class="custom-badge badge-date" style="background-color: #e3fafc; color: #0b7285;">{{ cashier.bill_count }} فاتورة</span>
                         </td>
                         <td style="text-align: left;">
-                            <strong style="color: #2ecc71; font-size: 15px;">{{ cashier.total_sales|default:0 }} د.ع</strong>
+                            <strong style="color: #2ecc71; font-size: 15px;">{{ cashier.total_sales|iqd }}</strong>
                         </td>
                     </tr>
                     {% empty %}
@@ -434,16 +434,16 @@
                 {% for cashier in cashier_summary %}
                     <div style="margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px dashed #cbd5e0;">
                         <h5 style="color: #34495e; margin-top: 5px; margin-bottom: 10px; background: #eaeded; padding: 6px 12px; border-radius: 4px;">
-                            الموظف: <strong>{{ cashier.username }}</strong>
+                            البائع: <strong>{{ cashier.username }}</strong>
                         </h5>
                         <ul style="list-style: none; padding: 0; margin: 0;">
                             {% for inv in cashier.invoices_list %}
                                 <li class="flex-row-between" style="padding: 7px 8px; border-bottom: 1px solid #f1f2f6; font-size: 13px;">
-                                    <span>📄 الفاتورة <strong>{{ inv.invoice_number }}</strong> | الصافي الصادر: <strong style="color: #2ecc71;">{{ inv.final_amount|default:0 }} د.ع</strong></span>
+                                    <span>📄 الفاتورة <strong>{{ inv.invoice_number }}</strong> | الصافي الصادر: <strong style="color: #2ecc71;">{{ inv.final_amount|iqd }}</strong></span>
                                     <span class="custom-badge badge-time">{{ inv.created_at|date:"H:i" }}</span>
                                 </li>
                             {% empty %}
-                                <li style="color: #a0aec0; padding: 5px 8px; font-size: 13px; list-style: none;">لم يقم هذا الموظف بإصدار أي فواتير في شفت اليوم.</li>
+                                <li style="color: #a0aec0; padding: 5px 8px; font-size: 13px; list-style: none;">لم يقم هذا البائع بإصدار أي فواتير في شفت اليوم.</li>
                             {% endfor %}
                         </ul>
                     </div>
