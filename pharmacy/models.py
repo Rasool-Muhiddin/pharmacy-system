@@ -1,5 +1,5 @@
-import uuid
 import secrets
+import uuid
 from django.db import models, transaction
 from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator

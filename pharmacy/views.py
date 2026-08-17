@@ -21,6 +21,30 @@ from .iraqi_drugs import IRAQI_MEDICINES
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.db.models.functions import Coalesce
+from django_ratelimit.decorators import ratelimit
+
+
+# =======================================================
+# 🛡️ حماية Brute-Force: مفتاح تقييد مبني على حقل داخل جسم JSON
+# يُستخدم مع endpoints الـ API (desktop_login / desktop_activate)
+# التي لا تستقبل بيانات POST عادية بل JSON خام.
+# =======================================================
+def _ratelimit_key_from_json(field_name):
+    def _key(group, request):
+        try:
+            data = json.loads(request.body.decode('utf-8'))
+            return str(data.get(field_name, ''))[:150]
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            return ''
+    return _key
+
+
+def json_ratelimit_view(request, exception):
+    """رسالة JSON موحّدة عند تجاوز الحد على أي endpoint من الـ API."""
+    return JsonResponse(
+        {'ok': False, 'message': 'محاولات كثيرة جداً، حاول لاحقاً.'},
+        status=429,
+    )
 
 
 def log_action(request, action, model_name, obj, description, pharmacy=None, user=None):
@@ -1245,6 +1269,8 @@ def damaged_medicines_list(request):
 
 
 # تسجيل الدخول والخروج
+@ratelimit(key='ip', rate='15/m', method='POST', block=True)
+@ratelimit(key='post:username', rate='6/m', method='POST', block=True)
 def login_view(request):
     if request.method == 'POST':
         form = AuthenticationForm(request, data=request.POST)
@@ -1297,6 +1323,8 @@ def landing_page(request):
 # API تفعيل نسخة سطح المكتب
 # يستدعيه تطبيق Flutter مرة واحدة عند إدخال رمز التفعيل.
 # =======================================================
+@ratelimit(key='ip', rate='20/m', method='POST', block=True)
+@ratelimit(key=_ratelimit_key_from_json('activation_code'), rate='6/m', method='POST', block=True)
 @csrf_exempt
 @require_POST
 def desktop_activate(request):
@@ -1413,6 +1441,8 @@ def desktop_activate(request):
 # يستخدمه Flutter عند أول تسجيل دخول عبر الإنترنت،
 # ثم يمكنه حفظ بيانات التحقق للعمل دون اتصال لمدة 30 يومًا.
 # =======================================================
+@ratelimit(key='ip', rate='20/m', method='POST', block=True)
+@ratelimit(key=_ratelimit_key_from_json('username'), rate='6/m', method='POST', block=True)
 @csrf_exempt
 @require_POST
 def desktop_login(request):
