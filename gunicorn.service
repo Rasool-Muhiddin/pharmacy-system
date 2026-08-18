@@ -1,16 +1,28 @@
+# /etc/systemd/system/gunicorn.service
+#
+# بعد وضع هذا الملف:
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable gunicorn
+#   sudo systemctl start gunicorn
+#   sudo systemctl status gunicorn   # للتأكد من عدم وجود أخطاء
+
 [Unit]
-Description=gunicorn daemon for Django Project
+Description=gunicorn daemon for clinic_project (Django)
 After=network.target
 
 [Service]
 User=ubuntu
 Group=www-data
-WorkingDirectory=/var/www/myproject
-ExecStart=/var/www/myproject/venv/bin/gunicorn \
+WorkingDirectory=/var/www/clinic_project
+
+# يضمن إنشاء الـ socket بصلاحيات يقدر Nginx (www-data) يقرأها ويكتب فيها
+UMask=007
+
+ExecStart=/var/www/clinic_project/venv/bin/gunicorn \
           --access-logfile - \
           --workers 3 \
-          --bind unix:/var/www/myproject/gunicorn.sock \
-          myproject.wsgi:application
+          --bind unix:/var/www/clinic_project/gunicorn.sock \
+          clinic_project.wsgi:application
 
 Restart=always
 RestartSec=3

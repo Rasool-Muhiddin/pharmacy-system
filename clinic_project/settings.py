@@ -3,7 +3,7 @@ from pathlib import Path
 import dj_database_url
 from decouple import Csv, config
 from django.core.exceptions import ImproperlyConfigured
-
+import sentry_sdk
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -208,3 +208,13 @@ CACHES = {
         "OPTIONS": {"CLIENT_CLASS": "django_redis.client.DefaultClient"},
     }
 }
+
+SENTRY_DSN = config("SENTRY_DSN", default="")
+
+if SENTRY_DSN:
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        environment="production" if not DEBUG else "development",
+        traces_sample_rate=0.1,  # نسبة العينات لمراقبة الأداء، 10% كافية لحجمك
+        send_default_pii=False,  # مهم: لا ترسل بيانات شخصية (IP، هيدرز) تلقائيًا
+    )
