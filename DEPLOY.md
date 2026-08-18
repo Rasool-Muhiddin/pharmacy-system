@@ -4,7 +4,7 @@
 مع PostgreSQL محلي، Redis، Cloudflare (Full strict)، Sentry، ونسخ احتياطي تلقائي إلى R2.
 
 **الدومين المستخدم في هذا الدليل:** `tera-software1.com`
-**مسار المشروع المستخدم:** `/var/www/clinic_project`
+**مسار المشروع المستخدم:** `/var/www/pharmacy`
 **موديول WSGI:** `clinic_project.wsgi:application`
 
 عدّل هذي القيم في كل الأوامر أدناه لو غيّرتها.
@@ -65,9 +65,9 @@ GRANT ALL PRIVILEGES ON DATABASE clinic_db TO clinic_user;
 ## 4. استنساخ المشروع وإعداد البيئة الافتراضية
 
 ```bash
-sudo mkdir -p /var/www/clinic_project
-sudo chown $USER:$USER /var/www/clinic_project
-cd /var/www/clinic_project
+sudo mkdir -p /var/www/pharmacy
+sudo chown $USER:$USER /var/www/pharmacy
+cd /var/www/pharmacy
 
 git clone <رابط-مستودع-Git-الخاص-بك> .
 
@@ -152,7 +152,7 @@ sudo chmod 644 /etc/ssl/cloudflare/cert.pem
 
 ```bash
 sudo nano /etc/systemd/system/gunicorn.service
-# الصق محتوى ملف gunicorn.service الجاهز (تحقق من المسارات: /var/www/clinic_project)
+# الصق محتوى ملف gunicorn.service الجاهز (تحقق من المسارات: /var/www/pharmacy)
 ```
 
 ```bash
@@ -164,7 +164,7 @@ sudo systemctl status gunicorn
 
 تأكد من عدم وجود أخطاء، ومن وجود ملف الـ socket:
 ```bash
-ls -la /var/www/clinic_project/gunicorn.sock
+ls -la /var/www/pharmacy/gunicorn.sock
 ```
 
 ---
@@ -283,7 +283,7 @@ sudo journalctl -u gunicorn -f
 sudo tail -f /var/log/nginx/error.log
 
 # إعادة تشغيل بعد تحديث الكود
-cd /var/www/clinic_project
+cd /var/www/pharmacy
 source venv/bin/activate
 git pull
 pip install -r requirements.txt

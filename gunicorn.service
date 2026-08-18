@@ -13,15 +13,15 @@ After=network.target
 [Service]
 User=ubuntu
 Group=www-data
-WorkingDirectory=/var/www/clinic_project
+WorkingDirectory=/var/www/pharmacy
 
 # يضمن إنشاء الـ socket بصلاحيات يقدر Nginx (www-data) يقرأها ويكتب فيها
 UMask=007
 
-ExecStart=/var/www/clinic_project/venv/bin/gunicorn \
+ExecStart=/var/www/pharmacy/venv/bin/gunicorn \
           --access-logfile - \
           --workers 3 \
-          --bind unix:/var/www/clinic_project/gunicorn.sock \
+          --bind unix:/var/www/pharmacy/gunicorn.sock \
           clinic_project.wsgi:application
 
 Restart=always
