@@ -145,6 +145,7 @@ LOGOUT_REDIRECT_URL = "login"
 # فعّل Cloudflare SSL/TLS على Full (strict)، وليس Flexible.
 # لا تفتح Gunicorn للإنترنت؛ يكون الوصول إليه محليًا من Nginx فقط.
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+RATELIMIT_IP_META_KEY = "HTTP_X_FORWARDED_FOR"
 SECURE_SSL_REDIRECT = config(
     "SECURE_SSL_REDIRECT",
     default=not DEBUG,
