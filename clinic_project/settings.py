@@ -1,12 +1,14 @@
 from pathlib import Path
 
 import dj_database_url
-from decouple import Csv, config
-from django.core.exceptions import ImproperlyConfigured
-import sentry_sdk
+from pathlib import Path
+from decouple import Config, RepositoryEnv, Csv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-
+_env_file = BASE_DIR / ".env.local" if (BASE_DIR / ".env.local").exists() else BASE_DIR / ".env"
+config = Config(RepositoryEnv(str(_env_file)))
+from django.core.exceptions import ImproperlyConfigured
+import sentry_sdk
 # لا يملك المشروع قيمة افتراضية للمفتاح: يفشل التشغيل بدل العمل بمفتاح مكشوف.
 SECRET_KEY = config("SECRET_KEY")
 DEBUG = config("DEBUG", default=False, cast=bool)
@@ -201,15 +203,20 @@ LOGGING = {
     },
 }
 
-# settings.py — أضف هذا
-CACHES = {
-    "default": {
-        "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": config("REDIS_URL", default="redis://127.0.0.1:6379/1"),
-        "OPTIONS": {"CLIENT_CLASS": "django_redis.client.DefaultClient"},
+if config("USE_LOCAL_CACHE", default=False, cast=bool):
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        }
     }
-}
-
+else:
+    CACHES = {
+        "default": {
+            "BACKEND": "django_redis.cache.RedisCache",
+            "LOCATION": config("REDIS_URL", default="redis://127.0.0.1:6379/1"),
+            "OPTIONS": {"CLIENT_CLASS": "django_redis.client.DefaultClient"},
+        }
+    }
 SENTRY_DSN = config("SENTRY_DSN", default="")
 
 if SENTRY_DSN:

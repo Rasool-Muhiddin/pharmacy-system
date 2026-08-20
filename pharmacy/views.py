@@ -1,4 +1,8 @@
 import json
+from pathlib import Path
+BASE_DIR = Path(__file__).resolve().parent
+with open(BASE_DIR / "iraqi_drugs.json", "r", encoding="utf-8") as f:
+    IRAQI_MEDICINES = json.load(f)
 from django.shortcuts import render, redirect, get_object_or_404
 from decimal import Decimal
 from django.db.models import Count, Sum, F, Q
@@ -17,7 +21,6 @@ from .models import (
     DamagedMedicine, PharmacySupplier, DesktopLicense, DeviceActivation, UserProfile,
     SupplierInvoice,  SupplierPayment, SupplierReturn, SupplierRefund, AuditLog,
 )
-from .iraqi_drugs import IRAQI_MEDICINES
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.db.models.functions import Coalesce
