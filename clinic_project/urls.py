@@ -3,14 +3,13 @@ from django.contrib import admin
 from django.contrib.sitemaps.views import sitemap
 from django.http import HttpResponse
 from django.urls import include, path
-from django.views.decorators.http import require_GET
+from django.views.decorators.http import require_http_methods
 from django.views.generic import TemplateView
-
 from pharmacy import views as pharmacy_views
 from pharmacy.sitemaps import StaticViewSitemap
 
 
-@require_GET
+@require_http_methods(["GET", "HEAD"])
 def healthz(request):
     """فحص بسيط تستخدمه Hetzner أو Nginx للتأكد أن Django يعمل."""
     return HttpResponse("ok", content_type="text/plain")
