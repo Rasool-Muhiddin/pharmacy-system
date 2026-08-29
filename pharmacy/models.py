@@ -622,3 +622,21 @@ class SupplierRefund(models.Model):
 
     def __str__(self):
         return f"استلام من المذخر - {self.invoice.invoice_number} - {self.amount}"
+
+
+
+class DesktopAppVersion(models.Model):
+    """ يخزّن آخر إصدار متاح لتطبيق سطح المكتب.
+    يُحدَّث عبر admin عند رفع نسخة جديدة - لا حاجة لتعديل الكود """
+
+    version = models.CharField(max_length=20)  # مثال: "1.0.1"
+    download_url = models.URLField()           # رابط ملف installer.exe
+    release_notes = models.TextField(blank=True)
+    is_mandatory = models.BooleanField(default=False)  # تحديث إجباري؟
+    released_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-released_at']
+
+    def __str__(self):
+        return f"v{self.version}"

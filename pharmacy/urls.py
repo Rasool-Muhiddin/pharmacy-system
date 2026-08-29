@@ -22,6 +22,7 @@ urlpatterns = [
     path('login/', views.login_view, name='login'),
     path('api/desktop/activate/', views.desktop_activate, name='desktop_activate'),
     path('api/desktop/login/', views.desktop_login, name='desktop_login'),
+    path('api/desktop/latest-version/', views.desktop_latest_version, name='desktop_latest_version'),
     path('logout/', views.logout_view, name='logout'),
     path('damaged-medicines/', views.damaged_medicines_list, name='damaged_medicines'),
     path('', views.landing_page, name='landing_page'),

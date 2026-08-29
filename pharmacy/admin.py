@@ -3,7 +3,7 @@ from .models import (
     PharmacyBranch, UserProfile, Medicine, Sale,
     Invoice, InvoiceItem, PharmacySupplier,
     DamagedMedicine, Subscription, Payment, AuditLog,
-    DesktopLicense, DeviceActivation,
+    DesktopLicense, DeviceActivation, DesktopAppVersion,
 )
 
 # =======================================================
@@ -232,3 +232,7 @@ class DeviceActivationAdmin(admin.ModelAdmin):
     @admin.display(description='معرف الجهاز')
     def short_fingerprint(self, obj):
         return obj.device_fingerprint[:20]    
+
+@admin.register(DesktopAppVersion)
+class DesktopAppVersionAdmin(admin.ModelAdmin):
+    list_display = ('version', 'is_mandatory', 'released_at')    

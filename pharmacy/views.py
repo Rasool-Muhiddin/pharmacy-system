@@ -19,7 +19,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from .models import (
     Medicine, Sale, Invoice, InvoiceItem,
     DamagedMedicine, PharmacySupplier, DesktopLicense, DeviceActivation, UserProfile,
-    SupplierInvoice,  SupplierPayment, SupplierReturn, SupplierRefund, AuditLog,
+    SupplierInvoice,  SupplierPayment, SupplierReturn, SupplierRefund, AuditLog, DesktopAppVersion,
 )
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
@@ -1572,6 +1572,31 @@ def desktop_login(request):
                 ),
                 'max_devices': desktop_license.max_devices,
             },
+        },
+        status=200,
+    )
+
+# =======================================================
+# API فحص آخر إصدار متاح لتطبيق سطح المكتب
+# يستخدمه Flutter عند فتح التطبيق للتحقق من وجود تحديث
+# =======================================================
+@ratelimit(key='ip', rate='30/m', method='GET', block=True)
+def desktop_latest_version(request):
+    latest = DesktopAppVersion.objects.order_by('-released_at').first()
+
+    if latest is None:
+        return JsonResponse(
+            {'ok': False, 'message': 'لا توجد بيانات إصدار متاحة.'},
+            status=404,
+        )
+
+    return JsonResponse(
+        {
+            'ok': True,
+            'version': latest.version,
+            'download_url': latest.download_url,
+            'release_notes': latest.release_notes,
+            'is_mandatory': latest.is_mandatory,
         },
         status=200,
     )
