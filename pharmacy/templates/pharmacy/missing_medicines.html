@@ -22,7 +22,6 @@
 
   .suppliers-wrapper {
     direction: rtl;
-    font-family: system-ui, -apple-system, sans-serif;
     color: var(--text-dark);
     padding: 18px;
     font-size: 16px;
@@ -176,8 +175,8 @@
     gap: 6px;
   }
 
-  .supplier-meta h3 { margin: 0; font-size: px; color: var(--text-dark); }
-  .supplier-meta span { font-size: 15px; color: var(--text-muted); }
+  .supplier-meta h3 { margin: 0; font-size: 17px; color: var(--text-dark); }
+  .supplier-meta span { font-size: 13px; color: var(--text-muted); }
 
   .supplier-metrics {
     padding: 20px;
@@ -194,8 +193,8 @@
     text-align: center;
   }
 
-  .metric-box span { display: block; font-size: 15px; color: var(--text-muted); margin-bottom: 5px; }
-  .metric-box strong { font-size: 19px; }
+  .metric-box span { display: block; font-size: 13px; color: var(--text-muted); margin-bottom: 5px; }
+  .metric-box strong { font-size: 17px; }
 
   .supplier-actions {
     padding: 12px 20px;
@@ -236,7 +235,7 @@
     width: 100%;
     border-collapse: collapse;
     margin-top: 15px;
-    font-size: 15px;
+    font-size: 13px;
   }
 
   .invoice-table th, .invoice-table td {
@@ -262,6 +261,23 @@
 
   .action-btn {
     border: none; background: none; cursor: pointer; padding: 4px; font-size: 16px;
+  }
+
+  .action-btn.btn-text {
+    font-size: 13px;
+    font-weight: 700;
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-body);
+    color: var(--text-dark);
+    white-space: nowrap;
+    transition: .2s;
+  }
+  .action-btn.btn-text:hover {
+    background: var(--primary-light);
+    border-color: var(--primary);
+    color: var(--primary-dark);
   }
 
   /* Modals */
@@ -371,18 +387,17 @@
         <div class="supplier-meta">
           <h3>{{ item.supplier.name }}</h3>
           <span>📞 {{ item.supplier.phone|default:"بدون رقم" }}</span>
-          <!-- مساحة قابلة للتوسعة مستقبلاً (اسم المندوب، العنوان، الخ) -->
         </div>
         <div style="display:flex; gap:6px; align-items:flex-start;">
-          <button class="action-btn trigger-modal"
+          <button class="action-btn btn-text trigger-modal"
                   data-target="modal-statement-{{ item.supplier.id }}"
-                  title="كشف الحساب">🧾</button>
-          <button class="action-btn trigger-modal" 
+                  title="كشف الحساب">كشف الحساب</button>
+          <button class="action-btn btn-text trigger-modal" 
                   data-target="modal-edit-supplier" 
                   data-id="{{ item.supplier.id }}"
                   data-name="{{ item.supplier.name }}"
                   data-phone="{{ item.supplier.phone }}"
-                  title="تعديل">✏️</button>
+                  title="تعديل">تعديل</button>
         </div>
       </div>
 
@@ -476,7 +491,6 @@
                       <button type="submit" class="action-btn" title="استلام الدين من المذخر - تصفير الرصيد">🏦</button>
                     </form>
                     {% endif %}
-                    <!-- روابط الحذف أو التعديل إذا كانت موجودة في الـ views لديك يتم وضعها هنا -->
                   </td>
                 </tr>
                 {% empty %}
@@ -519,10 +533,10 @@
                   <th>التاريخ</th>
                   <th>البيان</th>
                   <th>مدين (فاتورة)</th>
-                  <th>دائن - دفعة 💵</th>
-                  <th>دائن - استرجاع 📦</th>
-                  <th>مدين - استلام دين 🏦</th>
-                  <th>الرصيد بعد الحركة</th>
+                  <th>  دفعة 💵</th>
+                  <th>  استرجاع 📦</th>
+                  <th> استلام دين 🏦</th>
+                  <th>الرصيد</th>
                 </tr>
               </thead>
               <tbody>
@@ -530,9 +544,6 @@
                 <tr>
                   <td>{{ entry.date }}</td>
                   <td>
-                    <span class="badge {% if entry.type == 'invoice' %}badge-warning{% elif entry.type == 'payment' %}badge-success{% elif entry.type == 'refund' %}badge-info{% else %}badge-info{% endif %}">
-                      {{ entry.type_label }}
-                    </span>
                     {{ entry.label }}
                     {% if entry.notes %}<br><small style="color: var(--text-muted);">{{ entry.notes }}</small>{% endif %}
                   </td>
@@ -578,7 +589,7 @@
 </div>
 
 <!-- Modals -->
-  
+
   <!-- Modal: Add Supplier -->
   <div class="modal-overlay" id="modal-add-supplier">
     <div class="modal-box">
@@ -636,7 +647,7 @@
     </div>
   </div>
 
-  <!-- Modal: Add Invoice -->
+  <!-- Modal: Add Invoice (معدّل: 3 حقول فقط والتاريخ تلقائي) -->
   <div class="modal-overlay" id="modal-add-invoice">
     <div class="modal-box">
       <div class="modal-header">
@@ -653,41 +664,12 @@
             <input type="text" name="invoice_number" class="form-control" required>
           </div>
           <div class="form-group">
-            <label>تاريخ الفاتورة</label>
-            <input type="date" name="invoice_date" class="form-control set-today" required>
-          </div>
-          <div class="form-group">
-            <label>المبلغ الأصلي للفاتورة *</label>
+            <label>مبلغ الفاتورة الأصلي *</label>
             <input type="number" step="0.01" name="original_amount" class="form-control" required>
           </div>
           <div class="form-group">
-            <label>ملاحظات</label>
-            <textarea name="notes" class="form-control" rows="2"></textarea>
-          </div>
-
-          <hr style="margin: 15px 0; border-color: var(--border-color, #ddd);">
-
-          <div class="form-group">
-            <label>حالة الدفع</label>
-            <div style="display:flex; gap:15px; flex-wrap:wrap;">
-              <label style="display:flex; align-items:center; gap:5px; font-weight:normal;">
-                <input type="radio" name="payment_type" value="none" class="invoice-payment-type" checked>
-                لم يُدفع شيء بعد
-              </label>
-              <label style="display:flex; align-items:center; gap:5px; font-weight:normal;">
-                <input type="radio" name="payment_type" value="paid" class="invoice-payment-type">
-                مدفوعة بالكامل الآن
-              </label>
-              <label style="display:flex; align-items:center; gap:5px; font-weight:normal;">
-                <input type="radio" name="payment_type" value="partial" class="invoice-payment-type">
-                دفعة أولى (جزئي)
-              </label>
-            </div>
-          </div>
-
-          <div class="form-group" id="first_payment_group" style="display:none;">
-            <label>مبلغ الدفعة الأولى *</label>
-            <input type="number" step="0.01" name="first_payment" id="first_payment_input" class="form-control">
+            <label>المبلغ المدفوع</label>
+            <input type="number" step="0.01" name="first_payment" id="first_payment_input" class="form-control" placeholder="0 أو اتركه فارغاً إن كانت مؤجلة">
           </div>
         </div>
         <div class="modal-footer">
@@ -786,7 +768,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 details.style.maxHeight = null;
                 this.textContent = 'عرض التفاصيل والفواتير';
             } else {
-                // Close others (Optional)
                 document.querySelectorAll('.supplier-details').forEach(el => el.style.maxHeight = null);
                 document.querySelectorAll('.btn-toggle-details').forEach(btn => btn.textContent = 'عرض التفاصيل والفواتير');
                 
@@ -812,22 +793,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const openModal = (modalId) => document.getElementById(modalId)?.classList.add('active');
     const closeModal = (modalId) => document.getElementById(modalId)?.classList.remove('active');
 
-    // إظهار/إخفاء حقل "الدفعة الأولى" حسب حالة الدفع المختارة عند إضافة فاتورة
-    const firstPaymentGroup = document.getElementById('first_payment_group');
-    const firstPaymentInput = document.getElementById('first_payment_input');
-    document.querySelectorAll('.invoice-payment-type').forEach(radio => {
-        radio.addEventListener('change', function() {
-            if (this.value === 'partial') {
-                firstPaymentGroup.style.display = 'block';
-                firstPaymentInput.setAttribute('required', 'required');
-            } else {
-                firstPaymentGroup.style.display = 'none';
-                firstPaymentInput.removeAttribute('required');
-                firstPaymentInput.value = '';
-            }
-        });
-    });
-
     // Attach click events to all triggers
     document.querySelectorAll('.trigger-modal').forEach(trigger => {
         trigger.addEventListener('click', function() {
@@ -838,13 +803,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('edit_supplier_id').value = this.dataset.id;
                 document.getElementById('edit_supplier_name').value = this.dataset.name;
                 document.getElementById('edit_supplier_phone').value = this.dataset.phone;
-                 document.getElementById('editSupplierForm').action =
+                document.getElementById('editSupplierForm').action =
                     `/pharmacy/missing-medicines/edit-supplier/${this.dataset.id}/`;
             } 
             else if (targetId === 'modal-add-invoice') {
                 document.getElementById('addInvoiceForm').reset();
-                firstPaymentGroup.style.display = 'none';
-                firstPaymentInput.removeAttribute('required');
                 document.getElementById('invoice_supplier_id').value = this.dataset.supplierId;
                 document.getElementById('addInvoiceForm').action =
                     `/pharmacy/missing-medicines/add-invoice/${this.dataset.supplierId}/`;

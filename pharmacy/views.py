@@ -796,19 +796,22 @@ def add_invoice(request, supplier_id):
         pharmacy=user_profile.pharmacy
     )
 
+    # 1. قراءة الحقول الثلاثة فقط (مع دعم name="first_payment" من الـ HTML)
     invoice_number = request.POST.get("invoice_number", "").strip()
-    invoice_date = request.POST.get("invoice_date") or timezone.now().date()
     original_amount_raw = request.POST.get("original_amount", "0").strip()
-    payment_type = request.POST.get("payment_type")
-    notes = request.POST.get("notes", "").strip()
-    first_payment_raw = request.POST.get("first_payment", "0").strip()
+    paid_amount_raw = (request.POST.get("first_payment") or request.POST.get("paid_amount", "0")).strip()
 
+    # 2. التاريخ يُسجّل تلقائياً بلحظة الحفظ
+    invoice_date = timezone.now().date()
+
+    # 3. التحقق من رقم الفاتورة
     if not invoice_number:
         messages.error(request, "رقم الفاتورة مطلوب.")
         return redirect("missing_medicines")
 
+    # 4. التحقق من مبلغ الفاتورة الأصلي
     try:
-        original_amount = int(original_amount_raw)
+        original_amount = float(original_amount_raw)
     except (TypeError, ValueError):
         messages.error(request, "مبلغ الفاتورة غير صحيح.")
         return redirect("missing_medicines")
@@ -817,21 +820,22 @@ def add_invoice(request, supplier_id):
         messages.error(request, "مبلغ الفاتورة يجب أن يكون أكبر من الصفر.")
         return redirect("missing_medicines")
 
-    if payment_type not in ('none', 'paid', 'partial'):
-        messages.error(request, "حالة الدفع غير صالحة.")
+    # 5. التحقق من المبلغ المدفوع
+    paid_amount = 0.0
+    if paid_amount_raw:
+        try:
+            paid_amount = float(paid_amount_raw)
+        except (TypeError, ValueError):
+            messages.error(request, "المبلغ المدفوع غير صحيح.")
+            return redirect("missing_medicines")
+
+    if paid_amount < 0:
+        messages.error(request, "المبلغ المدفوع لا يمكن أن يكون بالسالب.")
         return redirect("missing_medicines")
 
-    first_payment = 0
-    if payment_type == 'partial':
-        try:
-            first_payment = int(first_payment_raw)
-        except (TypeError, ValueError):
-            messages.error(request, "مبلغ الدفعة الأولى غير صحيح.")
-            return redirect("missing_medicines")
-
-        if first_payment <= 0 or first_payment >= original_amount:
-            messages.error(request, "الدفعة الأولى يجب أن تكون أكبر من الصفر وأقل من مبلغ الفاتورة.")
-            return redirect("missing_medicines")
+    if paid_amount > original_amount:
+        messages.error(request, "المبلغ المدفوع لا يمكن أن يكون أكبر من المبلغ الأصلي للفاتورة.")
+        return redirect("missing_medicines")
 
     with transaction.atomic():
         supplier = get_object_or_404(
@@ -847,30 +851,26 @@ def add_invoice(request, supplier_id):
             messages.warning(request, "رقم الفاتورة مستخدم مسبقاً لهذا المذخر.")
             return redirect("missing_medicines")
 
+        # إنشاء الفاتورة
         invoice = SupplierInvoice.objects.create(
             supplier=supplier,
             invoice_number=invoice_number,
             invoice_date=invoice_date,
             original_amount=original_amount,
-            status="partial",
-            notes=notes,
+            notes="",
         )
 
-        if payment_type == "paid":
+        # 6. إن كان هناك مبلغ مدفوع (أكبر من 0)، تُسجّل حركة دفع
+        if paid_amount > 0:
+            payment_note = "تم الدفع بالكامل عند إنشاء الفاتورة." if paid_amount == original_amount else "الدفعة الأولى عند إنشاء الفاتورة."
             SupplierPayment.objects.create(
                 invoice=invoice,
-                amount=invoice.original_amount,
+                amount=paid_amount,
                 payment_date=invoice.invoice_date,
-                notes="تم الدفع بالكامل عند إنشاء الفاتورة."
-            )
-        elif payment_type == "partial":
-            SupplierPayment.objects.create(
-                invoice=invoice,
-                amount=first_payment,
-                payment_date=invoice.invoice_date,
-                notes="الدفعة الأولى."
+                notes=payment_note
             )
 
+        # تحديث حالة الفاتورة تلقائياً بناءً على المدفوعات
         invoice.update_status()
 
     log_action(
@@ -879,8 +879,6 @@ def add_invoice(request, supplier_id):
     )
     messages.success(request, "تمت إضافة الفاتورة بنجاح.")
     return redirect("missing_medicines")
-
-
 # إضافة دفعة مالية لفاتورة
 @login_required
 def add_payment(request, invoice_id):

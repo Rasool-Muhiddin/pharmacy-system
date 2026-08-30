@@ -4973,5 +4973,1797 @@
     "trade_name": "Al-Masia Omeprazole 20mg Capsule",
     "scientific_name": "Omeprazole",
     "category": "tablet"
+  },
+  {
+    "trade_name": "Ketorolac Pioneer 30mg/1ml Ampoule",
+    "scientific_name": "Ketorolac",
+    "category": "injection"
+  },
+  {
+    "trade_name": "Naproxen Pioneer 500mg",
+    "scientific_name": "Naproxen",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Piroxicam Pioneer 20mg",
+    "scientific_name": "Piroxicam",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Difene 75mg/3ml Ampoule",
+    "scientific_name": "Diclofenac Sodium",
+    "category": "injection"
+  },
+  {
+    "trade_name": "Sulperazon 1g Vial",
+    "scientific_name": "Cefoperazone + Sulbactam",
+    "category": "injection"
+  },
+  {
+    "trade_name": "Meronem 1g Vial",
+    "scientific_name": "Meropenem",
+    "category": "injection"
+  },
+  {
+    "trade_name": "Klacid 500mg",
+    "scientific_name": "Clarithromycin",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Klacid Syrup 125mg/5ml",
+    "scientific_name": "Clarithromycin",
+    "category": "syrup"
+  },
+  {
+    "trade_name": "Cefuroxime Pioneer 500mg",
+    "scientific_name": "Cefuroxime",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Septrin Forte 960mg",
+    "scientific_name": "Sulfamethoxazole + Trimethoprim",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Septrin Syrup 240mg/5ml",
+    "scientific_name": "Sulfamethoxazole + Trimethoprim",
+    "category": "syrup"
+  },
+  {
+    "trade_name": "Gentamicin Pioneer 80mg/2ml Ampoule",
+    "scientific_name": "Gentamicin",
+    "category": "injection"
+  },
+  {
+    "trade_name": "Vancomycin Pioneer 500mg Vial",
+    "scientific_name": "Vancomycin",
+    "category": "injection"
+  },
+  {
+    "trade_name": "Tamiflu 75mg",
+    "scientific_name": "Oseltamivir",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Acyclovir Pioneer 400mg",
+    "scientific_name": "Acyclovir",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Cerazette Tablet",
+    "scientific_name": "Desogestrel",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Duphaston 10mg Tablet (Awamedica)",
+    "scientific_name": "Dydrogesterone",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Prednisolone Pioneer 5mg",
+    "scientific_name": "Prednisolone",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Dexamethasone Pioneer 4mg/1ml Ampoule",
+    "scientific_name": "Dexamethasone",
+    "category": "injection"
+  },
+  {
+    "trade_name": "Hydrocortisone Pioneer 100mg Vial",
+    "scientific_name": "Hydrocortisone Sodium Succinate",
+    "category": "injection"
+  },
+  {
+    "trade_name": "Digoxin Pioneer 0.25mg",
+    "scientific_name": "Digoxin",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Isoket 20mg",
+    "scientific_name": "Isosorbide Dinitrate",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Nitrocine 5mg/5ml Ampoule",
+    "scientific_name": "Glyceryl Trinitrate",
+    "category": "injection"
+  },
+  {
+    "trade_name": "Valsartan Pioneer 80mg",
+    "scientific_name": "Valsartan",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Losartan Pioneer 50mg",
+    "scientific_name": "Losartan Potassium",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Furosemide Pioneer 40mg/4ml Ampoule",
+    "scientific_name": "Furosemide",
+    "category": "injection"
+  },
+  {
+    "trade_name": "Gliclazide Pioneer 80mg",
+    "scientific_name": "Gliclazide",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Pioglitazone Pioneer 30mg",
+    "scientific_name": "Pioglitazone",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Novomix 30 FlexPen",
+    "scientific_name": "Insulin Aspart / Insulin Aspart Protamine",
+    "category": "injection"
+  },
+  {
+    "trade_name": "Actrapid HM 100 IU/ml Vial",
+    "scientific_name": "Insulin (Regular, Human)",
+    "category": "injection"
+  },
+  {
+    "trade_name": "Chlorpheniramine Pioneer 4mg",
+    "scientific_name": "Chlorpheniramine Maleate",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Rabeprazole Pioneer 20mg",
+    "scientific_name": "Rabeprazole",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Sucralfate Pioneer Syrup 1g/5ml",
+    "scientific_name": "Sucralfate",
+    "category": "syrup"
+  },
+  {
+    "trade_name": "Ursofalk 250mg",
+    "scientific_name": "Ursodeoxycholic Acid",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Primperan 10mg/2ml Ampoule",
+    "scientific_name": "Metoclopramide",
+    "category": "injection"
+  },
+  {
+    "trade_name": "Zofran 4mg/2ml Ampoule",
+    "scientific_name": "Ondansetron",
+    "category": "injection"
+  },
+  {
+    "trade_name": "Ondansetron Pioneer 8mg",
+    "scientific_name": "Ondansetron",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Iron Sucrose Pioneer 100mg/5ml Ampoule",
+    "scientific_name": "Iron Sucrose",
+    "category": "injection"
+  },
+  {
+    "trade_name": "Ferrous Sulfate Pioneer 200mg",
+    "scientific_name": "Ferrous Sulfate",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Magnesium Sulfate 50% Ampoule",
+    "scientific_name": "Magnesium Sulfate",
+    "category": "injection"
+  },
+  {
+    "trade_name": "Potassium Chloride Infusion 10%",
+    "scientific_name": "Potassium Chloride",
+    "category": "injection"
+  },
+  {
+    "trade_name": "Dextrose 5% 500ml Infusion",
+    "scientific_name": "Dextrose",
+    "category": "injection"
+  },
+  {
+    "trade_name": "Clobetasol Pioneer Cream 0.05%",
+    "scientific_name": "Clobetasol Propionate",
+    "category": "cream_ointment_gel"
+  },
+  {
+    "trade_name": "Mupirocin Pioneer Ointment 2%",
+    "scientific_name": "Mupirocin",
+    "category": "cream_ointment_gel"
+  },
+  {
+    "trade_name": "Benzyl Benzoate Lotion 25%",
+    "scientific_name": "Benzyl Benzoate",
+    "category": "cream_ointment_gel"
+  },
+  {
+    "trade_name": "Permethrin Cream 5%",
+    "scientific_name": "Permethrin",
+    "category": "cream_ointment_gel"
+  },
+  {
+    "trade_name": "Chloramphenicol Eye Drops 0.5%",
+    "scientific_name": "Chloramphenicol",
+    "category": "drops_eye_ear"
+  },
+  {
+    "trade_name": "Ciprofloxacin Eye Drops 0.3%",
+    "scientific_name": "Ciprofloxacin",
+    "category": "drops_eye_ear"
+  },
+  {
+    "trade_name": "Timolol Eye Drops 0.5%",
+    "scientific_name": "Timolol Maleate",
+    "category": "drops_eye_ear"
+  },
+  {
+    "trade_name": "Otocalm Ear Drops",
+    "scientific_name": "Choline Salicylate + Glycerin",
+    "category": "drops_eye_ear"
+  },
+  {
+    "trade_name": "Symbicort Turbuhaler 160/4.5mcg",
+    "scientific_name": "Budesonide + Formoterol",
+    "category": "inhaler_nebulizer"
+  },
+  {
+    "trade_name": "Pulmicort Respules 0.5mg/2ml",
+    "scientific_name": "Budesonide",
+    "category": "inhaler_nebulizer"
+  },
+  {
+    "trade_name": "Bricanyl Respules 5mg/2ml",
+    "scientific_name": "Terbutaline",
+    "category": "inhaler_nebulizer"
+  },
+  {
+    "trade_name": "Ambroxol Pioneer Syrup 30mg/5ml",
+    "scientific_name": "Ambroxol",
+    "category": "syrup"
+  },
+  {
+    "trade_name": "Bromhexine Pioneer Syrup 4mg/5ml",
+    "scientific_name": "Bromhexine",
+    "category": "syrup"
+  },
+  {
+    "trade_name": "Ranitidine Pioneer 150mg",
+    "scientific_name": "Ranitidine",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Levothyroxine Pioneer 75mcg",
+    "scientific_name": "Levothyroxine",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Feldene 20mg Capsule",
+    "scientific_name": "Piroxicam",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Cephalexin Pioneer 250mg",
+    "scientific_name": "Cephalexin",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Neomercazole 5mg Tablet (Awamedica)",
+    "scientific_name": "Carbimazole",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Cetirizine SDI 10mg",
+    "scientific_name": "Cetirizine",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Zyrtec Drops 10mg/ml",
+    "scientific_name": "Cetirizine",
+    "category": "drops_oral"
+  },
+  {
+    "trade_name": "Simvastatin SDI 20mg",
+    "scientific_name": "Simvastatin",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Atorvastatin SDI 20mg",
+    "scientific_name": "Atorvastatin",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Rosuvastatin SDI 10mg",
+    "scientific_name": "Rosuvastatin",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Fenofibrate Pioneer 200mg",
+    "scientific_name": "Fenofibrate",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Nebilet 5mg",
+    "scientific_name": "Nebivolol",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Carvedilol Pioneer 25mg",
+    "scientific_name": "Carvedilol",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Perindopril Pioneer 5mg",
+    "scientific_name": "Perindopril",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Captopril Pioneer 25mg",
+    "scientific_name": "Captopril",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Enalapril Pioneer 10mg",
+    "scientific_name": "Enalapril",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Trimetazidine Pioneer 20mg",
+    "scientific_name": "Trimetazidine",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Vastarel MR 35mg",
+    "scientific_name": "Trimetazidine",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Glucovance 500mg/5mg",
+    "scientific_name": "Metformin + Glibenclamide",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Glibenclamide Pioneer 5mg",
+    "scientific_name": "Glibenclamide",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Repaglinide Pioneer 1mg",
+    "scientific_name": "Repaglinide",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Insulatard 100 IU/ml Vial",
+    "scientific_name": "Insulin (NPH, Human)",
+    "category": "injection"
+  },
+  {
+    "trade_name": "Omeprazole SDI 40mg",
+    "scientific_name": "Omeprazole",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Domperidone Pioneer 10mg",
+    "scientific_name": "Domperidone",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Trimebutine Pioneer 200mg",
+    "scientific_name": "Trimebutine",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Mebeverine Pioneer 135mg",
+    "scientific_name": "Mebeverine",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "ORS Sachet (Oral Rehydration Salts)",
+    "scientific_name": "Oral Rehydration Salts",
+    "category": "powder_sachet"
+  },
+  {
+    "trade_name": "Movicol Sachet",
+    "scientific_name": "Macrogol (Polyethylene Glycol)",
+    "category": "powder_sachet"
+  },
+  {
+    "trade_name": "Espumisan Drops 100mg/ml",
+    "scientific_name": "Simethicone",
+    "category": "drops_oral"
+  },
+  {
+    "trade_name": "Colimix Drops",
+    "scientific_name": "Simethicone",
+    "category": "drops_oral"
+  },
+  {
+    "trade_name": "Nystatin Oral Suspension 100000 IU/ml",
+    "scientific_name": "Nystatin",
+    "category": "syrup"
+  },
+  {
+    "trade_name": "Nystatin Pioneer Vaginal Tablet",
+    "scientific_name": "Nystatin",
+    "category": "suppository"
+  },
+  {
+    "trade_name": "Clotrimazole Pioneer Vaginal Tablet 500mg",
+    "scientific_name": "Clotrimazole",
+    "category": "suppository"
+  },
+  {
+    "trade_name": "Metronidazole Vaginal Tablet 500mg",
+    "scientific_name": "Metronidazole",
+    "category": "suppository"
+  },
+  {
+    "trade_name": "Glycerin Suppository",
+    "scientific_name": "Glycerin",
+    "category": "suppository"
+  },
+  {
+    "trade_name": "Diclofenac Suppository 100mg",
+    "scientific_name": "Diclofenac Sodium",
+    "category": "suppository"
+  },
+  {
+    "trade_name": "Indomethacin Suppository 100mg",
+    "scientific_name": "Indomethacin",
+    "category": "suppository"
+  },
+  {
+    "trade_name": "Beclomethasone Nasal Spray 50mcg",
+    "scientific_name": "Beclomethasone",
+    "category": "drops_nasal"
+  },
+  {
+    "trade_name": "Otrivin Nasal Spray 0.1%",
+    "scientific_name": "Xylometazoline",
+    "category": "drops_nasal"
+  },
+  {
+    "trade_name": "Fluticasone Nasal Spray 50mcg",
+    "scientific_name": "Fluticasone Propionate",
+    "category": "drops_nasal"
+  },
+  {
+    "trade_name": "Sodium Chloride Nasal Drops 0.9%",
+    "scientific_name": "Sodium Chloride",
+    "category": "drops_nasal"
+  },
+  {
+    "trade_name": "Combodart 0.5mg/0.4mg",
+    "scientific_name": "Dutasteride + Tamsulosin",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Sildenafil Pioneer 100mg",
+    "scientific_name": "Sildenafil Citrate",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Tadalafil Pioneer 20mg",
+    "scientific_name": "Tadalafil",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Alfuzosin Pioneer 10mg",
+    "scientific_name": "Alfuzosin",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Betahistine Pioneer 24mg",
+    "scientific_name": "Betahistine",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Serc 16mg",
+    "scientific_name": "Betahistine",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Cinnarizine Pioneer 25mg",
+    "scientific_name": "Cinnarizine",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Risperidone Pioneer 2mg",
+    "scientific_name": "Risperidone",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Diazepam Pioneer 5mg",
+    "scientific_name": "Diazepam",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Amitriptyline Pioneer 25mg",
+    "scientific_name": "Amitriptyline",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Carbamazepine Pioneer 200mg",
+    "scientific_name": "Carbamazepine",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Phenytoin Pioneer 100mg",
+    "scientific_name": "Phenytoin",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Myonal 50mg",
+    "scientific_name": "Eperisone",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Alprazolam Pioneer 0.5mg",
+    "scientific_name": "Alprazolam",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Clonazepam Pioneer 2mg",
+    "scientific_name": "Clonazepam",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Rivotril 2mg",
+    "scientific_name": "Clonazepam",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Zolpidem Pioneer 10mg",
+    "scientific_name": "Zolpidem",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Stilnox 10mg",
+    "scientific_name": "Zolpidem",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Olanzapine Pioneer 10mg",
+    "scientific_name": "Olanzapine",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Quetiapine Pioneer 100mg",
+    "scientific_name": "Quetiapine",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Haloperidol Pioneer 5mg",
+    "scientific_name": "Haloperidol",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Haloperidol Decanoate 50mg/ml Ampoule",
+    "scientific_name": "Haloperidol Decanoate",
+    "category": "injection"
+  },
+  {
+    "trade_name": "Lithium Carbonate Pioneer 400mg",
+    "scientific_name": "Lithium Carbonate",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Chlorpromazine Pioneer 100mg",
+    "scientific_name": "Chlorpromazine",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Trihexyphenidyl Pioneer 2mg",
+    "scientific_name": "Trihexyphenidyl",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Sinemet 25mg/250mg",
+    "scientific_name": "Carbidopa + Levodopa",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Salbutamol Pioneer 4mg",
+    "scientific_name": "Salbutamol",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Salbutamol Syrup Pioneer 2mg/5ml",
+    "scientific_name": "Salbutamol",
+    "category": "syrup"
+  },
+  {
+    "trade_name": "Theophylline Pioneer 200mg",
+    "scientific_name": "Theophylline",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Singulair Chewable 4mg",
+    "scientific_name": "Montelukast",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Prednisolone Syrup Pioneer 15mg/5ml",
+    "scientific_name": "Prednisolone",
+    "category": "syrup"
+  },
+  {
+    "trade_name": "Methylprednisolone Pioneer 16mg",
+    "scientific_name": "Methylprednisolone",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Depo-Medrol 40mg/1ml Ampoule",
+    "scientific_name": "Methylprednisolone Acetate",
+    "category": "injection"
+  },
+  {
+    "trade_name": "Diprospan 1ml Ampoule",
+    "scientific_name": "Betamethasone",
+    "category": "injection"
+  },
+  {
+    "trade_name": "Kenacort-A 40mg/1ml Ampoule",
+    "scientific_name": "Triamcinolone Acetonide",
+    "category": "injection"
+  },
+  {
+    "trade_name": "Allopurinol Pioneer 300mg",
+    "scientific_name": "Allopurinol",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Colchicine Pioneer 0.5mg",
+    "scientific_name": "Colchicine",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Methotrexate Pioneer 2.5mg",
+    "scientific_name": "Methotrexate",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Sulfasalazine Pioneer 500mg",
+    "scientific_name": "Sulfasalazine",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Azathioprine Pioneer 50mg",
+    "scientific_name": "Azathioprine",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Ciclosporin Pioneer 100mg",
+    "scientific_name": "Ciclosporin",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Tranexamic Acid Pioneer 500mg",
+    "scientific_name": "Tranexamic Acid",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Tranexamic Acid Injection 500mg/5ml",
+    "scientific_name": "Tranexamic Acid",
+    "category": "injection"
+  },
+  {
+    "trade_name": "Vitamin K1 10mg/1ml Ampoule",
+    "scientific_name": "Phytomenadione",
+    "category": "injection"
+  },
+  {
+    "trade_name": "Heparin Sodium 5000 IU/ml Vial",
+    "scientific_name": "Heparin Sodium",
+    "category": "injection"
+  },
+  {
+    "trade_name": "Aspirin Pioneer 81mg",
+    "scientific_name": "Aspirin",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Pentoxifylline Pioneer 400mg",
+    "scientific_name": "Pentoxifylline",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Daflon 500mg",
+    "scientific_name": "Diosmin + Hesperidin",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Hepa-Merz Sachet",
+    "scientific_name": "L-Ornithine L-Aspartate",
+    "category": "powder_sachet"
+  },
+  {
+    "trade_name": "Isomar Nasal Spray",
+    "scientific_name": "Sea Water (Sodium Chloride Hypertonic)",
+    "category": "drops_nasal"
+  },
+  {
+    "trade_name": "Isomar Baby Nasal Drops",
+    "scientific_name": "Sea Water (Sodium Chloride Isotonic)",
+    "category": "drops_nasal"
+  },
+  {
+    "trade_name": "Physiomer Nasal Spray",
+    "scientific_name": "Sea Water (Sodium Chloride)",
+    "category": "drops_nasal"
+  },
+  {
+    "trade_name": "Sterimar Nasal Spray",
+    "scientific_name": "Sea Water (Sodium Chloride)",
+    "category": "drops_nasal"
+  },
+  {
+    "trade_name": "Aquamaris Nasal Spray",
+    "scientific_name": "Sea Water (Sodium Chloride)",
+    "category": "drops_nasal"
+  },
+  {
+    "trade_name": "Colgate Total Toothpaste",
+    "scientific_name": "Sodium Fluoride",
+    "category": "oral_care"
+  },
+  {
+    "trade_name": "Listerine Mouthwash",
+    "scientific_name": "Essential Oils Antiseptic",
+    "category": "oral_care"
+  },
+  {
+    "trade_name": "Parodontax Toothpaste",
+    "scientific_name": "Sodium Bicarbonate Herbal",
+    "category": "oral_care"
+  },
+  {
+    "trade_name": "Oral-B Mouthwash",
+    "scientific_name": "Cetylpyridinium Chloride",
+    "category": "oral_care"
+  },
+  {
+    "trade_name": "Bexident Gum Mouthwash",
+    "scientific_name": "Chlorhexidine + Allantoin",
+    "category": "oral_care"
+  },
+  {
+    "trade_name": "Betadine Solution 10%",
+    "scientific_name": "Povidone Iodine",
+    "category": "topical_solution"
+  },
+  {
+    "trade_name": "Savlon Antiseptic Solution",
+    "scientific_name": "Chlorhexidine + Cetrimide",
+    "category": "topical_solution"
+  },
+  {
+    "trade_name": "Dettol Antiseptic Liquid",
+    "scientific_name": "Chloroxylenol",
+    "category": "topical_solution"
+  },
+  {
+    "trade_name": "Hydrogen Peroxide Solution 3%",
+    "scientific_name": "Hydrogen Peroxide",
+    "category": "topical_solution"
+  },
+  {
+    "trade_name": "Alcohol Antiseptic Solution 70%",
+    "scientific_name": "Isopropyl Alcohol",
+    "category": "topical_solution"
+  },
+  {
+    "trade_name": "Castellani Paint Solution",
+    "scientific_name": "Phenol + Resorcinol",
+    "category": "topical_solution"
+  },
+  {
+    "trade_name": "Systane Eye Drops (Lubricant)",
+    "scientific_name": "Polyethylene Glycol / Propylene Glycol",
+    "category": "drops_eye_ear"
+  },
+  {
+    "trade_name": "Tears Naturale Eye Drops",
+    "scientific_name": "Hypromellose",
+    "category": "drops_eye_ear"
+  },
+  {
+    "trade_name": "Optive Eye Drops",
+    "scientific_name": "Carmellose Sodium",
+    "category": "drops_eye_ear"
+  },
+  {
+    "trade_name": "Cortimycin Eye/Ear Drops",
+    "scientific_name": "Neomycin + Dexamethasone",
+    "category": "drops_eye_ear"
+  },
+  {
+    "trade_name": "Waxsol Ear Drops",
+    "scientific_name": "Docusate Sodium",
+    "category": "drops_eye_ear"
+  },
+  {
+    "trade_name": "Movelat Gel",
+    "scientific_name": "Salicylic Acid + Heparinoid",
+    "category": "cream_ointment_gel"
+  },
+  {
+    "trade_name": "Contractubex Gel",
+    "scientific_name": "Onion Extract + Heparin + Allantoin",
+    "category": "cream_ointment_gel"
+  },
+  {
+    "trade_name": "Fusidic Acid Cream 2%",
+    "scientific_name": "Fusidic Acid",
+    "category": "cream_ointment_gel"
+  },
+  {
+    "trade_name": "Acnetin-A Gel 0.025%",
+    "scientific_name": "Tretinoin",
+    "category": "cream_ointment_gel"
+  },
+  {
+    "trade_name": "Panoxyl Gel 5%",
+    "scientific_name": "Benzoyl Peroxide",
+    "category": "cream_ointment_gel"
+  },
+  {
+    "trade_name": "Silverex Cream 1%",
+    "scientific_name": "Silver Sulfadiazine",
+    "category": "cream_ointment_gel"
+  },
+  {
+    "trade_name": "Adol Cold & Flu Syrup",
+    "scientific_name": "Paracetamol + Phenylephrine + Chlorpheniramine",
+    "category": "syrup"
+  },
+  {
+    "trade_name": "Tussin Expectorant Syrup",
+    "scientific_name": "Guaifenesin",
+    "category": "syrup"
+  },
+  {
+    "trade_name": "Tixylix Cough Syrup",
+    "scientific_name": "Pholcodine",
+    "category": "syrup"
+  },
+  {
+    "trade_name": "Panadol Cold Relief Tablet",
+    "scientific_name": "Paracetamol + Phenylephrine",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Strepsils Lozenges",
+    "scientific_name": "Amylmetacresol + Dichlorobenzyl Alcohol",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Difflam Lozenges",
+    "scientific_name": "Benzydamine",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Voltaren Ampoule 75mg/3ml",
+    "scientific_name": "Diclofenac Sodium",
+    "category": "injection"
+  },
+  {
+    "trade_name": "B12 Ampoule 1000mcg/1ml (Awamedica)",
+    "scientific_name": "Cyanocobalamin",
+    "category": "injection"
+  },
+  {
+    "trade_name": "Fervex Sachet",
+    "scientific_name": "Paracetamol + Pheniramine + Vitamin C",
+    "category": "powder_sachet"
+  },
+  {
+    "trade_name": "Atrovent Nebules 250mcg/ml",
+    "scientific_name": "Ipratropium Bromide",
+    "category": "inhaler_nebulizer"
+  },
+  {
+    "trade_name": "Combivent Nebules",
+    "scientific_name": "Ipratropium + Salbutamol",
+    "category": "inhaler_nebulizer"
+  },
+  {
+    "trade_name": "Berodual Inhaler",
+    "scientific_name": "Ipratropium + Fenoterol",
+    "category": "inhaler_nebulizer"
+  },
+  {
+    "trade_name": "Berodual Respirator Solution",
+    "scientific_name": "Ipratropium + Fenoterol",
+    "category": "inhaler_nebulizer"
+  },
+  {
+    "trade_name": "Spiriva Respimat 2.5mcg",
+    "scientific_name": "Tiotropium Bromide",
+    "category": "inhaler_nebulizer"
+  },
+  {
+    "trade_name": "Serevent Evohaler 25mcg",
+    "scientific_name": "Salmeterol",
+    "category": "inhaler_nebulizer"
+  },
+  {
+    "trade_name": "Foster Inhaler 100/6mcg",
+    "scientific_name": "Beclomethasone + Formoterol",
+    "category": "inhaler_nebulizer"
+  },
+  {
+    "trade_name": "Relvar Ellipta 92/22mcg",
+    "scientific_name": "Fluticasone Furoate + Vilanterol",
+    "category": "inhaler_nebulizer"
+  },
+  {
+    "trade_name": "Asthalin Inhaler 100mcg",
+    "scientific_name": "Salbutamol",
+    "category": "inhaler_nebulizer"
+  },
+  {
+    "trade_name": "Duolin Respules",
+    "scientific_name": "Ipratropium + Salbutamol",
+    "category": "inhaler_nebulizer"
+  },
+  {
+    "trade_name": "Sensodyne Rapid Relief Toothpaste",
+    "scientific_name": "Stannous Fluoride",
+    "category": "oral_care"
+  },
+  {
+    "trade_name": "Eludril Mouthwash",
+    "scientific_name": "Chlorhexidine + Chlorobutanol",
+    "category": "oral_care"
+  },
+  {
+    "trade_name": "Meridol Toothpaste",
+    "scientific_name": "Amine Fluoride + Stannous Fluoride",
+    "category": "oral_care"
+  },
+  {
+    "trade_name": "Perio-Aid Mouthwash 0.12%",
+    "scientific_name": "Chlorhexidine",
+    "category": "oral_care"
+  },
+  {
+    "trade_name": "Difflam Mouthwash",
+    "scientific_name": "Benzydamine Hydrochloride",
+    "category": "oral_care"
+  },
+  {
+    "trade_name": "Emoform Toothpaste",
+    "scientific_name": "Potassium Nitrate + Fluoride",
+    "category": "oral_care"
+  },
+  {
+    "trade_name": "Colgate Sensitive Pro-Relief Toothpaste",
+    "scientific_name": "Arginine + Calcium Carbonate",
+    "category": "oral_care"
+  },
+  {
+    "trade_name": "Signal Toothpaste",
+    "scientific_name": "Sodium Fluoride",
+    "category": "oral_care"
+  },
+  {
+    "trade_name": "Iodine Tincture 2%",
+    "scientific_name": "Iodine",
+    "category": "topical_solution"
+  },
+  {
+    "trade_name": "Gentian Violet Solution 1%",
+    "scientific_name": "Gentian Violet",
+    "category": "topical_solution"
+  },
+  {
+    "trade_name": "Potassium Permanganate Solution",
+    "scientific_name": "Potassium Permanganate",
+    "category": "topical_solution"
+  },
+  {
+    "trade_name": "Salicylic Acid Solution 17%",
+    "scientific_name": "Salicylic Acid",
+    "category": "topical_solution"
+  },
+  {
+    "trade_name": "Boric Acid Solution 3%",
+    "scientific_name": "Boric Acid",
+    "category": "topical_solution"
+  },
+  {
+    "trade_name": "Burow's Solution (Aluminum Acetate)",
+    "scientific_name": "Aluminum Acetate",
+    "category": "topical_solution"
+  },
+  {
+    "trade_name": "Multivitamin Drops (SDI)",
+    "scientific_name": "Multivitamin",
+    "category": "drops_oral"
+  },
+  {
+    "trade_name": "Vitamin AD Drops",
+    "scientific_name": "Vitamin A + Vitamin D",
+    "category": "drops_oral"
+  },
+  {
+    "trade_name": "Iberogast Drops",
+    "scientific_name": "Herbal Extract Combination",
+    "category": "drops_oral"
+  },
+  {
+    "trade_name": "Zinc Sulfate Drops (Pediatric)",
+    "scientific_name": "Zinc Sulfate",
+    "category": "drops_oral"
+  },
+  {
+    "trade_name": "Vitamin C Drops (Pediatric)",
+    "scientific_name": "Ascorbic Acid",
+    "category": "drops_oral"
+  },
+  {
+    "trade_name": "Domperidone Drops 5mg/ml",
+    "scientific_name": "Domperidone",
+    "category": "drops_oral"
+  },
+  {
+    "trade_name": "Nystatin Oral Drops 100000 IU/ml",
+    "scientific_name": "Nystatin",
+    "category": "drops_oral"
+  },
+  {
+    "trade_name": "Coldrex Powder Sachet",
+    "scientific_name": "Paracetamol + Phenylephrine + Vitamin C",
+    "category": "powder_sachet"
+  },
+  {
+    "trade_name": "Dioralyte Sachet",
+    "scientific_name": "Oral Rehydration Salts",
+    "category": "powder_sachet"
+  },
+  {
+    "trade_name": "Metamucil Sachet",
+    "scientific_name": "Psyllium Husk",
+    "category": "powder_sachet"
+  },
+  {
+    "trade_name": "Calcium Effervescent Sachet (SDI)",
+    "scientific_name": "Calcium Carbonate",
+    "category": "powder_sachet"
+  },
+  {
+    "trade_name": "Vitamin C Effervescent Sachet 1000mg",
+    "scientific_name": "Ascorbic Acid",
+    "category": "powder_sachet"
+  },
+  {
+    "trade_name": "Panadol Cold & Flu Sachet",
+    "scientific_name": "Paracetamol + Phenylephrine + Chlorpheniramine",
+    "category": "powder_sachet"
+  },
+  {
+    "trade_name": "Rhinathiol Nasal Spray",
+    "scientific_name": "Xylometazoline",
+    "category": "drops_nasal"
+  },
+  {
+    "trade_name": "Afrin Nasal Spray 0.05%",
+    "scientific_name": "Oxymetazoline",
+    "category": "drops_nasal"
+  },
+  {
+    "trade_name": "Iliadin Nasal Drops 0.025%",
+    "scientific_name": "Oxymetazoline",
+    "category": "drops_nasal"
+  },
+  {
+    "trade_name": "Proctosedyl Suppository",
+    "scientific_name": "Cinchocaine + Hydrocortisone",
+    "category": "suppository"
+  },
+  {
+    "trade_name": "Faktu Suppository",
+    "scientific_name": "Policresulen + Cinchocaine",
+    "category": "suppository"
+  },
+  {
+    "trade_name": "Anusol Suppository",
+    "scientific_name": "Zinc Oxide + Balsam Peru",
+    "category": "suppository"
+  },
+  {
+    "trade_name": "Ketoprofen Suppository 100mg",
+    "scientific_name": "Ketoprofen",
+    "category": "suppository"
+  },
+  {
+    "trade_name": "Aminophylline Suppository 250mg",
+    "scientific_name": "Aminophylline",
+    "category": "suppository"
+  },
+  {
+    "trade_name": "Mesalazine Suppository 500mg",
+    "scientific_name": "Mesalazine",
+    "category": "suppository"
+  },
+  {
+    "trade_name": "Paracetamol Suppository 500mg",
+    "scientific_name": "Paracetamol",
+    "category": "suppository"
+  },
+  {
+    "trade_name": "Miconazole Vaginal Suppository 100mg",
+    "scientific_name": "Miconazole",
+    "category": "suppository"
+  },
+  {
+    "trade_name": "Ciprofloxacin Awamedica 250mg",
+    "scientific_name": "Ciprofloxacin",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Levofloxacin Pioneer 500mg",
+    "scientific_name": "Levofloxacin",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Cefixime Awamedica 200mg",
+    "scientific_name": "Cefixime",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Augmentin BD 1g",
+    "scientific_name": "Amoxicillin + Clavulanic Acid",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Klavax 625mg",
+    "scientific_name": "Amoxicillin + Clavulanic Acid",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Amoxicillin Awamedica 500mg",
+    "scientific_name": "Amoxicillin",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Ibuprofen Pioneer 400mg",
+    "scientific_name": "Ibuprofen",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Mefenamic Acid Pioneer 500mg",
+    "scientific_name": "Mefenamic Acid",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Ponstan 500mg",
+    "scientific_name": "Mefenamic Acid",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Tramadol Pioneer 50mg",
+    "scientific_name": "Tramadol",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Ultracet Tablet",
+    "scientific_name": "Tramadol + Paracetamol",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Metformin SDI 500mg",
+    "scientific_name": "Metformin",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Metformin Awamedica 1000mg",
+    "scientific_name": "Metformin",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Amlodipine SDI 5mg",
+    "scientific_name": "Amlodipine",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Bisoprolol Awamedica 5mg",
+    "scientific_name": "Bisoprolol",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Atenolol Pioneer 100mg",
+    "scientific_name": "Atenolol",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Hydrochlorothiazide Pioneer 25mg",
+    "scientific_name": "Hydrochlorothiazide",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Spironolactone Pioneer 25mg",
+    "scientific_name": "Spironolactone",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Furosemide Pioneer 40mg",
+    "scientific_name": "Furosemide",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Loratadine Pioneer 10mg",
+    "scientific_name": "Loratadine",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Domperidone Awamedica 10mg",
+    "scientific_name": "Domperidone",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Pantoprazole SDI 40mg",
+    "scientific_name": "Pantoprazole",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Esomeprazole SDI 40mg",
+    "scientific_name": "Esomeprazole",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Bromazepam Pioneer 3mg",
+    "scientific_name": "Bromazepam",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Lexotanil 3mg",
+    "scientific_name": "Bromazepam",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Vitamin B1-B6-B12 Tablet (SDI)",
+    "scientific_name": "Thiamine + Pyridoxine + Cyanocobalamin",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Neurorubine Forte Tablet",
+    "scientific_name": "Thiamine + Pyridoxine + Cyanocobalamin",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Ferrous Fumarate Pioneer 200mg",
+    "scientific_name": "Ferrous Fumarate",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Amoxicillin + Clavulanic Acid Pioneer 1.2g Vial",
+    "scientific_name": "Amoxicillin + Clavulanic Acid",
+    "category": "injection"
+  },
+  {
+    "trade_name": "Cefazolin Pioneer 1g Vial",
+    "scientific_name": "Cefazolin",
+    "category": "injection"
+  },
+  {
+    "trade_name": "Ampicillin + Sulbactam Pioneer 1.5g Vial",
+    "scientific_name": "Ampicillin + Sulbactam",
+    "category": "injection"
+  },
+  {
+    "trade_name": "Diclofenac Sodium Awamedica 75mg/3ml Ampoule",
+    "scientific_name": "Diclofenac Sodium",
+    "category": "injection"
+  },
+  {
+    "trade_name": "Tramadol Pioneer 100mg/2ml Ampoule",
+    "scientific_name": "Tramadol",
+    "category": "injection"
+  },
+  {
+    "trade_name": "Ranitidine Pioneer 50mg/2ml Ampoule",
+    "scientific_name": "Ranitidine",
+    "category": "injection"
+  },
+  {
+    "trade_name": "Omeprazole Pioneer 40mg Vial",
+    "scientific_name": "Omeprazole",
+    "category": "injection"
+  },
+  {
+    "trade_name": "Insulin Mixtard 30/70 100 IU/ml Vial",
+    "scientific_name": "Insulin (Biphasic, Human)",
+    "category": "injection"
+  },
+  {
+    "trade_name": "Adrenaline Awamedica 1mg/ml Ampoule",
+    "scientific_name": "Adrenaline (Epinephrine)",
+    "category": "injection"
+  },
+  {
+    "trade_name": "Cefixime Syrup Pioneer 100mg/5ml",
+    "scientific_name": "Cefixime",
+    "category": "syrup"
+  },
+  {
+    "trade_name": "Azithromycin Syrup Pioneer 200mg/5ml",
+    "scientific_name": "Azithromycin",
+    "category": "syrup"
+  },
+  {
+    "trade_name": "Cefuroxime Syrup Pioneer 125mg/5ml",
+    "scientific_name": "Cefuroxime",
+    "category": "syrup"
+  },
+  {
+    "trade_name": "Paracetamol Syrup SDI 120mg/5ml",
+    "scientific_name": "Paracetamol",
+    "category": "syrup"
+  },
+  {
+    "trade_name": "Ibuprofen Syrup Pioneer 100mg/5ml",
+    "scientific_name": "Ibuprofen",
+    "category": "syrup"
+  },
+  {
+    "trade_name": "Multivitamin Syrup Pioneer",
+    "scientific_name": "Multivitamin",
+    "category": "syrup"
+  },
+  {
+    "trade_name": "Ferrous Sulfate Syrup Pioneer",
+    "scientific_name": "Ferrous Sulfate",
+    "category": "syrup"
+  },
+  {
+    "trade_name": "Iberet Syrup",
+    "scientific_name": "Ferrous Sulfate + Vitamin B Complex",
+    "category": "syrup"
+  },
+  {
+    "trade_name": "Mupirocin Awamedica Cream 2%",
+    "scientific_name": "Mupirocin",
+    "category": "cream_ointment_gel"
+  },
+  {
+    "trade_name": "Clotrimazole Awamedica Cream 1%",
+    "scientific_name": "Clotrimazole",
+    "category": "cream_ointment_gel"
+  },
+  {
+    "trade_name": "Hydrocortisone Cream 1% Pioneer",
+    "scientific_name": "Hydrocortisone",
+    "category": "cream_ointment_gel"
+  },
+  {
+    "trade_name": "Betamethasone Cream 0.1% Pioneer",
+    "scientific_name": "Betamethasone Valerate",
+    "category": "cream_ointment_gel"
+  },
+  {
+    "trade_name": "Diclofenac Gel Pioneer 1%",
+    "scientific_name": "Diclofenac Diethylamine",
+    "category": "cream_ointment_gel"
+  },
+  {
+    "trade_name": "Zinc Oxide Cream 15%",
+    "scientific_name": "Zinc Oxide",
+    "category": "cream_ointment_gel"
+  },
+  {
+    "trade_name": "Doxycycline Pioneer 100mg",
+    "scientific_name": "Doxycycline",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Norfloxacin Pioneer 400mg",
+    "scientific_name": "Norfloxacin",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Nitrofurantoin SDI 100mg",
+    "scientific_name": "Nitrofurantoin",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Diclofenac Potassium Pioneer 50mg",
+    "scientific_name": "Diclofenac Potassium",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Etoricoxib Pioneer 90mg",
+    "scientific_name": "Etoricoxib",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Aceclofenac Pioneer 100mg",
+    "scientific_name": "Aceclofenac",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Nimesulide Pioneer 100mg",
+    "scientific_name": "Nimesulide",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Amlodipine + Valsartan Pioneer 5/80mg",
+    "scientific_name": "Amlodipine + Valsartan",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Co-Diovan 80/12.5mg",
+    "scientific_name": "Valsartan + Hydrochlorothiazide",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Exforge 5/80mg",
+    "scientific_name": "Amlodipine + Valsartan",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Telmisartan Pioneer 40mg",
+    "scientific_name": "Telmisartan",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Irbesartan Pioneer 150mg",
+    "scientific_name": "Irbesartan",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Ramipril Pioneer 5mg",
+    "scientific_name": "Ramipril",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Vildagliptin Pioneer 50mg",
+    "scientific_name": "Vildagliptin",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Galvus Met 50/1000mg",
+    "scientific_name": "Vildagliptin + Metformin",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Empagliflozin Pioneer 10mg",
+    "scientific_name": "Empagliflozin",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Acarbose Pioneer 50mg",
+    "scientific_name": "Acarbose",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Xyzal Awamedica 5mg",
+    "scientific_name": "Levocetirizine",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Rupatadine Pioneer 10mg",
+    "scientific_name": "Rupatadine",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Hydroxyzine Pioneer 25mg",
+    "scientific_name": "Hydroxyzine",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Famotidine Pioneer 40mg",
+    "scientific_name": "Famotidine",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Simethicone Pioneer 80mg",
+    "scientific_name": "Simethicone",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Meteospasmyl Capsule",
+    "scientific_name": "Alverine + Simethicone",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Spasmo-Canulase Tablet",
+    "scientific_name": "Alverine + Pancreatin + Simethicone",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Cefazolin SDI 1g Vial",
+    "scientific_name": "Cefazolin",
+    "category": "injection"
+  },
+  {
+    "trade_name": "Amikacin Pioneer 500mg/2ml Vial",
+    "scientific_name": "Amikacin",
+    "category": "injection"
+  },
+  {
+    "trade_name": "Clindamycin Injection Pioneer 600mg/4ml",
+    "scientific_name": "Clindamycin",
+    "category": "injection"
+  },
+  {
+    "trade_name": "Ketorolac Awamedica 30mg/1ml Ampoule",
+    "scientific_name": "Ketorolac",
+    "category": "injection"
+  },
+  {
+    "trade_name": "Pethidine Hydrochloride 50mg/ml Ampoule",
+    "scientific_name": "Pethidine (Meperidine)",
+    "category": "injection"
+  },
+  {
+    "trade_name": "Morphine Sulfate 10mg/ml Ampoule",
+    "scientific_name": "Morphine Sulfate",
+    "category": "injection"
+  },
+  {
+    "trade_name": "Insulin Glargine Basalog 100 IU/ml Vial",
+    "scientific_name": "Insulin Glargine",
+    "category": "injection"
+  },
+  {
+    "trade_name": "Amoxicillin Syrup Awamedica 250mg/5ml",
+    "scientific_name": "Amoxicillin",
+    "category": "syrup"
+  },
+  {
+    "trade_name": "Cephalexin Syrup Pioneer 125mg/5ml",
+    "scientific_name": "Cephalexin",
+    "category": "syrup"
+  },
+  {
+    "trade_name": "Loratadine Syrup Pioneer 5mg/5ml",
+    "scientific_name": "Loratadine",
+    "category": "syrup"
+  },
+  {
+    "trade_name": "Diphenhydramine Syrup 12.5mg/5ml",
+    "scientific_name": "Diphenhydramine",
+    "category": "syrup"
+  },
+  {
+    "trade_name": "Ciprofloxacin Ear Drops 0.3%",
+    "scientific_name": "Ciprofloxacin",
+    "category": "drops_eye_ear"
+  },
+  {
+    "trade_name": "Acyclovir Cream 5%",
+    "scientific_name": "Aciclovir",
+    "category": "cream_ointment_gel"
+  },
+  {
+    "trade_name": "Terbinafine Cream Pioneer 1%",
+    "scientific_name": "Terbinafine",
+    "category": "cream_ointment_gel"
+  },
+  {
+    "trade_name": "Miconazole Cream Pioneer 2%",
+    "scientific_name": "Miconazole",
+    "category": "cream_ointment_gel"
+  },
+  {
+    "trade_name": "Cefpodoxime Awamedica 200mg",
+    "scientific_name": "Cefpodoxime",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Doxycycline Awamedica 100mg",
+    "scientific_name": "Doxycycline",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Gabapentin SDI 300mg",
+    "scientific_name": "Gabapentin",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Pregabalin SDI 75mg",
+    "scientific_name": "Pregabalin",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Ramipril SDI 5mg",
+    "scientific_name": "Ramipril",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Levocetirizine SDI 5mg",
+    "scientific_name": "Levocetirizine",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Bilastine SDI 20mg",
+    "scientific_name": "Bilastine",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Hydroxyzine SDI 25mg",
+    "scientific_name": "Hydroxyzine",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Lansoprazole SDI 30mg",
+    "scientific_name": "Lansoprazole",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Pancreatin SDI Capsule",
+    "scientific_name": "Pancreatin (Pancreatic Enzymes)",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Aspirin Cardio 100mg",
+    "scientific_name": "Aspirin",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Dexketoprofen Pioneer 25mg",
+    "scientific_name": "Dexketoprofen",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Ketoprofen Pioneer 100mg",
+    "scientific_name": "Ketoprofen",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Flurbiprofen Lozenges (Strefen)",
+    "scientific_name": "Flurbiprofen",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Amoxicillin SDI 250mg",
+    "scientific_name": "Amoxicillin",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Azithromycin SDI 250mg",
+    "scientific_name": "Azithromycin",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Metronidazole Awamedica 250mg",
+    "scientific_name": "Metronidazole",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Albendazole Pioneer 400mg",
+    "scientific_name": "Albendazole",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Praziquantel Pioneer 600mg",
+    "scientific_name": "Praziquantel",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Domperidone SDI 10mg",
+    "scientific_name": "Domperidone",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Loperamide SDI 2mg",
+    "scientific_name": "Loperamide",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Simethicone SDI 40mg",
+    "scientific_name": "Simethicone",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Bisacodyl SDI 5mg",
+    "scientific_name": "Bisacodyl",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Ispaghula Husk Sachet (Fybogel)",
+    "scientific_name": "Ispaghula Husk",
+    "category": "powder_sachet"
+  },
+  {
+    "trade_name": "Fybogel Sachet",
+    "scientific_name": "Ispaghula Husk",
+    "category": "powder_sachet"
+  },
+  {
+    "trade_name": "Movicol Half Sachet (Pediatric)",
+    "scientific_name": "Macrogol (Polyethylene Glycol)",
+    "category": "powder_sachet"
+  },
+  {
+    "trade_name": "Cetirizine Awamedica Drops 10mg/ml",
+    "scientific_name": "Cetirizine",
+    "category": "drops_oral"
+  },
+  {
+    "trade_name": "Paracetamol Drops SDI 100mg/ml",
+    "scientific_name": "Paracetamol",
+    "category": "drops_oral"
+  },
+  {
+    "trade_name": "Prednisolone Eye Drops 1%",
+    "scientific_name": "Prednisolone Acetate",
+    "category": "drops_eye_ear"
+  },
+  {
+    "trade_name": "Sodium Cromoglicate Eye Drops 2%",
+    "scientific_name": "Sodium Cromoglicate",
+    "category": "drops_eye_ear"
+  },
+  {
+    "trade_name": "Olopatadine Eye Drops 0.1%",
+    "scientific_name": "Olopatadine",
+    "category": "drops_eye_ear"
+  },
+  {
+    "trade_name": "Neomycin Ear Drops",
+    "scientific_name": "Neomycin + Polymyxin B",
+    "category": "drops_eye_ear"
+  },
+  {
+    "trade_name": "Cefixime Pioneer 100mg",
+    "scientific_name": "Cefixime",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Clindamycin Pioneer 150mg",
+    "scientific_name": "Clindamycin",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Erythromycin Ethylsuccinate Syrup 200mg/5ml",
+    "scientific_name": "Erythromycin",
+    "category": "syrup"
+  },
+  {
+    "trade_name": "Clarithromycin Syrup Pioneer 125mg/5ml",
+    "scientific_name": "Clarithromycin",
+    "category": "syrup"
+  },
+  {
+    "trade_name": "Vitamin D3 Drops (Pediatric) 400 IU/ml",
+    "scientific_name": "Vitamin D3 (Cholecalciferol)",
+    "category": "drops_oral"
+  },
+  {
+    "trade_name": "Betamethasone Ointment Pioneer 0.1%",
+    "scientific_name": "Betamethasone Valerate",
+    "category": "cream_ointment_gel"
+  },
+  {
+    "trade_name": "Framycetin Skin Cream 1%",
+    "scientific_name": "Framycetin Sulfate",
+    "category": "cream_ointment_gel"
   }
+
+
 ]
