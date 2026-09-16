@@ -17,7 +17,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from .models import (
-    Medicine, Sale, Invoice, InvoiceItem,
+    Medicine, Sale, Invoice, InvoiceItem, Expense,
     DamagedMedicine, PharmacySupplier, DesktopLicense, DeviceActivation, UserProfile,
     SupplierInvoice,  SupplierPayment, SupplierReturn, SupplierRefund, AuditLog, DesktopAppVersion,
 )
@@ -1185,7 +1185,25 @@ def sales_reports(request):
 
     total_sales = invoices.aggregate(Sum('final_amount'))['final_amount__sum'] or 0.0
     total_invoices_count = invoices.count()
+    refunded_invoices_count = Invoice.objects.filter(
+        pharmacy=user_pharmacy,
+        created_at__range=(start_date, end_date),
+        is_refunded=True,
+    ).count()
     total_discounts_given = invoices.aggregate(Sum('discount'))['discount__sum'] or 0.0
+    total_expenses = Expense.objects.filter(
+        pharmacy=user_pharmacy,
+        expense_date__range=(start_date.date(), end_date.date()),
+    ).aggregate(total=Sum('amount'))['total'] or 0
+
+    # الرصيد الحالي للمذاخر لا يرتبط بفترة التقرير: تُحسب كل الفواتير
+    # مع حركاتها الفعلية (دفعات، استرجاعات، ومبالغ مستلمة من المذخر).
+    supplier_invoices = SupplierInvoice.objects.filter(
+        supplier__pharmacy=user_pharmacy,
+    ).prefetch_related('payments', 'returns', 'refunds')
+    total_supplier_debt = sum(
+        invoice.remaining_amount for invoice in supplier_invoices
+    )
 
     today = timezone.localdate()
     expired_medicines = Medicine.objects.filter(
@@ -1237,12 +1255,157 @@ def sales_reports(request):
         'total_sales': int(total_sales or 0),
         'total_discounts_given': int(total_discounts_given or 0),
         'total_invoices_count': total_invoices_count,
+        'refunded_invoices_count': refunded_invoices_count,
+        'total_supplier_debt': int(total_supplier_debt),
+        'total_expenses': int(total_expenses),
+        'net_after_expenses': int(total_sales - total_expenses),
         'total_damage_losses': int(total_combined_losses or 0), 
         'top_selling_items': top_selling_items,
         'stagnant_medicines': stagnant_medicines,
         'pharmacy_name': user_pharmacy.name
     }
     return render(request, 'pharmacy/reports.html', context)
+
+
+def _expense_redirect_url(request):
+    query_string = request.POST.get('next_query', '')
+    return f"{redirect('expenses').url}?{query_string}" if query_string else redirect('expenses').url
+
+
+@login_required
+def expenses(request):
+    user_profile = request.user.profile
+    if not user_profile.is_pharmacy_owner:
+        messages.error(request, 'عذراً، هذه الصفحة مخصصة للإدارة فقط.')
+        return redirect('pharmacy_dashboard')
+
+    pharmacy = user_profile.pharmacy
+    today = timezone.localdate()
+    start_date_str = request.GET.get('start_date', '')
+    end_date_str = request.GET.get('end_date', '')
+    expense_type = request.GET.get('expense_type', '')
+    expenses_queryset = Expense.objects.filter(pharmacy=pharmacy)
+
+    try:
+        if start_date_str:
+            start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
+            expenses_queryset = expenses_queryset.filter(expense_date__gte=start_date)
+        if end_date_str:
+            end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
+            expenses_queryset = expenses_queryset.filter(expense_date__lte=end_date)
+        if start_date_str and end_date_str and start_date > end_date:
+            raise ValueError
+    except ValueError:
+        messages.error(request, 'يرجى إدخال فترة زمنية صحيحة.')
+        return redirect('expenses')
+
+    if expense_type:
+        valid_types = dict(Expense.EXPENSE_TYPES)
+        if expense_type not in valid_types:
+            messages.error(request, 'نوع المصروف المحدد غير صحيح.')
+            return redirect('expenses')
+        expenses_queryset = expenses_queryset.filter(expense_type=expense_type)
+
+    chart_data = list(
+        expenses_queryset.values('expense_type')
+        .annotate(total=Sum('amount'))
+        .order_by('expense_type')
+    )
+    labels_by_type = dict(Expense.EXPENSE_TYPES)
+    chart_labels = [labels_by_type[row['expense_type']] for row in chart_data]
+    chart_amounts = [row['total'] for row in chart_data]
+    today_expenses = Expense.objects.filter(pharmacy=pharmacy, expense_date=today)
+
+    return render(request, 'pharmacy/expenses.html', {
+        'expenses': expenses_queryset,
+        'expense_types': Expense.EXPENSE_TYPES,
+        'selected_expense_type': expense_type,
+        'start_date': start_date_str,
+        'end_date': end_date_str,
+        'today_total': today_expenses.aggregate(total=Sum('amount'))['total'] or 0,
+        'today_count': today_expenses.count(),
+        'chart_labels': json.dumps(chart_labels, ensure_ascii=False),
+        'chart_amounts': json.dumps(chart_amounts),
+        'next_query': request.GET.urlencode(),
+    })
+
+
+@login_required
+@require_POST
+def add_expense(request):
+    user_profile = request.user.profile
+    if not user_profile.is_pharmacy_owner:
+        messages.error(request, 'ليس لديك صلاحية لإضافة مصروف.')
+        return redirect('pharmacy_dashboard')
+
+    expense_type = request.POST.get('expense_type', '')
+    expense_date_raw = request.POST.get('expense_date', '')
+    amount_raw = request.POST.get('amount', '').strip()
+    notes = request.POST.get('notes', '').strip()
+    if expense_type not in dict(Expense.EXPENSE_TYPES):
+        messages.error(request, 'يرجى اختيار نوع مصروف صحيح.')
+        return redirect(_expense_redirect_url(request))
+    try:
+        expense_date = datetime.strptime(expense_date_raw, '%Y-%m-%d').date()
+        amount = int(amount_raw)
+    except (TypeError, ValueError):
+        messages.error(request, 'يرجى إدخال تاريخ ومبلغ صحيحين.')
+        return redirect(_expense_redirect_url(request))
+    if amount <= 0:
+        messages.error(request, 'المبلغ يجب أن يكون أكبر من صفر.')
+        return redirect(_expense_redirect_url(request))
+
+    expense = Expense.objects.create(
+        pharmacy=user_profile.pharmacy, expense_type=expense_type,
+        expense_date=expense_date, amount=amount, notes=notes,
+    )
+    log_action(request, 'create', 'Expense', expense, f'إضافة مصروف {expense.get_expense_type_display()} بقيمة {amount} د.ع')
+    messages.success(request, 'تمت إضافة المصروف بنجاح.')
+    return redirect(_expense_redirect_url(request))
+
+
+@login_required
+@require_POST
+def edit_expense(request, expense_id):
+    user_profile = request.user.profile
+    if not user_profile.is_pharmacy_owner:
+        messages.error(request, 'ليس لديك صلاحية لتعديل المصروفات.')
+        return redirect('pharmacy_dashboard')
+    expense = get_object_or_404(Expense, pk=expense_id, pharmacy=user_profile.pharmacy)
+    expense_type = request.POST.get('expense_type', '')
+    expense_date_raw = request.POST.get('expense_date', '')
+    amount_raw = request.POST.get('amount', '').strip()
+    notes = request.POST.get('notes', '').strip()
+    try:
+        expense_date = datetime.strptime(expense_date_raw, '%Y-%m-%d').date()
+        amount = int(amount_raw)
+    except (TypeError, ValueError):
+        messages.error(request, 'يرجى إدخال تاريخ ومبلغ صحيحين.')
+        return redirect(_expense_redirect_url(request))
+    if expense_type not in dict(Expense.EXPENSE_TYPES) or amount <= 0:
+        messages.error(request, 'بيانات المصروف غير صحيحة.')
+        return redirect(_expense_redirect_url(request))
+    expense.expense_type, expense.expense_date = expense_type, expense_date
+    expense.amount, expense.notes = amount, notes
+    expense.save(update_fields=['expense_type', 'expense_date', 'amount', 'notes'])
+    log_action(request, 'update', 'Expense', expense, f'تعديل مصروف {expense.get_expense_type_display()} بقيمة {amount} د.ع')
+    messages.success(request, 'تم تعديل المصروف بنجاح.')
+    return redirect(_expense_redirect_url(request))
+
+
+@login_required
+@require_POST
+def delete_expense(request, expense_id):
+    user_profile = request.user.profile
+    if not user_profile.is_pharmacy_owner:
+        messages.error(request, 'ليس لديك صلاحية لحذف المصروفات.')
+        return redirect('pharmacy_dashboard')
+    expense = get_object_or_404(Expense, pk=expense_id, pharmacy=user_profile.pharmacy)
+    description = f'حذف مصروف {expense.get_expense_type_display()} بقيمة {expense.amount} د.ع'
+    expense.delete()
+    log_action(request, 'delete', 'Expense', None, description)
+    messages.success(request, 'تم حذف المصروف بنجاح.')
+    return redirect(_expense_redirect_url(request))
 
 
 # 10. التوالف

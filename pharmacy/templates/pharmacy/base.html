@@ -298,6 +298,9 @@
             <a href="{% url 'damaged_medicines' %}" class="{% if request.resolver_match.url_name == 'damaged_medicines_list' %}active{% endif %}">
                 <span>⚠️</span> الأدوية التالفة
             </a>
+            <a href="{% url 'expenses' %}" class="{% if request.resolver_match.url_name == 'expenses' %}active{% endif %}">
+                <span>💸</span> المصروفات
+            </a>
             <a href="{% url 'sales_reports' %}" class="{% if request.resolver_match.url_name == 'sales_reports' %}active{% endif %}">
                 <span>📊</span> التقارير والتحليلات
             </a>

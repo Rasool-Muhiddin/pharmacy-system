@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models import (
-    PharmacyBranch, UserProfile, Medicine, Sale,
+    PharmacyBranch, UserProfile, Medicine, Sale, Expense,
     Invoice, InvoiceItem, PharmacySupplier,
     DamagedMedicine, Subscription, Payment, AuditLog,
     DesktopLicense, DeviceActivation, DesktopAppVersion,
@@ -64,6 +64,15 @@ class SaleAdmin(admin.ModelAdmin):
     list_filter = ('pharmacy', 'is_refunded', 'sold_at')
     search_fields = ('medicine__trade_name', 'cashier__username')
 
+    list_per_page = 50
+
+
+@admin.register(Expense)
+class ExpenseAdmin(admin.ModelAdmin):
+    list_display = ('expense_date', 'expense_type', 'amount', 'pharmacy')
+    list_filter = ('pharmacy', 'expense_type', 'expense_date')
+    search_fields = ('notes',)
+    ordering = ('-expense_date', '-id')
     list_per_page = 50
 
 # عرض تفاصيل عناصر الفاتورة مدمجة داخل صفحة الفاتورة الرئيسية
@@ -235,4 +244,4 @@ class DeviceActivationAdmin(admin.ModelAdmin):
 
 @admin.register(DesktopAppVersion)
 class DesktopAppVersionAdmin(admin.ModelAdmin):
-    list_display = ('version', 'is_mandatory', 'released_at')    
+    list_display = ('version', 'is_mandatory', 'released_at')

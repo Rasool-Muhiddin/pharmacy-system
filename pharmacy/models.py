@@ -98,6 +98,41 @@ class Sale(models.Model):
         med_name = self.medicine.trade_name if self.medicine else "دواء محذوف"
         return f"بيعة: {med_name} x {self.quantity_sold}"
 
+
+# =======================================================
+# 4️⃣ أ - جدول المصروفات التشغيلية للصيدلية
+# =======================================================
+class Expense(models.Model):
+    EXPENSE_TYPES = [
+        ('rent', 'إيجار'),
+        ('salaries', 'رواتب'),
+        ('utilities', 'كهرباء وماء وإنترنت'),
+        ('maintenance', 'صيانة'),
+        ('transport', 'نقل ومواصلات'),
+        ('other', 'أخرى'),
+    ]
+
+    pharmacy = models.ForeignKey(
+        PharmacyBranch,
+        on_delete=models.CASCADE,
+        related_name='expenses',
+        verbose_name='الصيدلية',
+    )
+    expense_type = models.CharField(max_length=20, choices=EXPENSE_TYPES, verbose_name='نوع المصروف')
+    expense_date = models.DateField(default=timezone.localdate, verbose_name='تاريخ المصروف')
+    amount = models.IntegerField(validators=[MinValueValidator(1)], verbose_name='المبلغ')
+    notes = models.TextField(blank=True, verbose_name='الملاحظات')
+
+    class Meta:
+        ordering = ['-expense_date', '-id']
+        indexes = [
+            models.Index(fields=['pharmacy', 'expense_date']),
+            models.Index(fields=['pharmacy', 'expense_type']),
+        ]
+
+    def __str__(self):
+        return f"{self.get_expense_type_display()} - {self.amount} د.ع"
+
 # =======================================================
 # 5️⃣ أ - جدول المذاخر والمكاتب العلمية
 # =======================================================

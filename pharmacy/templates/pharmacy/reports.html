@@ -323,12 +323,29 @@
                 <div class="kpi-value" style="color: #dd6b20;">{{ total_discounts_given|iqd }} </div>
             </div>
             <div class="kpi-card">
-                <div class="kpi-title"><i class="bi bi-receipt" style="color: #1abc9c;"></i> عدد الفواتير الصادرة</div>
+                <div class="kpi-title"><i class="bi bi-receipt" style="color: #1abc9c;"></i> عدد الفواتير</div>
                 <div class="kpi-value" style="color: #2d3748;">{{ total_invoices_count|default:0 }} فاتورة</div>
+            </div>
+            <div class="kpi-card red">
+                <div class="kpi-title"><i class="bi bi-arrow-counterclockwise" style="color: #e53e3e;"></i> عدد الفواتير الراجعة</div>
+                <div class="kpi-value" style="color: #e53e3e;">{{ refunded_invoices_count|default:0 }} فاتورة</div>
             </div>
             <div class="kpi-card red">
                 <div class="kpi-title"><i class="bi bi-trash3-fill" style="color: #e53e3e;"></i> خسائر الأدوية والتوالف</div>
                 <div class="kpi-value" style="color: #e53e3e;">{{ total_damage_losses|iqd }}</div>
+            </div>
+            <div class="kpi-card red">
+                <div class="kpi-title"><i class="bi bi-wallet2" style="color: #e53e3e;"></i> إجمالي المصروفات</div>
+                <div class="kpi-value" style="color: #e53e3e;">{{ total_expenses|iqd }}</div>
+            </div>
+            <div class="kpi-card blue">
+                <div class="kpi-title"><i class="bi bi-calculator" style="color: #3182ce;"></i> صافي المبيعات بعد المصروفات</div>
+                <div class="kpi-value" style="color: #3182ce;">{{ net_after_expenses|iqd }}</div>
+            </div>
+            <div class="kpi-card orange">
+                <div class="kpi-title"><i class="bi bi-building" style="color: #dd6b20;"></i> إجمالي ديون المذاخر</div>
+                <div class="kpi-value" style="color: #dd6b20;">{{ total_supplier_debt|iqd }}</div>
+                <div style="font-size: 11px; color: #718096; margin-top: 6px;">الرصيد الحالي</div>
             </div>
         </div>
 
