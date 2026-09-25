@@ -86,6 +86,14 @@
         <h2>مرحباً بك </h2>
         <p>الرجاء تسجيل الدخول لإدارة نظام الصيدلية</p>
 
+        {% if messages %}
+            {% for message in messages %}
+                <div style="color: #e74c3c; font-size: 14px; margin-bottom: 15px; text-align: right; font-weight: 600;">
+                    ⚠️ {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
         <form method="POST">
             {% csrf_token %}
             
