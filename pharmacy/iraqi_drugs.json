@@ -6763,6 +6763,501 @@
     "trade_name": "Framycetin Skin Cream 1%",
     "scientific_name": "Framycetin Sulfate",
     "category": "cream_ointment_gel"
+  },
+  {
+    "trade_name": "Brufen 100mg/5ml Syrup",
+    "scientific_name": "Ibuprofen",
+    "category": "syrup"
+  },
+  {
+    "trade_name": "Paracetol 500mg Tab SDI",
+    "scientific_name": "Paracetamol",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Supixime 100mg Susp",
+    "scientific_name": "Cefixime",
+    "category": "syrup"
+  },
+  {
+    "trade_name": "Ketofen Syrup ME",
+    "scientific_name": "Ketotifen",
+    "category": "syrup"
+  },
+  {
+    "trade_name": "Sitavia Plus 50/1000mg Tab pioneer",
+    "scientific_name": "Sitagliptin + Metformin",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Piodol 500mg Tab",
+    "scientific_name": "Paracetamol",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Nexium 40mg Tab",
+    "scientific_name": "Esomeprazole",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Atacand Plus 16/12.5mg 28 Tab",
+    "scientific_name": "Candesartan + Hydrochlorothiazide",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Multivitamin x20 Eff",
+    "scientific_name": "Multivitamin",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Foltene Treatment Women Vials",
+    "scientific_name": "Trichogenic Complex (Hair loss treatment)",
+    "category": "topical_solution"
+  },
+  {
+    "trade_name": "Lastavin HTZ 80/12.5mg Tab ajanta",
+    "scientific_name": "Valsartan + Hydrochlorothiazide",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Adol Drop julphar",
+    "scientific_name": "Paracetamol",
+    "category": "drops_oral"
+  },
+  {
+    "trade_name": "Lastavin AM 160/5mg Tab ajanta",
+    "scientific_name": "Valsartan + Amlodipine",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "AB-Kolicare Drop 8ml",
+    "scientific_name": "Simethicone",
+    "category": "drops_oral"
+  },
+  {
+    "trade_name": "Deep Relief Gel 50g",
+    "scientific_name": "Ibuprofen + Levomenthol",
+    "category": "cream_ointment_gel"
+  },
+  {
+    "trade_name": "Lastavin AM Plus 10/160/12.5mg Tab ajanta",
+    "scientific_name": "Amlodipine + Valsartan + Hydrochlorothiazide",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Nebilet 5mg 28 Tab",
+    "scientific_name": "Nebivolol",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Dad Teething Gel 15g",
+    "scientific_name": "Choline Salicylate + Lidocaine",
+    "category": "oral_care"
+  },
+  {
+    "trade_name": "Nevxal 0.1% Drop",
+    "scientific_name": "Naphazoline",
+    "category": "drops_eye_ear"
+  },
+  {
+    "trade_name": "Yasmin Tab bayer",
+    "scientific_name": "Drospirenone + Ethinylestradiol",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Digoxin 250mcg tab accord",
+    "scientific_name": "Digoxin",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Micardis Plus 80/12.5mg boehringer",
+    "scientific_name": "Telmisartan + Hydrochlorothiazide",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Depakine 200mg Tab sanofi",
+    "scientific_name": "Sodium Valproate",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Zithromax Oral Susp 22.5ml pfizer",
+    "scientific_name": "Azithromycin",
+    "category": "syrup"
+  },
+  {
+    "trade_name": "Telmi Cand 40mg Tab Ultra Medica",
+    "scientific_name": "Telmisartan",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Gabapentin 300mg Cap accord",
+    "scientific_name": "Gabapentin",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Pregafix 150mg 30 Cap PIONEER",
+    "scientific_name": "Pregabalin",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Novaten 100mg Tab",
+    "scientific_name": "Atenolol",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Calcium Plus 600mg 30 tab",
+    "scientific_name": "Calcium Carbonate + Vitamin D3",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Vimoxi 0.5% Eye Drop",
+    "scientific_name": "Moxifloxacin",
+    "category": "drops_eye_ear"
+  },
+  {
+    "trade_name": "Handistan 1% Vaginal Cream",
+    "scientific_name": "Clotrimazole",
+    "category": "cream_ointment_gel"
+  },
+  {
+    "trade_name": "Amlodipine 10mg tab accord",
+    "scientific_name": "Amlodipine",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Rosufix 20mg",
+    "scientific_name": "Rosuvastatin",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Fitting Insertion",
+    "scientific_name": "Vaginal Suppository",
+    "category": "suppository"
+  },
+  {
+    "trade_name": "Motorax 1.05mg 30tab ferrer",
+    "scientific_name": "Pramipexole",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Lipitor 40mg Tab pfizer",
+    "scientific_name": "Atorvastatin",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Serodu DR 30mg 30 cap",
+    "scientific_name": "Duloxetine",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Lastavin AM Plus 10/160/25mg Tab ajanta",
+    "scientific_name": "Amlodipine + Valsartan + Hydrochlorothiazide",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Thrombo Ass 75mg GEROT LANNACH",
+    "scientific_name": "Acetylsalicylic Acid (Aspirin)",
+    "category": "tablet"
+  },
+{
+    "trade_name": "Trialog Dental Paste 15gm Ultra Medica",
+    "scientific_name": "Fluoride Dental Paste",
+    "category": "oral_care"
+  },
+  {
+    "trade_name": "Glucovance 500/5mg Tab",
+    "scientific_name": "Glibenclamide + Metformin",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Foncitril 4000 Granules FRANCE",
+    "scientific_name": "Potassium Citrate",
+    "category": "powder_sachet"
+  },
+  {
+    "trade_name": "Motilium 10mg x30 Tab janssen",
+    "scientific_name": "Domperidone",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Colchicum-dispert 0.5mg Recordati",
+    "scientific_name": "Colchicine",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Omnic Ocas 0.4mg Tab ASTELLAS",
+    "scientific_name": "Tamsulosin",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Sinofed Syrup 100ml FPI",
+    "scientific_name": "Pseudoephedrine + Triprolidine",
+    "category": "syrup"
+  },
+  {
+    "trade_name": "Piolac 3.3mg/5ml Syrup",
+    "scientific_name": "Lactulose",
+    "category": "syrup"
+  },
+  {
+    "trade_name": "Clindamycin 30ml Solution safa",
+    "scientific_name": "Clindamycin",
+    "category": "topical_solution"
+  },
+  {
+    "trade_name": "Serodu DR 60mg 30cap",
+    "scientific_name": "Duloxetine",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Piopenem 1000mg IV pioneer",
+    "scientific_name": "Meropenem",
+    "category": "injection"
+  },
+  {
+    "trade_name": "Ketofen Syrup ME",
+    "scientific_name": "Ketotifen",
+    "category": "syrup"
+  },
+  {
+    "trade_name": "Fastum Gel 50g menarini",
+    "scientific_name": "Ketoprofen",
+    "category": "cream_ointment_gel"
+  },
+  {
+    "trade_name": "Omnic Ocas 0.4mg Tab ASTELLAS",
+    "scientific_name": "Tamsulosin",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Zecuf Cough Lozenges",
+    "scientific_name": "Menthol + Herbal Extracts",
+    "category": "oral_care"
+  },
+  {
+    "trade_name": "Moov Spray",
+    "scientific_name": "Diclofenac Diethylamine + Menthol + Methyl Salicylate",
+    "category": "topical_solution"
+  },
+  {
+    "trade_name": "Platil 75mg Tab",
+    "scientific_name": "Diclofenac Sodium",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Ferplex 40mg Verplex",
+    "scientific_name": "Iron Protein Succinylate",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Nebilet 5mg 28 Tab",
+    "scientific_name": "Nebivolol",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Aspirin 100mg Tab Bayer",
+    "scientific_name": "Acetylsalicylic Acid",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Motorax 0.52mg 30tab ferrer",
+    "scientific_name": "Pramipexole",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Baclocalm 10mg x50 tab LABATEC",
+    "scientific_name": "Baclofen",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Canesten 1% Cream",
+    "scientific_name": "Clotrimazole",
+    "category": "cream_ointment_gel"
+  },
+  {
+    "trade_name": "Gaviscon Double Action 32 Tab",
+    "scientific_name": "Alginic Acid + Sodium Bicarbonate + Calcium Carbonate",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Newgel+E 15g New Medical",
+    "scientific_name": "Silicone Scar Gel",
+    "category": "cream_ointment_gel"
+  },
+  {
+    "trade_name": "Diostar-Plus 80/12.5mg Tab",
+    "scientific_name": "Valsartan + Hydrochlorothiazide",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Diostar 80mg 30 Tab",
+    "scientific_name": "Valsartan",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Santafer Syrup santa farma",
+    "scientific_name": "Ferrous Ammonium Citrate (Iron)",
+    "category": "syrup"
+  },
+  {
+    "trade_name": "Proviron Tab 25mg bayer",
+    "scientific_name": "Mesterolone",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Sunya 20/75mg Tab",
+    "scientific_name": "Ethinylestradiol + Gestodene",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Nastocord Cream 15g Dijla",
+    "scientific_name": "Nystatin + Neomycin + Gramicidin + Triamcinolone",
+    "category": "cream_ointment_gel"
+  },
+  {
+    "trade_name": "Neuropathy Relief Softgel vitasea",
+    "scientific_name": "Alpha Lipoic Acid + B-Vitamins",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Diazac M ER 10/1000 X30 tab ajanta",
+    "scientific_name": "Gliclazide + Metformin",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Fungicon 150mg Cap",
+    "scientific_name": "Fluconazole",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "BioFresh (K)",
+    "scientific_name": "Toothpaste (Fluoride/Antiseptic)",
+    "category": "oral_care"
+  },
+  {
+    "trade_name": "Dexa Tobrom Eye Drop 5ml Rompharm",
+    "scientific_name": "Dexamethasone + Tobramycin",
+    "category": "drops_eye_ear"
+  },
+  {
+    "trade_name": "B12 Vita-Aachen 10 Oral Vials",
+    "scientific_name": "Vitamin B12 (Cyanocobalamin)",
+    "category": "drops_oral"
+  },
+  {
+    "trade_name": "Rabedom Cap Seo Pharma",
+    "scientific_name": "Rabeprazole + Domperidone",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Empoli Plus XR 25mg+1000mg 28 Tab sami",
+    "scientific_name": "Empagliflozin + Metformin",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Dona 1500mg Sachets Meda",
+    "scientific_name": "Glucosamine Sulfate",
+    "category": "powder_sachet"
+  },
+  {
+    "trade_name": "Dad Teething Gel 15g",
+    "scientific_name": "Choline Salicylate + Lidocaine",
+    "category": "oral_care"
+  },
+  {
+    "trade_name": "Arimidex 1mg Tab",
+    "scientific_name": "Anastrozole",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Fastum Gel 50g menarini",
+    "scientific_name": "Ketoprofen",
+    "category": "cream_ointment_gel"
+  },
+  {
+    "trade_name": "Folico Drop 30ml uenukot",
+    "scientific_name": "Folic Acid",
+    "category": "drops_oral"
+  },
+  {
+    "trade_name": "Fastum Gel 50g menarini",
+    "scientific_name": "Ketoprofen",
+    "category": "cream_ointment_gel"
+  },
+  {
+    "trade_name": "Cyprodine Syrup ME",
+    "scientific_name": "Cyproheptadine",
+    "category": "syrup"
+  },
+  {
+    "trade_name": "Sedilar Syrup SDI",
+    "scientific_name": "Cetirizine",
+    "category": "syrup"
+  },
+  {
+    "trade_name": "Sefarin 300mg x10 Cap",
+    "scientific_name": "Cefdinir",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Brequal 50mcg/250mcg",
+    "scientific_name": "Salmeterol + Fluticasone Propionate",
+    "category": "inhaler_nebulizer"
+  },
+  {
+    "trade_name": "Cefodox 200mg Tab",
+    "scientific_name": "Cefpodoxime",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Cefodox 100mg Tab",
+    "scientific_name": "Cefpodoxime",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Losart 100mg Tab",
+    "scientific_name": "Losartan",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Rheumalgin Oint 25g",
+    "scientific_name": "Diclofenac Diethylamine",
+    "category": "cream_ointment_gel"
+  },
+  {
+    "trade_name": "Somadril Comp 20tab minapharm",
+    "scientific_name": "Carisoprodol + Paracetamol",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Bepanthene Ointment Bayer",
+    "scientific_name": "Dexpanthenol",
+    "category": "cream_ointment_gel"
+  },
+  {
+    "trade_name": "Atoxia 90mg Tab",
+    "scientific_name": "Etoricoxib",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Pregafix 150mg 30 Cap PIONEER",
+    "scientific_name": "Pregabalin",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Concor 5mg Tab",
+    "scientific_name": "Bisoprolol",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Inosita Plus 50/1000mg Pharmevo",
+    "scientific_name": "Inosita Plus 50/1000mg",
+    "category": "tablet"
+  },
+  {
+    "trade_name": "Hyfresh 10ml Drop Jamjoom",
+    "scientific_name": "Sodium Hyaluronate (Artificial Tears)",
+    "category": "drops_eye_ear"
   }
 
 

@@ -5,9 +5,19 @@ from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator
 from django.core.exceptions import ValidationError
 from django.utils import timezone
+
+
 def generate_desktop_license_code():
-    """إنشاء رمز تفعيل آمن وفريد لنسخة سطح المكتب."""
+    """
+    ⚠️ غير مستخدمة بعد الآن (نموذج DesktopLicense الذي كانت خاصة به حُذف
+    ضمن فصل نظام التفعيل إلى مشروع pharmacy_APP/backend منفصل). أُبقيت
+    عمداً فقط لأن ترحيلاً قديماً (migrations/0017_...) يستوردها كقيمة
+    افتراضية لحقل تاريخي — حذفها يكسر تحميل تاريخ الترحيلات بالكامل على أي
+    بيئة، بما فيها قاعدة الإنتاج. لا تُزلها إلا بعد التأكد من ضغط
+    (squash) أو حذف الترحيلات القديمة التي تعتمد عليها.
+    """
     return f"TERA-{secrets.token_urlsafe(24).upper()}"
+
 
 # =======================================================
 # 1️⃣ جدول الصيدليات (المشتركين في نظامك)
@@ -367,119 +377,6 @@ class AuditLog(models.Model):
         user_str = self.user.username if self.user else "نظام تلقائي"
         return f"[{self.timestamp.strftime('%Y-%m-%d %H:%M')}] {user_str} - {self.get_action_display()} في {self.model_name}"
 
-# =======================================================
-# تراخيص نسخة سطح المكتب الأوفلاين
-# هذا الترخيص منفصل عن اشتراك SaaS.
-# =======================================================
-class DesktopLicense(models.Model):
-    LICENSE_TYPE_CHOICES = [
-        ('trial', 'تجريبي'),
-        ('annual', 'سنوي'),
-        ('lifetime', 'مدى الحياة'),
-    ]
-
-    STATUS_CHOICES = [
-        ('active', 'فعال'),
-        ('suspended', 'موقوف'),
-        ('revoked', 'ملغى'),
-    ]
-
-    pharmacy = models.OneToOneField(
-        PharmacyBranch,
-        on_delete=models.CASCADE,
-        related_name='desktop_license',
-        verbose_name='الصيدلية',
-    )
-
-    activation_code = models.CharField(
-        max_length=80,
-        unique=True,
-        default=generate_desktop_license_code,
-        editable=False,
-        verbose_name='رمز التفعيل',
-    )
-
-    license_type = models.CharField(
-        max_length=20,
-        choices=LICENSE_TYPE_CHOICES,
-        default='lifetime',
-        verbose_name='نوع الترخيص',
-    )
-
-    status = models.CharField(
-        max_length=20,
-        choices=STATUS_CHOICES,
-        default='active',
-        verbose_name='حالة الترخيص',
-    )
-
-    max_devices = models.PositiveSmallIntegerField(
-        default=1,
-        verbose_name='عدد الأجهزة المسموح بها',
-    )
-
-    expires_at = models.DateTimeField(
-        null=True,
-        blank=True,
-        verbose_name='تاريخ انتهاء الترخيص',
-    )
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    @property
-    def is_valid(self):
-        if self.status != 'active':
-            return False
-
-        if self.license_type == 'lifetime':
-            return True
-
-        return self.expires_at is not None and self.expires_at >= timezone.now()
-
-    def __str__(self):
-        return f"ترخيص سطح المكتب: {self.pharmacy.name}"
-
-
-# =======================================================
-# الأجهزة المفعلة لكل ترخيص
-# =======================================================
-class DeviceActivation(models.Model):
-    license = models.ForeignKey(
-        DesktopLicense,
-        on_delete=models.CASCADE,
-        related_name='devices',
-        verbose_name='الترخيص',
-    )
-
-    device_fingerprint = models.CharField(
-        max_length=128,
-        verbose_name='معرف الجهاز',
-    )
-
-    device_name = models.CharField(
-        max_length=120,
-        blank=True,
-        verbose_name='اسم الجهاز',
-    )
-
-    is_active = models.BooleanField(default=True, verbose_name='نشط')
-    activated_at = models.DateTimeField(auto_now_add=True, verbose_name='تاريخ التفعيل')
-    last_seen_at = models.DateTimeField(auto_now=True, verbose_name='آخر اتصال')
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=['license', 'device_fingerprint'],
-                name='unique_device_per_desktop_license',
-            )
-        ]
-
-    def __str__(self):
-        device = self.device_name or self.device_fingerprint[:12]
-        return f"{self.license.pharmacy.name} - {device}"    
-
-
 #موديل فواتير المذاخر
 class SupplierInvoice(models.Model):
     STATUS_CHOICES = (
@@ -657,21 +554,3 @@ class SupplierRefund(models.Model):
 
     def __str__(self):
         return f"استلام من المذخر - {self.invoice.invoice_number} - {self.amount}"
-
-
-
-class DesktopAppVersion(models.Model):
-    """ يخزّن آخر إصدار متاح لتطبيق سطح المكتب.
-    يُحدَّث عبر admin عند رفع نسخة جديدة - لا حاجة لتعديل الكود """
-
-    version = models.CharField(max_length=20)  # مثال: "1.0.1"
-    download_url = models.URLField()           # رابط ملف installer.exe
-    release_notes = models.TextField(blank=True)
-    is_mandatory = models.BooleanField(default=False)  # تحديث إجباري؟
-    released_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        ordering = ['-released_at']
-
-    def __str__(self):
-        return f"v{self.version}"
