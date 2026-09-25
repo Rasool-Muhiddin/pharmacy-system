@@ -6,7 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('pharmacy', '0027_rename_pharmacy_ex_pharmac_97cfe0_idx_pharmacy_ex_pharmac_f86b8e_idx_and_more'),
+        ('pharmacy', '0029_simplify_subscription_plan_type'),
     ]
 
     operations = [

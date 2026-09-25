@@ -103,8 +103,8 @@ class InvoiceItemAdmin(admin.ModelAdmin):
 # =======================================================
 @admin.register(Subscription)
 class SubscriptionAdmin(admin.ModelAdmin):
-    list_display = ('pharmacy', 'plan_type', 'status', 'start_date', 'end_date', 'is_valid')
-    list_filter = ('plan_type', 'status', 'is_auto_renew')
+    list_display = ('pharmacy', 'status', 'start_date', 'end_date', 'is_valid')
+    list_filter = ('status', 'is_auto_renew')
     search_fields = ('pharmacy__name',)
     ordering = ('-end_date',)
 

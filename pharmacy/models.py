@@ -286,13 +286,6 @@ class DamagedMedicine(models.Model):
 # 9️⃣ جدول اشتراكات الصيدليات
 # =======================================================
 class Subscription(models.Model):
-    PLAN_CHOICES = [
-        ('free', '🆓 مجاني (تجريبي)'),
-        ('silver', '🥈 الفضية'),
-        ('gold', '🥇 الذهبية'),
-        ('enterprise', '💎 ماسية / خاصة'),
-    ]
-
     STATUS_CHOICES = [
         ('active', '✅ فعال'),
         ('expired', '❌ منتهي'),
@@ -301,7 +294,6 @@ class Subscription(models.Model):
     ]
 
     pharmacy = models.OneToOneField(PharmacyBranch, on_delete=models.CASCADE, related_name='subscription', verbose_name="الصيدلية")
-    plan_type = models.CharField(max_length=20, choices=PLAN_CHOICES, default='free', verbose_name="نوع الخطة")
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='trial', verbose_name="حالة الاشتراك")
     start_date = models.DateTimeField(default=timezone.now, verbose_name="تاريخ بداية الاشتراك")
     end_date = models.DateTimeField(verbose_name="تاريخ انتهاء الاشتراك")
@@ -315,7 +307,7 @@ class Subscription(models.Model):
         return self.status in ['active', 'trial'] and self.end_date >= timezone.now()
 
     def __str__(self):
-        return f"اشتراك {self.pharmacy.name} - الخطة: {self.get_plan_type_display()} ({self.get_status_display()})"
+        return f"اشتراك {self.pharmacy.name} - ({self.get_status_display()})"
 
 # =======================================================
 # 🔟 جدول المدفوعات والفواتير المالية للاشتراكات
